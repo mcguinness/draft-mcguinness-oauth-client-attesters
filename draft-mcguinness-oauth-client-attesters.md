@@ -37,6 +37,7 @@ normative:
   RFC9111:
 informative:
   RFC9449:
+  SPIFFE-OAUTH: I-D.ietf-oauth-spiffe-client-auth
   INSTANCE-ID:
     title: "Client Instance Identification for Attestation-Based Client Authentication"
     target: https://mcguinness.github.io/draft-mcguinness-oauth-client-instance-id/draft-mcguinness-oauth-client-instance-id.html
@@ -58,15 +59,30 @@ or authentication method.
 
 A client identified by one metadata URL can have many installations,
 each holding a different key. Attestation-Based Client Authentication
-{{ATTEST}} allows an attester to authenticate those instances, but
-leaves attester trust establishment to deployments. Client ID Metadata
-Documents {{CIMD}} publish client metadata but do not specify how the
-client endorses an attester for this purpose.
+{{ATTEST}} allows an attester to authenticate those instances. ATTEST
+requires an attestation to verify under the key of a known and trusted
+Client Attester ({{ATTEST, Section 7.1}}) and leaves how that trust is
+established to deployments ({{ATTEST, Section 10.8}}). Client ID Metadata
+Documents {{CIMD}} publish client metadata but do not specify how the client
+endorses an attester for this purpose.
+
+This profile exists for clients that cannot rely on a registration
+channel at the authorization server (AS) through which an operator could
+configure attester trust per client. A client identified by a Client ID
+Metadata Document is the primary case: the AS learns of the client by
+fetching its metadata, so that document is the only per-client channel
+the client controls. A registered client that uses more than one attester,
+across platforms or during an attester migration, is the second case
+when its registration channel does not support configuring those attester
+relationships. Where an operator can configure attester trust per client
+at the AS, ATTEST's existing key-resolution options suffice and this
+profile adds nothing.
 
 This profile adds `client_attesters`: the client's endorsements of
-attesters and their verification keys. An authorization server (AS)
-accepts an endorsement only under its own trust policy. The resulting
-chain is:
+attesters and their verification keys, generalizing the single-attester
+key location that SPIFFE client authentication already publishes. An AS
+accepts an endorsement only under its own trust policy. The resulting chain
+is:
 
 ~~~ ascii-art
 Client metadata --endorses--> Attester --attests--> Client Instance
@@ -135,6 +151,12 @@ discovery does not signal this trust policy; deployments relying on
 client endorsement enforcement establish that the AS applies this
 profile through their trust agreement.
 
+Client ID Metadata Documents do not yet specify how an AS treats metadata
+members it does not recognize. This profile does not depend on that
+outcome. An AS that ignores `client_attesters` does not apply this profile;
+an AS that applies it does so by configured policy. Publishing the member
+obligates no AS.
+
 ## Conformance
 
 Conformance is role-specific:
@@ -179,6 +201,13 @@ with a separate key location for each endorsed issuer. A top-level
 `jwks_uri` can contain several issuers' keys, but does not associate
 them with named attesters or separate them from client authentication
 keys. It does not replace `client_attesters` under this profile.
+
+SPIFFE client authentication {{SPIFFE-OAUTH}} already lets a client publish
+`spiffe_bundle_endpoint`, the location of the keys that validate its SVIDs,
+for one SPIFFE trust domain. `client_attesters` generalizes that pattern
+to any Client Attester: the issuer is named explicitly, several attesters
+can be endorsed, and the AS's approval policy decides whether the
+published key location or an independently configured one is used.
 
 Clients using attestation as client authentication select
 `attest_jwt_client_auth` or `attest_jwt_client_auth_dpop` under
@@ -446,3 +475,7 @@ Pragma: no-cache
 *RFC EDITOR: Remove this section before publication.*
 
 * Initial draft.
+* Stated the target population, cited ATTEST's trust requirement and
+  out-of-scope statement, positioned `client_attesters` against SPIFFE's
+  bundle endpoint, and noted independence from CIMD's handling of
+  unrecognized metadata.
