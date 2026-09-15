@@ -1,0 +1,2115 @@
+<!DOCTYPE html>
+<html lang="en" class="Internet-Draft">
+<head>
+<meta charset="utf-8">
+<meta content="Common,Latin" name="scripts">
+<meta content="initial-scale=1.0" name="viewport">
+<title>OAuth 2.0 Client Attester Endorsement</title>
+<meta content="Karl McGuinness" name="author">
+<meta content="
+       This specification profiles OAuth 2.0 Attestation-Based Client
+Authentication with client metadata identifying endorsed attesters and,
+optionally, their verification-key locations. It defines authorization-server
+validation and withdrawal rules for endorsements in registered client
+metadata or Client ID Metadata Documents, and an authorization-server
+metadata parameter advertising support. It introduces no new credential
+or authentication method. 
+    " name="description">
+<meta content="xml2rfc 3.34.0" name="generator">
+<meta content="OAuth" name="keyword">
+<meta content="client attestation" name="keyword">
+<meta content="client metadata" name="keyword">
+<meta content="draft-mcguinness-oauth-client-attesters-latest" name="ietf.draft">
+<!-- Generator version information:
+  xml2rfc 3.34.0
+    Python 3.14.7
+    ConfigArgParse 1.7.5
+    google-i18n-address 3.1.1
+    intervaltree 3.2.1
+    Jinja2 3.1.6
+    lxml 6.1.1
+    natsort 8.4.0
+    platformdirs 4.11.7
+    pycountry 24.6.1
+    PyYAML 6.0.3
+    requests 2.33.1
+    wcwidth 0.8.3
+-->
+<link href="draft-mcguinness-oauth-client-attesters.xml" rel="alternate" type="application/rfc+xml">
+<link href="#copyright" rel="license">
+<style type="text/css">@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Lora SemiBold'), local('Lora-SemiBold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-semibold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-greek.woff2') format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-greek.woff2') format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+  color-scheme: light dark;
+  --background-color: #fff;
+  --text-color: #222;
+  --title-color: #191919;
+  --link-color: #2a6496;
+  --highlight-color: #f9f9f9;
+  --line-color: #eee;
+  --pilcrow-weak: #ddd;
+  --pilcrow-strong: #bbb;
+  --small-font-size: 14.5px;
+  --font-mono: 'Oxygen Mono', monospace;
+  --font-title: "Sofia Sans Semi Condensed", sans-serif;
+  scrollbar-color: #bbb #eee;
+}
+body {
+  max-width: 600px;
+  margin: 75px auto;
+  padding: 0 5px;
+  color: var(--text-color);
+  background-color: var(--background-color);
+  font: 16px/22px "Lora", serif;
+  scroll-behavior: smooth;
+}
+
+.ears {
+  display: none;
+}
+
+/* headings */
+section {
+  clear: both;
+}
+.section-number {
+  padding-right: 0.5em;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-title);
+  font-weight: 680;
+  margin: 0.8em 0 0.3em;
+  font-size-adjust: 0.5;
+  color: var(--title-color);
+}
+h1 {
+  &#title {
+    font-size: 32px;
+    line-height: 40px;
+    clear: both;
+    margin: 1.5em 0 0.2em;
+  }
+  &#rfcnum {
+    margin: 1.5em 0 0.2em;
+    & + h1#title {
+      margin: 0.2em 0;
+    }
+  }
+}
+
+h1, h2, h3 {
+  font-size: 22px;
+  line-height: 27px;
+}
+h4, h5, h6 {
+  font-size: 20px;
+  line-height: 24px;
+}
+
+/* general structure */
+.author {
+  padding-bottom: 0.3em;
+  vertical-align: top;
+}
+#abstract+p {
+  font-size: 18px;
+  line-height: 24px;
+  & code, & samp, & tt {
+    font-size: 16px;
+    line-height: 0;
+  }
+}
+
+p {
+  padding: 0;
+  margin: 0.5em 0;
+  text-align: left;
+}
+div {
+  margin: 0;
+}
+.alignRight {
+  margin: 1em 0;
+  &.art-text {
+    background-color: var(--highlight-color);
+    border: 1px solid var(--line-color);
+    border-radius: 3px;
+    padding: 0.5em 1em 0;
+    margin-bottom: 0.5em;
+    & pre {
+      padding: 0;
+      width: auto;
+    }
+  }
+  & > *:first-child {
+    border: none;
+    margin: 0;
+    float: right;
+    clear: both;
+  }
+  & > *:nth-child(2) {
+    clear: both;
+    display: block;
+    border: none;
+  }
+}
+svg {
+  display: block;
+  /* font-family isn't space-separated, but =~ will have to do */
+  &[font-family~="monospace" i], & [font-family~="monospace" i] {
+    font-family: var(--font-mono);
+  }
+}
+.alignCenter {
+  margin: 1em 0;
+  &.art-text {
+    background-color: var(--highlight-color);
+    border: 1px solid var(--line-color);
+    border-radius: 3px;
+    padding: 0.5em 1em 0;
+    margin-bottom: 0.5em;
+    & pre {
+      padding: 0;
+      width: auto;
+    }
+  }
+  & > *:first-child {
+    border: none;
+    /* this isn't optimal, but it's an existence proof.  PrinceXML doesn't
+       support flexbox yet.
+    */
+    display: table;
+    margin: 0 auto;
+  }
+}
+
+/* lists */
+ol, ul {
+  padding: 0;
+  margin: 0 0 0.5em 2em;
+  & :is(ol, ul) {
+    margin-left: 1em;
+  }
+}
+li {
+  margin: 0 0 0.25em 0;
+}
+ul.empty, .ulEmpty {
+  list-style-type: none;
+  & li {
+    margin-top: 0.5em;
+  }
+}
+:is(ul, ol).compact, .ulCompact, .olCompact {
+  margin: 0 0 0 2em;
+  & li {
+    margin: 0;
+    & :first-child { margin-top: 0; }
+    & :last-child { margin-bottom: 0; }
+  }
+}
+
+/* definition lists */
+dl {
+  clear: left;
+  --indent: 3ch;
+  /* --indent: attr(indent ch); not supported in any browser, but we can dream */
+  &.olPercent {
+    --indent: 5ch;
+    & > dt {
+      min-width: calc(var(--indent) - 2ch);
+      float: none;
+    }
+  }
+
+  dl > dd > & {
+    margin-top: 0.5em;
+    margin-bottom: 0;
+  }
+
+  &:not(.dlNewline) > dt {
+    float: left;
+    margin-right: 2ch;
+    min-width: 8ch;
+  }
+  & > dd {
+    margin-bottom: .8em;
+    margin-left: var(--indent) !important; /* stupid element overrides */
+    min-height: 2ex;
+  }
+}
+:is(dl.compact, .dlCompact) > dd {
+  margin-bottom: 0;
+  & > :is(:first-child, .break:first-child + *) {
+    margin-top: 0;
+  }
+  & > :is(:last-child) {
+    margin-bottom: 0;
+  }
+}
+:is(dd, span).break {
+  display: none;
+}
+
+/* links */
+a {
+  text-decoration: none;
+  &[href] {
+    color: var(--link-color);
+    &:hover { text-decoration: underline; }
+    &.selfRef {
+      color: var(--text-color);
+      &:hover {
+        text-decoration: none;
+        background-color: var(--highlight-color);
+      }
+    }
+  }
+}
+.iref + a[href].internal {
+  color: var(--text-color);
+}
+a.xref:is(.cite, .auto), :is(#status-of-memo, #copyright) a {
+  white-space: nowrap;
+}
+
+/* Figures */
+tt, code, pre {
+  background-color: var(--highlight-color);
+  font: 14px/22px var(--font-mono);
+}
+tt, code {
+  /* changing the font for inline elements leads to different ascender
+     and descender heights; as we want to retain baseline alignment,
+     remove leading to avoid altering the final height of lines
+     note: this fails if these blocks take an entire line,
+     a different solution would be great */
+  line-height: 0;
+}
+:is(h1, h2, h3, h4, h5, h6) :is(tt, code) {
+  font-size: 84%;
+}
+pre {
+  border: 1px solid var(--line-color);
+  font-size: 13.5px;
+  line-height: 16px;
+  letter-spacing: -0.2px;
+  margin: 5px;
+  padding: 5px;
+}
+img {
+  max-width: 100%;
+}
+figure {
+  margin: 0.5em 0;
+  padding: 0;
+  & blockquote {
+    margin: 0.8em 0.4em 0.4em;
+  }
+}
+figcaption, caption {
+  font-style: italic;
+  margin: 0.5em 1.5em;
+  text-align: left;
+  caption-side: bottom;
+}
+@media screen {
+  /* Auto-collapse boilerplate. */
+  :is(#status-of-memo, #copyright) {
+    & p {
+      margin: -2px 0;
+      max-height: 0;
+      transition: max-height 2s ease, margin 0.5s ease 0.5s;
+      overflow: hidden;
+    }
+    &:hover p,
+    & h2:target ~ p {
+      margin: 0.5em 0;
+      max-height: 500px;
+      overflow: auto;
+    }
+  }
+  pre, svg {
+    display: inline-block;
+    /* In the horizontal direction, sometimes people make over-sized figures.
+       Scrollbars for those is therefore necessary: auto adds them as necessary..
+       In the vertical direction, the line-height can combine with the font
+       asender/descender height to produce scrollbars: hidden avoids that. */
+    overflow: auto hidden;
+  }
+  pre {
+    max-width: 100%;
+    width: calc(100% - 22px - 1em);
+  }
+  svg {
+    max-width: calc(100% - 22px - 1em);
+  }
+  figure pre {
+    display: block;
+    width: calc(100% - 25px);
+  }
+  :is(pre, svg) + .pilcrow {
+    display: inline-block;
+    vertical-align: text-bottom;
+    padding-bottom: 8px;
+  }
+}
+
+/* aside, blockquote */
+aside, blockquote {
+  margin-left: 0;
+  padding: 0 2em;
+  font-style: italic;
+}
+blockquote {
+  margin: 1em 0;
+  border-left: 2px var(--pilcrow-strong) solid;
+}
+cite {
+  display: block;
+  text-align: right;
+  font-style: italic;
+}
+
+/* tables */
+table {
+  width: auto;
+  max-width: 100%;
+  margin: 0 0 1em;
+  border-collapse: collapse;
+  &.right { margin-left: auto; }
+  &.center { margin-left: auto; margin-right: auto; }
+  &.left { margin-right: auto; }
+  & .text-left { text-align: left; }
+  & .text-center { text-align: center; }
+  & .text-right { text-align: right; }
+  & caption {
+    margin: 0;
+    padding: 3px 0 3px 1em;
+  }
+  & p { margin: 0; }
+}
+
+thead, tbody {
+  border: 1px solid var(--line-color);
+}
+th, td {
+  text-align: left;
+  vertical-align: top;
+  padding: 5px 10px;
+}
+th {
+  background-color: var(--line-color);
+}
+:is(tr:nth-child(2n), thead+tbody > tr:nth-child(2n+1)) > td {
+  background-color: var(--background-color);
+}
+:is(tr:nth-child(2n+1), thead+tbody > tr:nth-child(2n)) > td {
+  background-color: var(--highlight-color);
+}
+
+/* pilcrow */
+a.pilcrow {
+  margin-left: 3px;
+  opacity: 0.2;
+  user-select: none;
+  &[href] {
+    color: var(--pilcrow-weak);
+    &:hover { text-decoration: none; }
+  }
+  @media not print {
+    :hover > &, &:focus {
+      opacity: 1;
+    }
+    &[href]:hover {
+      color: var(--pilcrow-strong);
+      background-color: transparent;
+    }
+  }
+  @media print {
+    display: none;
+  }
+}
+
+/* misc */
+hr {
+  border: 0;
+  border-top: 1px solid var(--line-color);
+}
+.bcp14 {
+  font-variant: small-caps;
+  font-weight: 600;
+  font-size: var(--small-font-size);
+}
+.role {
+  font-variant: all-small-caps;
+}
+sub, sup {
+  line-height: 1;
+  font-size: 80%;
+}
+
+/* info block */
+#identifiers {
+  margin: 0;
+  font-size: var(--small-font-size);
+  line-height: 18px;
+  --identifier-width: 15ch;
+  & dt {
+    width: var(--identifier-width);
+    min-width: var(--identifier-width);
+    clear: left;
+    float: left;
+    text-align: right;
+    margin-right: 1ch;
+  }
+  & dd {
+    margin: 0;
+    margin-left: calc(1em + var(--identifier-width)) !important;
+    min-width: 5em;
+  }
+  & .authors {
+    & .author {
+      display: inline-block;
+      margin-right: 1.5em;
+    }
+    & .org {
+      font-style: italic;
+    }
+  }
+}
+
+/* The prepared/rendered info at the very bottom of the page */
+.docInfo {
+  color: #999;
+  font-size: 0.9em;
+  font-style: italic;
+  margin-top: 2em;
+  & .prepared {
+    float: right;
+  }
+}
+
+/* table of contents */
+#toc {
+  padding: 0.75em 0 2em 0;
+  margin-bottom: 1em;
+
+  & nav {
+    & ul {
+      margin: 0 0.5em 0 0;
+      padding: 0;
+      list-style: none;
+    }
+    & li {
+      line-height: 1.3em;
+      margin: 2px 0;
+      padding-left: 1.2em;
+      text-indent: -1.2em;
+    }
+  }
+  & a.xref {
+    white-space: normal;
+  }
+}
+
+.references {
+  & > dt {
+    text-align: right;
+    font-weight: bold;
+    min-width: 10ch;
+    margin-right: 1.5ch;
+    &:target::before {
+      content: "⇒";
+      margin: 0 10px 0 -25px;
+    }
+  }
+  & > dd {
+    margin-left: 12ch !important;
+    overflow: visible;
+    & .refInstance {
+      margin-bottom: 0.8em;
+    }
+    & .ascii {
+      margin-bottom: 0.25em;
+    }
+  }
+}
+
+#rfc\.index\.index + ul {
+  margin-left: 0;
+}
+
+/* authors */
+address.vcard {
+  font-style: normal;
+  max-width: 20em;
+  margin: 1em auto 1em 0;
+
+  & .nameRole {
+    font-weight: 700;
+    margin-left: 0;
+  }
+  & .label {
+    margin: 0.5em 0;
+  }
+  & .type {
+    display: none;
+  }
+  & .alternative-contact {
+    margin: 0.5em 0 0.25em 0;
+  }
+  & .non-ascii {
+    margin: 0 0 0 2em;
+  }
+  & div.left {
+    text-align: left;
+  }
+  & div.right {
+    text-align: right;
+  }
+}
+
+hr.addr {
+  border-top: 1px dashed;
+  margin: 0;
+  color: #ddd;
+  max-width: calc(100% - 16px);
+}
+@media (min-width: 500px) {
+  #authors-addresses {
+    & > section {
+      column-count: 2;
+      column-gap: 20px;
+    }
+    & > section > h2 {
+      column-span: all;
+    }
+    /* hack for break-inside: avoid-column */
+    & address {
+      display: inline-block;
+      break-inside: avoid-column;
+    }
+  }
+}
+
+/* Comments */
+.rfcEditorRemove {
+  & p:first-of-type {
+    font-style: italic;
+  }
+}
+.cref {
+  background-color: rgba(249, 232, 105, 0.3);
+  padding: 2px 4px;
+}
+.crefSource {
+  font-style: italic;
+}
+
+@media screen {
+  #toc {
+    & nav {
+      font-family: var(--font-title);
+      font-weight: 360;
+      & > ul { margin-bottom: 2em; }
+      & ul {
+        margin: 0 0 0 4px;
+        & :is(p, li) {
+          margin: 2px 0;
+        }
+      }
+    }
+    & a.toplink {
+      float: right;
+    }
+  }
+}
+@media not screen {
+  #toc a.toplink {
+    display: none;
+  }
+}
+
+
+/* TOC layout for smaller screens */
+@media screen and (max-width: 929px) {
+  #toc {
+    position: fixed;
+    z-index: 2;
+    top: 0;
+    right: 0;
+    padding: 1px 0 0 0;
+    margin: 0;
+    border-bottom: 1px solid #ccc;
+    opacity: 0.6;
+    & h2 {
+      margin: 0;
+      padding: 2px 0 2px 6px;
+      padding-right: 1em;
+      font-size: 18px;
+      line-height: 24px;
+      min-width: 190px;
+      text-align: right;
+      background-color: #444;
+      color: white;
+      cursor: pointer;
+      &::before { /* css hamburger */
+        float: right;
+        position: relative;
+        width: 1em;
+        height: 1px;
+        left: -164px;
+        margin: 8px 0 0 0;
+        background: white none repeat scroll 0 0;
+        box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
+        content: "";
+      }
+    }
+    & nav {
+      display: none;
+      background-color: var(--background-color);
+      padding: 0.5em 1em 1em;
+      overflow: auto;
+      overscroll-behavior: contain;
+      height: calc(100vh - 48px);
+      border-left: 1px solid #ddd;
+    }
+    &.active {
+      opacity: 1;
+      & nav { display: block; }
+    }
+    /* Make the collapsed ToC header render white on gray also when it's a link */
+    & h2 a,
+    & h2 a:is(:link, :focus, :hover),
+    & a.toplink,
+    & a.toplink:hover {
+      color: white;
+      background-color: #444;
+      text-decoration: none;
+    }
+    & a.toplink {
+      margin: 2px 0.5em 0;
+    }
+  }
+}
+
+/* TOC layout for wide screens */
+@media screen and (min-width: 930px) {
+  body {
+    padding-right: 360px;
+    padding-right: calc(min(180px + 20%, 500px));
+  }
+  #toc {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    right: calc(50vw - 480px);
+    width: 312px;
+    margin: 0;
+    padding: 0;
+    z-index: 1;
+    & h2 {
+      margin: 0;
+      padding: 0.25em 1em 1em 0;
+    }
+    & nav {
+      display: block;
+      height: calc(90vh - 84px);
+      bottom: 0;
+      padding: 0.5em 0 2em;
+      overflow: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+    }
+    & a.toplink {
+      margin: 8px 0.5em 0;
+    }
+  }
+  img { /* future proofing */
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* pagination */
+@media print {
+  body {
+    width: 100%;
+  }
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+  #n-copyright-notice {
+    border-bottom: none;
+  }
+  #toc {
+    page-break-before: always;
+    border-top: none;
+    padding-top: 0;
+  }
+  #n-introduction {
+    page-break-before: always;
+  }
+  figure, pre, .vcard {
+    page-break-inside: avoid;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+  :is(h2, h3, h4, h5, h6)+*, dd {
+    page-break-before: avoid;
+  }
+  pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 10pt;
+  }
+  table {
+    border: 1px solid #ddd;
+  }
+  td {
+    border-top: 1px solid #ddd;
+  }
+}
+
+@page :first {
+  padding-top: 0;
+  @top-left {
+    content: normal;
+    border: none;
+  }
+  @top-center {
+    content: normal;
+    border: none;
+  }
+  @top-right {
+    content: normal;
+    border: none;
+  }
+}
+
+@page {
+  size: A4;
+  margin-bottom: 45mm;
+  padding-top: 20px;
+}
+
+/* Dark mode. */
+@media (prefers-color-scheme: dark) {
+:root {
+  --background-color: #121212;
+  --text-color: #f0f0f0;
+  --title-color: #fff;
+  --link-color: #4da4f0;
+  --highlight-color: #282828;
+  --line-color: #444;
+  --pilcrow-weak: #444;
+  --pilcrow-strong: #666;
+  scrollbar-color: #777 #333;
+}
+}
+
+/* SVG Trick: a prefix match works because only black and white are allowed */
+svg {
+  & :is([stroke="black"], [stroke^="#000"]) {
+    stroke: var(--text-color);
+  }
+  & :is([stroke="white"], [stroke^="#fff"]) {
+    stroke: var(--background-color);
+  }
+  & :is([fill="black"], [fill^="#000"], :not([fill])) {
+    fill: var(--text-color);
+  }
+  & :is([fill="white"], [fill^="#fff"]) {
+    fill: var(--background-color);
+  }
+}
+</style>
+
+</head>
+<body class="xml2rfc">
+<table class="ears">
+<thead><tr>
+<td class="left">Internet-Draft</td>
+<td class="center">Client Attester Endorsement</td>
+<td class="right">September 2026</td>
+</tr></thead>
+<tfoot><tr>
+<td class="left">McGuinness</td>
+<td class="center">Expires 19 March 2027</td>
+<td class="right">[Page]</td>
+</tr></tfoot>
+</table>
+<div id="external-metadata" class="document-information"></div>
+<div id="internal-metadata" class="document-information">
+<dl id="identifiers">
+<dt class="label-workgroup">Workgroup:</dt>
+<dd class="workgroup">Web Authorization Protocol</dd>
+<dt class="label-internet-draft">Internet-Draft:</dt>
+<dd class="internet-draft">draft-mcguinness-oauth-client-attesters-latest</dd>
+<dt class="label-published">Published:</dt>
+<dd class="published">
+<time datetime="2026-09-15" class="published">15 September 2026</time>
+    </dd>
+<dt class="label-intended-status">Intended Status:</dt>
+<dd class="intended-status">Standards Track</dd>
+<dt class="label-expires">Expires:</dt>
+<dd class="expires"><time datetime="2027-03-19">19 March 2027</time></dd>
+<dt class="label-authors">Author:</dt>
+<dd class="authors">
+<div class="author">
+      <div class="author-name">K. McGuinness</div>
+<div class="org">Independent</div>
+</div>
+</dd>
+</dl>
+</div>
+<h1 id="title">OAuth 2.0 Client Attester Endorsement</h1>
+<section id="section-abstract">
+      <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
+<p id="section-abstract-1">This specification profiles OAuth 2.0 Attestation-Based Client
+Authentication with client metadata identifying endorsed attesters and,
+optionally, their verification-key locations. It defines authorization-server
+validation and withdrawal rules for endorsements in registered client
+metadata or Client ID Metadata Documents, and an authorization-server
+metadata parameter advertising support. It introduces no new credential
+or authentication method.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+</section>
+<section class="note rfcEditorRemove" id="section-note.1">
+      <h2 id="name-about-this-document">
+<a href="#name-about-this-document" class="section-name selfRef">About This Document</a>
+      </h2>
+<p id="section-note.1-1">This note is to be removed before publishing as an RFC.<a href="#section-note.1-1" class="pilcrow">¶</a></p>
+<p id="section-note.1-2">
+        The latest revision of this draft can be found at <span><a href="https://mcguinness.github.io/draft-mcguinness-oauth-client-attesters/draft-mcguinness-oauth-client-attesters.html">https://mcguinness.github.io/draft-mcguinness-oauth-client-attesters/draft-mcguinness-oauth-client-attesters.html</a></span>.
+        Status information for this document may be found at <span><a href="https://datatracker.ietf.org/doc/draft-mcguinness-oauth-client-attesters/">https://datatracker.ietf.org/doc/draft-mcguinness-oauth-client-attesters/</a></span>.<a href="#section-note.1-2" class="pilcrow">¶</a></p>
+<p id="section-note.1-3">
+        Discussion of this document takes place on the
+        Web Authorization Protocol Working Group mailing list (<span><a href="mailto:oauth@ietf.org">mailto:oauth@ietf.org</a></span>),
+        which is archived at <span><a href="https://mailarchive.ietf.org/arch/browse/oauth/">https://mailarchive.ietf.org/arch/browse/oauth/</a></span>.
+        Subscribe at <span><a href="https://www.ietf.org/mailman/listinfo/oauth/">https://www.ietf.org/mailman/listinfo/oauth/</a></span>.<a href="#section-note.1-3" class="pilcrow">¶</a></p>
+<p id="section-note.1-4">Source for this draft and an issue tracker can be found at
+        <span><a href="https://github.com/mcguinness/draft-mcguinness-oauth-client-attesters">https://github.com/mcguinness/draft-mcguinness-oauth-client-attesters</a></span>.<a href="#section-note.1-4" class="pilcrow">¶</a></p>
+</section>
+<div id="status-of-memo">
+<section id="section-boilerplate.1">
+        <h2 id="name-status-of-this-memo">
+<a href="#name-status-of-this-memo" class="section-name selfRef">Status of This Memo</a>
+        </h2>
+<p id="section-boilerplate.1-1">
+        This Internet-Draft is submitted in full conformance with the
+        provisions of BCP 78 and BCP 79.<a href="#section-boilerplate.1-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-2">
+        Internet-Drafts are working documents of the Internet Engineering Task
+        Force (IETF). Note that other groups may also distribute working
+        documents as Internet-Drafts. The list of current Internet-Drafts is
+        at <span><a href="https://datatracker.ietf.org/drafts/current/">https://datatracker.ietf.org/drafts/current/</a></span>.<a href="#section-boilerplate.1-2" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-3">
+        Internet-Drafts are draft documents valid for a maximum of six months
+        and may be updated, replaced, or obsoleted by other documents at any
+        time. It is inappropriate to use Internet-Drafts as reference
+        material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-4">
+        This Internet-Draft will expire on 19 March 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="copyright">
+<section id="section-boilerplate.2">
+        <h2 id="name-copyright-notice">
+<a href="#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
+        </h2>
+<p id="section-boilerplate.2-1">
+            Copyright (c) 2026 IETF Trust and the persons identified as the
+            document authors. All rights reserved.<a href="#section-boilerplate.2-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.2-2">
+            This document is subject to BCP 78 and the IETF Trust's Legal
+            Provisions Relating to IETF Documents
+            (<span><a href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a></span>) in effect on the date of
+            publication of this document. Please review these documents
+            carefully, as they describe your rights and restrictions with
+            respect to this document. Code Components extracted from this
+            document must include Revised BSD License text as described in
+            Section 4.e of the Trust Legal Provisions and are provided without
+            warranty as described in the Revised BSD License.<a href="#section-boilerplate.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="toc">
+<section id="section-toc.1">
+        <a href="#" onclick="scroll(0,0)" class="toplink">▲</a><h2 id="name-table-of-contents">
+<a href="#name-table-of-contents" class="section-name selfRef">Table of Contents</a>
+        </h2>
+<nav class="toc"><ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1">
+            <p id="section-toc.1-1.1.1" class="keepWithNext"><a href="#section-1" class="auto internal xref">1</a>.  <a href="#name-introduction" class="internal xref">Introduction</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2">
+            <p id="section-toc.1-1.2.1"><a href="#section-2" class="auto internal xref">2</a>.  <a href="#name-conventions-and-trust-model" class="internal xref">Conventions and Trust Model</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.1">
+                <p id="section-toc.1-1.2.2.1.1" class="keepWithNext"><a href="#section-2.1" class="auto internal xref">2.1</a>.  <a href="#name-acceptance-policy" class="internal xref">Acceptance Policy</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.2">
+                <p id="section-toc.1-1.2.2.2.1" class="keepWithNext"><a href="#section-2.2" class="auto internal xref">2.2</a>.  <a href="#name-registered-endorsements" class="internal xref">Registered Endorsements</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.3">
+                <p id="section-toc.1-1.2.2.3.1"><a href="#section-2.3" class="auto internal xref">2.3</a>.  <a href="#name-profile-selection" class="internal xref">Profile Selection</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.4">
+                <p id="section-toc.1-1.2.2.4.1"><a href="#section-2.4" class="auto internal xref">2.4</a>.  <a href="#name-conformance" class="internal xref">Conformance</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3">
+            <p id="section-toc.1-1.3.1"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-client-metadata" class="internal xref">Client Metadata</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4">
+            <p id="section-toc.1-1.4.1"><a href="#section-4" class="auto internal xref">4</a>.  <a href="#name-authorization-server-metada" class="internal xref">Authorization Server Metadata</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5">
+            <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-attestation-and-as-processi" class="internal xref">Attestation and AS Processing</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.1">
+                <p id="section-toc.1-1.5.2.1.1"><a href="#section-5.1" class="auto internal xref">5.1</a>.  <a href="#name-issuance-and-presentation" class="internal xref">Issuance and Presentation</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.2">
+                <p id="section-toc.1-1.5.2.2.1"><a href="#section-5.2" class="auto internal xref">5.2</a>.  <a href="#name-authorization-server-proces" class="internal xref">Authorization Server Processing</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.3">
+                <p id="section-toc.1-1.5.2.3.1"><a href="#section-5.3" class="auto internal xref">5.3</a>.  <a href="#name-key-source-selection" class="internal xref">Key Source Selection</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.4">
+                <p id="section-toc.1-1.5.2.4.1"><a href="#section-5.4" class="auto internal xref">5.4</a>.  <a href="#name-errors" class="internal xref">Errors</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
+            <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-updates-and-withdrawal" class="internal xref">Updates and Withdrawal</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.1">
+                <p id="section-toc.1-1.6.2.1.1"><a href="#section-6.1" class="auto internal xref">6.1</a>.  <a href="#name-cache-freshness" class="internal xref">Cache Freshness</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.2">
+                <p id="section-toc.1-1.6.2.2.1"><a href="#section-6.2" class="auto internal xref">6.2</a>.  <a href="#name-endorsement-and-key-changes" class="internal xref">Endorsement and Key Changes</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.3">
+                <p id="section-toc.1-1.6.2.3.1"><a href="#section-6.3" class="auto internal xref">6.3</a>.  <a href="#name-existing-grants" class="internal xref">Existing Grants</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7">
+            <p id="section-toc.1-1.7.1"><a href="#section-7" class="auto internal xref">7</a>.  <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8">
+            <p id="section-toc.1-1.8.1"><a href="#section-8" class="auto internal xref">8</a>.  <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
+            <p id="section-toc.1-1.9.1"><a href="#section-9" class="auto internal xref">9</a>.  <a href="#name-references" class="internal xref">References</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.1">
+                <p id="section-toc.1-1.9.2.1.1"><a href="#section-9.1" class="auto internal xref">9.1</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.2">
+                <p id="section-toc.1-1.9.2.2.1"><a href="#section-9.2" class="auto internal xref">9.2</a>.  <a href="#name-informative-references" class="internal xref">Informative References</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
+            <p id="section-toc.1-1.10.1"><a href="#appendix-A" class="auto internal xref"></a><a href="#name-cimd-deployment-example" class="internal xref">CIMD Deployment Example</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11">
+            <p id="section-toc.1-1.11.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-registered-client-example" class="internal xref">Registered Client Example</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12">
+            <p id="section-toc.1-1.12.1"><a href="#appendix-C" class="auto internal xref"></a><a href="#name-document-history" class="internal xref">Document History</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13">
+            <p id="section-toc.1-1.13.1"><a href="#appendix-D" class="auto internal xref"></a><a href="#name-authors-address" class="internal xref">Author's Address</a></p>
+</li>
+        </ul>
+</nav>
+</section>
+</div>
+<div id="introduction">
+<section id="section-1">
+      <h2 id="name-introduction">
+<a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
+      </h2>
+<p id="section-1-1">A client can have many installations, each holding a different key.
+Attestation-Based Client Authentication
+<span>[<a href="#ATTEST" class="cite xref">ATTEST</a>]</span> allows an attester to authenticate those instances. ATTEST
+requires an attestation to verify under the key of a known and trusted
+Client Attester (<span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-7.1" class="relref">Section 7.1</a></span>) and leaves how that trust is
+established to deployments (<span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-10.8" class="relref">Section 10.8</a></span>).<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">This profile applies to both registered clients and clients identified by
+Client ID Metadata Documents <span>[<a href="#CIMD" class="cite xref">CIMD</a>]</span>. Either can endorse one or more
+attesters, for example across platforms or during migration. Deployments
+that manage attester trust entirely through authorization server (AS)
+configuration can continue to use ATTEST without this profile.<a href="#section-1-2" class="pilcrow">¶</a></p>
+<p id="section-1-3">This profile adds <code>client_attesters</code>: the client's endorsements of
+attesters and, optionally, their verification-key locations, generalizing SPIFFE client
+authentication's bundle endpoint <span>[<a href="#SPIFFE-OAUTH" class="cite xref">SPIFFE-OAUTH</a>]</span>. An AS accepts an
+endorsement only under its own trust policy. The resulting chain is:<a href="#section-1-3" class="pilcrow">¶</a></p>
+<div class="alignLeft art-ascii-art art-text artwork" id="section-1-4">
+<pre>
+Client metadata --endorses--&gt; Attester --attests--&gt; Client Instance
+       |                         |                       |
+       +----- AS accepts endorsement and validates proof-+
+</pre><a href="#section-1-4" class="pilcrow">¶</a>
+</div>
+<p id="section-1-5">The profile applies at AS endpoints accepting Client Attestations for
+client authentication or as an additional security signal, using the
+profiling hook in <span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-13" class="relref">Section 13</a></span>. It retains ATTEST's wire
+format, proof methods, and token binding.<a href="#section-1-5" class="pilcrow">¶</a></p>
+<p id="section-1-6">This profile, ATTEST, and <span>[<a href="#INSTANCE-ID" class="cite xref">INSTANCE-ID</a>]</span> answer three separate questions
+in layers:<a href="#section-1-6" class="pilcrow">¶</a></p>
+<div class="alignLeft art-ascii-art art-text artwork" id="section-1-7">
+<pre>
+Client Attester Endorsement    Who may attest for this client?
+             |
+             v
+ATTEST                         Is this a legitimate instance holding
+             |                 this key now?
+             v
+Client Instance ID (optional)  Which persistent instance is this?
+</pre><a href="#section-1-7" class="pilcrow">¶</a>
+</div>
+<p id="section-1-8">Endorsement carries no instance semantics, and instance identification
+does not establish attester trust. Neither establishes user delegation.<a href="#section-1-8" class="pilcrow">¶</a></p>
+<p id="section-1-9">Resource servers validating Client Attestations directly rely on
+configured attester trust; this profile does not define endorsement
+discovery or acceptance for those endpoints.<a href="#section-1-9" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="trust">
+<section id="section-2">
+      <h2 id="name-conventions-and-trust-model">
+<a href="#section-2" class="section-number selfRef">2. </a><a href="#name-conventions-and-trust-model" class="section-name selfRef">Conventions and Trust Model</a>
+      </h2>
+<p id="section-2-1">The key words "<span class="bcp14">MUST</span>", "<span class="bcp14">MUST NOT</span>", "<span class="bcp14">REQUIRED</span>", "<span class="bcp14">SHALL</span>", "<span class="bcp14">SHALL NOT</span>", "<span class="bcp14">SHOULD</span>", "<span class="bcp14">SHOULD NOT</span>", "<span class="bcp14">RECOMMENDED</span>", "<span class="bcp14">NOT RECOMMENDED</span>",
+"<span class="bcp14">MAY</span>", and "<span class="bcp14">OPTIONAL</span>" in this document are to be interpreted as
+described in BCP 14 <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span> <span>[<a href="#RFC8174" class="cite xref">RFC8174</a>]</span> when, and only when, they
+appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶</a></p>
+<p id="section-2-2">OAuth terms follow <span>[<a href="#RFC6749" class="cite xref">RFC6749</a>]</span> and Client Attester, Client Attestation,
+and Client Instance Key follow <span>[<a href="#ATTEST" class="cite xref">ATTEST</a>]</span>. The client publisher controls
+the authoritative metadata for a <code>client_id</code>.<a href="#section-2-2" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-2-3">
+        <dt id="section-2-3.1">Client Attester Endorsement</dt>
+        <dd style="margin-left: 1.5em" id="section-2-3.2">
+          <p id="section-2-3.2.1">A statement in the authoritative client metadata for a <code>client_id</code>
+that a specified Client Attester is authorized to issue Client
+Attestations naming that <code>client_id</code>. An endorsement delegates
+attestation authority for the named client only. It does not delegate
+OAuth authorization, user authority, or authority to further delegate
+attestation, and it does not extend to any other client.<a href="#section-2-3.2.1" class="pilcrow">¶</a></p>
+</dd>
+      <dd class="break"></dd>
+</dl>
+<div id="acceptance-policy">
+<section id="section-2.1">
+        <h3 id="name-acceptance-policy">
+<a href="#section-2.1" class="section-number selfRef">2.1. </a><a href="#name-acceptance-policy" class="section-name selfRef">Acceptance Policy</a>
+        </h3>
+<p id="section-2.1-1">For requests governed by this profile, the AS <span class="bcp14">MUST</span> accept a Client
+Attestation only when both of the following hold:<a href="#section-2.1-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-2.1-2">
+<li id="section-2.1-2.1">
+            <p id="section-2.1-2.1.1"><strong>Client endorsement:</strong> the authoritative metadata for the requested
+<code>client_id</code> currently endorses the attestation's issuer
+(<a href="#metadata" class="auto internal xref">Section 3</a>).<a href="#section-2.1-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-2.1-2.2">
+            <p id="section-2.1-2.2.1"><strong>AS attester acceptance:</strong> AS policy permits that attester for that
+client and determines how the attester's verification keys are
+trusted (<a href="#key-resolution" class="auto internal xref">Section 5.3</a>).<a href="#section-2.1-2.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ol>
+<p id="section-2.1-3">Endorsement alone does not make an attester trusted, and AS trust in an
+attester alone does not authorize it for a client. AS policy can narrow
+the endorsed set; it <span class="bcp14">MUST NOT</span> add an unendorsed attester or fall back to
+another trust mechanism. An endorsement <span class="bcp14">MUST NOT</span> by itself establish
+that the client is trusted or authorized to access a resource.<a href="#section-2.1-3" class="pilcrow">¶</a></p>
+<p id="section-2.1-4">The AS <span class="bcp14">MUST</span> configure, for each accepted attester, which of two
+key-trust policies governs it:<a href="#section-2.1-4" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-2.1-5.1">
+            <p id="section-2.1-5.1.1"><strong>Publisher-authorized key selection:</strong> the AS authorizes the
+publisher of specified clients to select both the attester and its
+key source, so the endorsed <code>jwks_uri</code> supplies the keys. For CIMD,
+configure exact client URLs or HTTPS origins, optionally restricted
+to path segments. Successful metadata retrieval does not establish
+this authorization. Shared hosting requires a boundary that excludes
+other publishers.<a href="#section-2.1-5.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-2.1-5.2">
+            <p id="section-2.1-5.2.1"><strong>AS-configured attester trust:</strong> the AS independently trusts a
+particular attester and configures its key source. The endorsement
+authorizes that attester to act for the client; it cannot supply the
+trust anchor, and an endorsed <code>jwks_uri</code> is not used for key
+retrieval.<a href="#section-2.1-5.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-2.1-6">When combined with <span>[<a href="#INSTANCE-ID" class="cite xref">INSTANCE-ID</a>]</span>, the same two requirements establish
+attester authority; instance continuity remains independent. Other ATTEST
+deployments can use configured trust without this profile.<a href="#section-2.1-6" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="registered-endorsements">
+<section id="section-2.2">
+        <h3 id="name-registered-endorsements">
+<a href="#section-2.2" class="section-number selfRef">2.2. </a><a href="#name-registered-endorsements" class="section-name selfRef">Registered Endorsements</a>
+        </h3>
+<p id="section-2.2-1">Registered endorsements <span class="bcp14">MUST</span> originate from a party authenticated and
+authorized to set them for that client, or be covered by a validated
+software statement from an issuer approved for that purpose under
+<span>[<a href="#RFC7591" class="cite xref">RFC7591</a>]</span>. Open registration alone supplies neither assurance; issuing
+a client credential does not retroactively approve its endorsements.
+The same restriction applies to endorsement updates.<a href="#section-2.2-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="profile-selection">
+<section id="section-2.3">
+        <h3 id="name-profile-selection">
+<a href="#section-2.3" class="section-number selfRef">2.3. </a><a href="#name-profile-selection" class="section-name selfRef">Profile Selection</a>
+        </h3>
+<p id="section-2.3-1">Profile applicability is an AS policy decision, not selected by the
+presence or absence of <code>client_attesters</code>. An AS advertises support with
+<code>client_attester_endorsement_supported</code> (<a href="#as-metadata" class="auto internal xref">Section 4</a>). Because that
+parameter is AS-wide and enforcement can vary per client, deployments
+relying on client endorsement enforcement establish that the AS applies
+this profile to their clients through their trust agreement.<a href="#section-2.3-1" class="pilcrow">¶</a></p>
+<p id="section-2.3-2">CIMD leaves handling of unrecognized metadata unspecified; this profile
+is independent of that choice. Publishing <code>client_attesters</code> does not
+require an AS to apply this profile.<a href="#section-2.3-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="conformance">
+<section id="section-2.4">
+        <h3 id="name-conformance">
+<a href="#section-2.4" class="section-number selfRef">2.4. </a><a href="#name-conformance" class="section-name selfRef">Conformance</a>
+        </h3>
+<p id="section-2.4-1">Conformance is role-specific:<a href="#section-2.4-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-2.4-2.1">
+            <p id="section-2.4-2.1.1">Client publishers implement <a href="#metadata" class="auto internal xref">Section 3</a> and <a href="#updates" class="auto internal xref">Section 6</a>.<a href="#section-2.4-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-2.4-2.2">
+            <p id="section-2.4-2.2.1">Client Attesters and clients implement their issuance and presentation
+requirements in <a href="#processing" class="auto internal xref">Section 5</a>.<a href="#section-2.4-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-2.4-2.3">
+            <p id="section-2.4-2.3.1">Authorization servers implement trust-policy selection, metadata and
+key validation, processing, and withdrawal, and can advertise support
+under <a href="#as-metadata" class="auto internal xref">Section 4</a>.<a href="#section-2.4-2.3.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-2.4-3">An implementation serving several roles satisfies each role's
+requirements. Instance identification is optional.<a href="#section-2.4-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="metadata">
+<section id="section-3">
+      <h2 id="name-client-metadata">
+<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-client-metadata" class="section-name selfRef">Client Metadata</a>
+      </h2>
+<p id="section-3-1"><code>client_attesters</code> is <span class="bcp14">OPTIONAL</span> client metadata, usable in registered client
+metadata (including <span>[<a href="#RFC7591" class="cite xref">RFC7591</a>]</span>) or a CIMD. Its value is an array of objects:<a href="#section-3-1" class="pilcrow">¶</a></p>
+<table class="center" id="table-1">
+        <caption><a href="#table-1" class="selfRef">Table 1</a></caption>
+<thead>
+          <tr>
+            <th class="text-left" rowspan="1" colspan="1">Member</th>
+            <th class="text-left" rowspan="1" colspan="1">Requirement</th>
+            <th class="text-left" rowspan="1" colspan="1">Meaning</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">
+              <code>issuer</code>
+</td>
+            <td class="text-left" rowspan="1" colspan="1">
+              <span class="bcp14">REQUIRED</span>, nonempty StringOrURI <span>[<a href="#RFC7519" class="cite xref">RFC7519</a>]</span>
+</td>
+            <td class="text-left" rowspan="1" colspan="1">Exact <code>iss</code> of the endorsed Client Attester</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">
+              <code>jwks_uri</code>
+</td>
+            <td class="text-left" rowspan="1" colspan="1">
+              <span class="bcp14">OPTIONAL</span>, HTTPS URL without userinfo or fragment</td>
+            <td class="text-left" rowspan="1" colspan="1">Location of the attester's public JSON Web Key (JWK) Set <span>[<a href="#RFC7517" class="cite xref">RFC7517</a>]</span>, used only under publisher-authorized key selection (<a href="#key-resolution" class="auto internal xref">Section 5.3</a>)</td>
+          </tr>
+        </tbody>
+      </table>
+<p id="section-3-3">An issuer occurs at most once in the array. A missing or empty array
+authorizes no attester. The AS <span class="bcp14">MUST</span>:<a href="#section-3-3" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3-4.1">
+          <p id="section-3-4.1.1">reject the metadata for this profile if an entry is malformed or an
+issuer occurs more than once, without accepting a partial list; and<a href="#section-3-4.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-3-4.2">
+          <p id="section-3-4.2.1">ignore unrecognized members.<a href="#section-3-4.2.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-3-5">Extensions <span class="bcp14">MUST NOT</span> weaken an endorsement's meaning for implementations
+that ignore them.<a href="#section-3-5" class="pilcrow">¶</a></p>
+<p id="section-3-6">An entry without <code>jwks_uri</code> is acceptable only under AS-configured
+attester trust; under publisher-authorized key selection its absence is
+an endorsement validation failure. Publishers <span class="bcp14">SHOULD</span> include <code>jwks_uri</code>
+unless every relying AS is known to configure the attester
+independently, because omitting it narrows the set of authorization
+servers that can accept the client.<a href="#section-3-6" class="pilcrow">¶</a></p>
+<p id="section-3-7">Each entry is a Client Attester Endorsement (<a href="#trust" class="auto internal xref">Section 2</a>) for the
+<code>client_id</code> whose metadata contains it. An <code>issuer</code> identifies a
+namespace, not a discovery endpoint. Key-source constraints are
+specified in <a href="#key-resolution" class="auto internal xref">Section 5.3</a>.<a href="#section-3-7" class="pilcrow">¶</a></p>
+<p id="section-3-8"><span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-10.8" class="relref">Section 10.8</a></span> recommends, among other options, resolving <code>kid</code>
+through client metadata <code>jwks_uri</code>. This profile extends that option
+with an optional separate key location for each endorsed issuer. A top-level
+<code>jwks_uri</code> can contain several issuers' keys, but does not associate
+them with named attesters or separate them from client authentication
+keys. It does not replace <code>client_attesters</code> under this profile.<a href="#section-3-8" class="pilcrow">¶</a></p>
+<p id="section-3-9">SPIFFE's <code>spiffe_bundle_endpoint</code> publishes a verification-key location
+for one trust domain. <code>client_attesters</code> extends this pattern to multiple
+named attesters, with AS key-trust policy selecting the published or
+AS-configured key source (<a href="#key-resolution" class="auto internal xref">Section 5.3</a>).<a href="#section-3-9" class="pilcrow">¶</a></p>
+<p id="section-3-10">Clients using attestation as client authentication select
+<code>attest_jwt_client_auth</code> or <code>attest_jwt_client_auth_dpop</code> under
+<span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-9" class="relref">Section 9</a></span>. When attestation supplements another method,
+that method remains required under <span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-7.6" class="relref">Section 7.6</a></span>.
+<code>client_attesters</code> does not select a grant, proof method, or the optional
+instance-identification profile.<a href="#section-3-10" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="as-metadata">
+<section id="section-4">
+      <h2 id="name-authorization-server-metada">
+<a href="#section-4" class="section-number selfRef">4. </a><a href="#name-authorization-server-metada" class="section-name selfRef">Authorization Server Metadata</a>
+      </h2>
+<p id="section-4-1">In addition to the parameters in <span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-8" class="relref">Section 8</a></span>, this profile
+defines one <span class="bcp14">OPTIONAL</span> authorization server metadata parameter
+<span>[<a href="#RFC8414" class="cite xref">RFC8414</a>]</span>:<a href="#section-4-1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-4-2">
+        <dt id="section-4-2.1"><code>client_attester_endorsement_supported</code></dt>
+        <dd style="margin-left: 1.5em" id="section-4-2.2">
+          <p id="section-4-2.2.1">Boolean. <code>true</code> indicates that the AS processes <code>client_attesters</code>
+under this profile for clients presenting Client Attestations. The
+default is <code>false</code>.<a href="#section-4-2.2.1" class="pilcrow">¶</a></p>
+</dd>
+      <dd class="break"></dd>
+</dl>
+<p id="section-4-3">This parameter does not indicate which key-trust policy applies to any
+attester or whether the profile governs a particular client. Those
+remain AS policy established through the trust agreement (<a href="#trust" class="auto internal xref">Section 2</a>).<a href="#section-4-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="processing">
+<section id="section-5">
+      <h2 id="name-attestation-and-as-processi">
+<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-attestation-and-as-processi" class="section-name selfRef">Attestation and AS Processing</a>
+      </h2>
+<div id="issuance-and-presentation">
+<section id="section-5.1">
+        <h3 id="name-issuance-and-presentation">
+<a href="#section-5.1" class="section-number selfRef">5.1. </a><a href="#name-issuance-and-presentation" class="section-name selfRef">Issuance and Presentation</a>
+        </h3>
+<p id="section-5.1-1">Requests under this profile <span class="bcp14">MUST</span> include <code>client_id</code> to select the
+client metadata; the parameter alone is not authentication.<a href="#section-5.1-1" class="pilcrow">¶</a></p>
+<p id="section-5.1-2">The Client Attester <span class="bcp14">MUST</span> establish that the requesting runtime is
+authorized to obtain a Client Attestation naming the specified
+<code>client_id</code>. The attester <span class="bcp14">MUST NOT</span> treat knowledge of the <code>client_id</code>
+or possession of a newly generated key, alone or together, as
+sufficient. How the attester establishes this authorization is outside
+the scope of this specification.<a href="#section-5.1-2" class="pilcrow">¶</a></p>
+<p id="section-5.1-3">The attester <span class="bcp14">MUST</span> include:<a href="#section-5.1-3" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.1-4.1">
+            <p id="section-5.1-4.1.1"><code>iss</code>: its endorsed <code>issuer</code> value;<a href="#section-5.1-4.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.1-4.2">
+            <p id="section-5.1-4.2.1"><code>sub</code>: the exact client identifier; and<a href="#section-5.1-4.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.1-4.3">
+            <p id="section-5.1-4.3.1"><code>kid</code>: a nonempty header parameter <span>[<a href="#RFC7515" class="cite xref">RFC7515</a>]</span> identifying its
+signing key.<a href="#section-5.1-4.3.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-5.1-5">This profile retains the default <code>client_id</code> to <code>sub</code> equality of
+<span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-7.5" class="relref">Section 7.5</a></span> and does not relax it. The binding prevents an
+endorsement for one client from validating an attestation naming
+another. Other claims and proof requirements follow ATTEST.<a href="#section-5.1-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="as-processing">
+<section id="section-5.2">
+        <h3 id="name-authorization-server-proces">
+<a href="#section-5.2" class="section-number selfRef">5.2. </a><a href="#name-authorization-server-proces" class="section-name selfRef">Authorization Server Processing</a>
+        </h3>
+<p id="section-5.2-1">For each presentation, the AS <span class="bcp14">MUST</span>:<a href="#section-5.2-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-5.2-2">
+<li id="section-5.2-2.1">
+            <p id="section-5.2-2.1.1">Select the authoritative metadata source for the requested <code>client_id</code>
+using AS registration or discovery policy, before evaluating endorsements.
+Obtain metadata from that source or a fresh cache, following CIMD
+resolution and validation or registered metadata policy, including
+<a href="#trust" class="auto internal xref">Section 2</a>. The AS <span class="bcp14">MUST NOT</span> combine endorsement lists from different
+sources or switch sources because endorsement validation fails.<a href="#section-5.2-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-5.2-2.2">
+            <p id="section-5.2-2.2.1">Validate <code>client_attesters</code> and select the entry whose <code>issuer</code>
+exactly matches the attestation's nonempty <code>iss</code>. Verify AS policy
+permits that client-to-attester association.<a href="#section-5.2-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-5.2-2.3">
+            <p id="section-5.2-2.3.1">Select the key source under <a href="#key-resolution" class="auto internal xref">Section 5.3</a>. Resolve <code>kid</code> to one
+eligible public key, refreshing on an unknown <code>kid</code> only as <a href="#updates" class="auto internal xref">Section 6</a>
+permits, and verify the signature using an acceptable asymmetric
+algorithm. Symmetric keys, private keys, and <code>alg=none</code> <span class="bcp14">MUST NOT</span> be
+accepted under this profile.<a href="#section-5.2-2.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-5.2-2.4">
+            <p id="section-5.2-2.4.1">Verify <code>sub</code> exactly equals the requested <code>client_id</code>, then validate
+the remaining attestation and proof under the selected ATTEST method.
+When the attestation is an additional security signal alongside
+another client authentication method (<span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-7.6" class="relref">Section 7.6</a></span>),
+validate that method under its own specification and verify that it
+authenticates that same client identifier. A mismatch is a failure of
+that method.<a href="#section-5.2-2.4.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-5.2-2.5">
+            <p id="section-5.2-2.5.1">Apply grant and authorization policy independently of the endorsement.<a href="#section-5.2-2.5.1" class="pilcrow">¶</a></p>
+</li>
+        </ol>
+</section>
+</div>
+<div id="key-resolution">
+<section id="section-5.3">
+        <h3 id="name-key-source-selection">
+<a href="#section-5.3" class="section-number selfRef">5.3. </a><a href="#name-key-source-selection" class="section-name selfRef">Key Source Selection</a>
+        </h3>
+<p id="section-5.3-1">The AS <span class="bcp14">MUST</span> select keys according to the key-trust policy configured
+for the accepted attester (<a href="#trust" class="auto internal xref">Section 2</a>):<a href="#section-5.3-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.3-2.1">
+            <p id="section-5.3-2.1.1"><strong>AS-configured attester trust:</strong> use the independently configured key
+source for the exact issuer. The AS <span class="bcp14">MUST NOT</span> retrieve keys from, or
+fall back to, an endorsed <code>jwks_uri</code>, even when the publisher is also
+authorized to select keys. An endorsed <code>jwks_uri</code> that differs from
+the configured source has no effect on acceptance and can be logged
+as a configuration discrepancy. The configured key source <span class="bcp14">MAY</span> use a
+different HTTPS origin from the issuer, and the entry <span class="bcp14">MAY</span> omit
+<code>jwks_uri</code>.<a href="#section-5.3-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.3-2.2">
+            <p id="section-5.3-2.2.1"><strong>Publisher-authorized key selection:</strong> use the endorsed <code>jwks_uri</code>.
+The entry <span class="bcp14">MUST</span> include <code>jwks_uri</code>, the <code>issuer</code> <span class="bcp14">MUST</span> be an HTTPS URL,
+and <code>jwks_uri</code> <span class="bcp14">MUST</span> have the same origin <span>[<a href="#RFC6454" class="cite xref">RFC6454</a>]</span>. This origin
+check neither isolates tenants sharing an origin nor establishes trust
+in an issuer name. Publisher-selected keys <span class="bcp14">MUST NOT</span> inherit an
+independently trusted attester's assurance merely because issuer
+strings match.<a href="#section-5.3-2.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-5.3-3">A non-HTTPS issuer requires AS-configured attester trust because it has
+no HTTPS origin binding.<a href="#section-5.3-3" class="pilcrow">¶</a></p>
+<p id="section-5.3-4">Issuer and client identifiers <span class="bcp14">MUST</span> use exact, case-sensitive comparison
+without URI normalization. Key selection and caches <span class="bcp14">MUST</span> bind keys to
+the client identifier, issuer, selected key source, and applicable trust
+policy; <code>kid</code> alone or a union of keys from different entries is
+insufficient. Token-controlled key locations <span class="bcp14">MUST NOT</span> override that
+source. Origin comparison does not change identifier comparison.<a href="#section-5.3-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="errors">
+<section id="section-5.4">
+        <h3 id="name-errors">
+<a href="#section-5.4" class="section-number selfRef">5.4. </a><a href="#name-errors" class="section-name selfRef">Errors</a>
+        </h3>
+<p id="section-5.4-1">Endorsement validation failures <span class="bcp14">MUST</span> produce <code>invalid_client_attestation</code>,
+without exposing policy details. Endorsement validation covers selecting
+a permitted endorsement in step 2 of <a href="#as-processing" class="auto internal xref">Section 5.2</a> and selecting the
+key source and resolving <code>kid</code> in step 3 under <a href="#key-resolution" class="auto internal xref">Section 5.3</a>,
+including an entry without <code>jwks_uri</code> under publisher-authorized key
+selection and the case where no eligible key is available after any
+refresh permitted by <a href="#updates" class="auto internal xref">Section 6</a>. Signature verification with a resolved key and
+the remaining attestation and proof checks follow <span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-7.4" class="relref">Section 7.4</a></span>,
+including challenge and freshness responses. A companion client
+authentication method that fails, or that authenticates a different
+client identifier, produces the error defined by its own specification.
+Other metadata-discovery, registration, authentication, and grant errors
+follow their base specifications. The no-fallback rule in <a href="#trust" class="auto internal xref">Section 2</a> applies.<a href="#section-5.4-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="updates">
+<section id="section-6">
+      <h2 id="name-updates-and-withdrawal">
+<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-updates-and-withdrawal" class="section-name selfRef">Updates and Withdrawal</a>
+      </h2>
+<div id="cache-freshness">
+<section id="section-6.1">
+        <h3 id="name-cache-freshness">
+<a href="#section-6.1" class="section-number selfRef">6.1. </a><a href="#name-cache-freshness" class="section-name selfRef">Cache Freshness</a>
+        </h3>
+<p id="section-6.1-1">The AS <span class="bcp14">MUST</span>:<a href="#section-6.1-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-6.1-2.1">
+            <p id="section-6.1-2.1.1">enforce configured finite maximum ages for cached endorsement metadata and
+JWK Sets, applying CIMD and HTTP caching constraints <span>[<a href="#RFC9111" class="cite xref">RFC9111</a>]</span> when
+stricter; and<a href="#section-6.1-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-6.1-2.2">
+            <p id="section-6.1-2.2.1">revalidate or refresh expired entries before use, rejecting stale
+entries if that operation fails.<a href="#section-6.1-2.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-6.1-3">Configured maximum ages bound withdrawal latency: a withdrawn
+endorsement or key can remain acceptable until the applicable age
+expires. The AS <span class="bcp14">MUST</span> be configured with maximum ages that keep this
+latency within the deployment's security requirements; short ages, for
+example one hour, keep it small. Fresh entries do not require retrieval on each
+request. These limits expire cached copies, not authoritative client
+registrations.<a href="#section-6.1-3" class="pilcrow">¶</a></p>
+<p id="section-6.1-4">On an unknown <code>kid</code>, the AS <span class="bcp14">SHOULD</span> refresh the selected key source's
+JWK Set once and retry key selection, subject to rate limits. The AS
+<span class="bcp14">MUST</span> rate-limit these refreshes per selected key source, independently
+of <code>kid</code>, and <span class="bcp14">MUST</span> reject
+the attestation if no eligible key is available.<a href="#section-6.1-4" class="pilcrow">¶</a></p>
+<p id="section-6.1-5">On observing that a CIMD has been removed (HTTP 404 or 410), the AS <span class="bcp14">MUST</span>
+stop using previously cached endorsements from that document. Removal
+cannot be detected while the AS continues to use an unexpired cache.<a href="#section-6.1-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="endorsement-and-key-changes">
+<section id="section-6.2">
+        <h3 id="name-endorsement-and-key-changes">
+<a href="#section-6.2" class="section-number selfRef">6.2. </a><a href="#name-endorsement-and-key-changes" class="section-name selfRef">Endorsement and Key Changes</a>
+        </h3>
+<p id="section-6.2-1">Once a metadata or key update is accepted, the AS <span class="bcp14">MUST</span> use it on the
+next presentation. Removing an endorsement, removing a verification
+key, or publishing an empty list prevents acceptance under that entry
+or key, including for attestations issued before the update. Local
+policy denial <span class="bcp14">MUST</span> take effect immediately on subsequent requests,
+without waiting for cache expiration.<a href="#section-6.2-1" class="pilcrow">¶</a></p>
+<p id="section-6.2-2">For planned key rotation, publish the new key and allow the applicable
+JWK Set cache lifetimes to elapse before using it. Retain the old key while
+attestations signed with it should remain acceptable. Under
+publisher-authorized key selection, changes to key locations also need
+time for metadata-cache propagation. The AS's configured maximum ages
+bound stale acceptance.<a href="#section-6.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="existing-grants">
+<section id="section-6.3">
+        <h3 id="name-existing-grants">
+<a href="#section-6.3" class="section-number selfRef">6.3. </a><a href="#name-existing-grants" class="section-name selfRef">Existing Grants</a>
+        </h3>
+<p id="section-6.3-1">Endorsement withdrawal is prospective with respect to client
+authentication: it prevents future authentication under the removed
+endorsement but does not itself revoke existing grants or access tokens
+unless the deployment separately couples withdrawal to revocation.
+Refresh requests requiring a Client Attestation are checked again under
+<a href="#processing" class="auto internal xref">Section 5</a>.<a href="#section-6.3-1" class="pilcrow">¶</a></p>
+<p id="section-6.3-2">Deployments using withdrawal to terminate existing access <span class="bcp14">MUST</span> configure
+the AS to revoke affected grants, invalidate their access and refresh
+tokens, and prevent further refresh issuance. Introspection <span>[<a href="#RFC7662" class="cite xref">RFC7662</a>]</span>
+reports revoked tokens inactive. Offline validation requires a separate
+revocation mechanism or token expiration.<a href="#section-6.3-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="security-considerations">
+<section id="section-7">
+      <h2 id="name-security-considerations">
+<a href="#section-7" class="section-number selfRef">7. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+      </h2>
+<p id="section-7-1">The considerations in <span>[<a href="#ATTEST" class="cite xref">ATTEST</a>]</span>, <span>[<a href="#CIMD" class="cite xref">CIMD</a>]</span>, and <span>[<a href="#RFC8725" class="cite xref">RFC8725</a>]</span> apply.<a href="#section-7-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-7-2.1">
+          <p id="section-7-2.1.1"><strong>Publisher compromise:</strong> control of a CIMD host or a client's registration
+administration permits changing endorsements, within AS policy. The AS
+<span class="bcp14">SHOULD</span> monitor and alert on endorsement changes and evaluate new attesters
+as policy changes.
+A separately specified signed-metadata mechanism could bind publisher
+intent independently of the HTTPS host, if its signing keys have an
+independent trust basis; this profile defines no such mechanism.<a href="#section-7-2.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-7-2.2">
+          <p id="section-7-2.2.1"><strong>Attester compromise:</strong> attesters serving several clients or tenants
+need issuance controls preventing one from obtaining attestations
+for another. Under AS-configured attester trust, the configured key
+source, not the endorsed <code>jwks_uri</code>, determines whose keys are
+accepted; pinning a tenant's key set is the AS operator's
+responsibility in that policy.<a href="#section-7-2.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-7-2.3">
+          <p id="section-7-2.3.1"><strong>Key retrieval:</strong> the AS <span class="bcp14">MUST</span> authenticate HTTPS servers, limit
+response sizes and request time, and prevent retrieval from prohibited
+network destinations. It <span class="bcp14">MUST NOT</span> follow redirects for JWK Set
+retrieval. This deliberately extends CIMD's no-automatic-redirect
+rule to attester key retrieval. Endorsed URLs remain subject to SSRF
+defenses; endorsement does not make a network location safe.<a href="#section-7-2.3.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-7-2.4">
+          <p id="section-7-2.4.1"><strong>Withdrawal latency:</strong> an already cached endorsement or key can
+remain acceptable until its allowed age expires. Urgent incidents
+require local denial or another revocation channel; removing a key
+at its origin is not instantaneous revocation.<a href="#section-7-2.4.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-7-2.5">
+          <p id="section-7-2.5.1"><strong>Privacy:</strong> public metadata exposes client-to-attester relationships.
+It <span class="bcp14">SHOULD NOT</span> enumerate instances or their keys. Caching reduces the
+request-timing information observable at metadata and key endpoints.
+No stable instance identifier is required by this profile.<a href="#section-7-2.5.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+</section>
+</div>
+<div id="iana-considerations">
+<section id="section-8">
+      <h2 id="name-iana-considerations">
+<a href="#section-8" class="section-number selfRef">8. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+      </h2>
+<p id="section-8-1">This document requests registration in the OAuth Dynamic Client
+Registration Metadata registry established by <span>[<a href="#RFC7591" class="cite xref">RFC7591</a>]</span>:<a href="#section-8-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-8-2.1">
+          <p id="section-8-2.1.1">Client Metadata Name: <code>client_attesters</code><a href="#section-8-2.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-8-2.2">
+          <p id="section-8-2.2.1">Client Metadata Description: Attesters endorsed to issue Client
+Attestations for this client, optionally with their verification-key
+locations<a href="#section-8-2.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-8-2.3">
+          <p id="section-8-2.3.1">Change Controller: IETF<a href="#section-8-2.3.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-8-2.4">
+          <p id="section-8-2.4.1">Specification Document(s): <a href="#metadata" class="auto internal xref">Section 3</a> of this document<a href="#section-8-2.4.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-8-3">This document also requests registration in the OAuth Authorization
+Server Metadata registry established by <span>[<a href="#RFC8414" class="cite xref">RFC8414</a>]</span>:<a href="#section-8-3" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-8-4.1">
+          <p id="section-8-4.1.1">Metadata Name: <code>client_attester_endorsement_supported</code><a href="#section-8-4.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-8-4.2">
+          <p id="section-8-4.2.1">Metadata Description: Boolean indicating that the AS processes
+<code>client_attesters</code> under this profile<a href="#section-8-4.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-8-4.3">
+          <p id="section-8-4.3.1">Change Controller: IETF<a href="#section-8-4.3.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-8-4.4">
+          <p id="section-8-4.4.1">Specification Document(s): <a href="#as-metadata" class="auto internal xref">Section 4</a> of this document<a href="#section-8-4.4.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+</section>
+</div>
+<div id="sec-combined-references">
+<section id="section-9">
+      <h2 id="name-references">
+<a href="#section-9" class="section-number selfRef">9. </a><a href="#name-references" class="section-name selfRef">References</a>
+      </h2>
+<div id="sec-normative-references">
+<section id="section-9.1">
+        <h3 id="name-normative-references">
+<a href="#section-9.1" class="section-number selfRef">9.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+        </h3>
+<dl class="references">
+<dt id="ATTEST">[ATTEST]</dt>
+        <dd>
+<span class="refAuthor">Looker, T.</span>, <span class="refAuthor">Bastian, P.</span>, and <span class="refAuthor">C. Bormann</span>, <span class="refTitle">"OAuth 2.0 Attestation-Based Client Authentication"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-oauth-attestation-based-client-auth-11</span>, <time datetime="2026-09-03" class="refDate">3 September 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11">https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="CIMD">[CIMD]</dt>
+        <dd>
+<span class="refAuthor">Parecki, A.</span> and <span class="refAuthor">E. Smith</span>, <span class="refTitle">"OAuth Client ID Metadata Document"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-oauth-client-id-metadata-document-02</span>, <time datetime="2026-07-06" class="refDate">6 July 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-client-id-metadata-document-02">https://datatracker.ietf.org/doc/html/draft-ietf-oauth-client-id-metadata-document-02</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC6749">[RFC6749]</dt>
+        <dd>
+<span class="refAuthor">Hardt, D., Ed.</span>, <span class="refTitle">"The OAuth 2.0 Authorization Framework"</span>, <span class="seriesInfo">RFC 6749</span>, <span class="seriesInfo">DOI 10.17487/RFC6749</span>, <time datetime="2012-10" class="refDate">October 2012</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc6749">https://www.rfc-editor.org/rfc/rfc6749</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC6454">[RFC6454]</dt>
+        <dd>
+<span class="refAuthor">Barth, A.</span>, <span class="refTitle">"The Web Origin Concept"</span>, <span class="seriesInfo">RFC 6454</span>, <span class="seriesInfo">DOI 10.17487/RFC6454</span>, <time datetime="2011-12" class="refDate">December 2011</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc6454">https://www.rfc-editor.org/rfc/rfc6454</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC7515">[RFC7515]</dt>
+        <dd>
+<span class="refAuthor">Jones, M.</span>, <span class="refAuthor">Bradley, J.</span>, and <span class="refAuthor">N. Sakimura</span>, <span class="refTitle">"JSON Web Signature (JWS)"</span>, <span class="seriesInfo">RFC 7515</span>, <span class="seriesInfo">DOI 10.17487/RFC7515</span>, <time datetime="2015-05" class="refDate">May 2015</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7515">https://www.rfc-editor.org/rfc/rfc7515</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC7517">[RFC7517]</dt>
+        <dd>
+<span class="refAuthor">Jones, M.</span>, <span class="refTitle">"JSON Web Key (JWK)"</span>, <span class="seriesInfo">RFC 7517</span>, <span class="seriesInfo">DOI 10.17487/RFC7517</span>, <time datetime="2015-05" class="refDate">May 2015</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7517">https://www.rfc-editor.org/rfc/rfc7517</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC7519">[RFC7519]</dt>
+        <dd>
+<span class="refAuthor">Jones, M.</span>, <span class="refAuthor">Bradley, J.</span>, and <span class="refAuthor">N. Sakimura</span>, <span class="refTitle">"JSON Web Token (JWT)"</span>, <span class="seriesInfo">RFC 7519</span>, <span class="seriesInfo">DOI 10.17487/RFC7519</span>, <time datetime="2015-05" class="refDate">May 2015</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7519">https://www.rfc-editor.org/rfc/rfc7519</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC7591">[RFC7591]</dt>
+        <dd>
+<span class="refAuthor">Richer, J., Ed.</span>, <span class="refAuthor">Jones, M.</span>, <span class="refAuthor">Bradley, J.</span>, <span class="refAuthor">Machulak, M.</span>, and <span class="refAuthor">P. Hunt</span>, <span class="refTitle">"OAuth 2.0 Dynamic Client Registration Protocol"</span>, <span class="seriesInfo">RFC 7591</span>, <span class="seriesInfo">DOI 10.17487/RFC7591</span>, <time datetime="2015-07" class="refDate">July 2015</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7591">https://www.rfc-editor.org/rfc/rfc7591</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC7662">[RFC7662]</dt>
+        <dd>
+<span class="refAuthor">Richer, J., Ed.</span>, <span class="refTitle">"OAuth 2.0 Token Introspection"</span>, <span class="seriesInfo">RFC 7662</span>, <span class="seriesInfo">DOI 10.17487/RFC7662</span>, <time datetime="2015-10" class="refDate">October 2015</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7662">https://www.rfc-editor.org/rfc/rfc7662</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8414">[RFC8414]</dt>
+        <dd>
+<span class="refAuthor">Jones, M.</span>, <span class="refAuthor">Sakimura, N.</span>, and <span class="refAuthor">J. Bradley</span>, <span class="refTitle">"OAuth 2.0 Authorization Server Metadata"</span>, <span class="seriesInfo">RFC 8414</span>, <span class="seriesInfo">DOI 10.17487/RFC8414</span>, <time datetime="2018-06" class="refDate">June 2018</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8414">https://www.rfc-editor.org/rfc/rfc8414</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8725">[RFC8725]</dt>
+        <dd>
+<span class="refAuthor">Sheffer, Y.</span>, <span class="refAuthor">Hardt, D.</span>, and <span class="refAuthor">M. Jones</span>, <span class="refTitle">"JSON Web Token Best Current Practices"</span>, <span class="seriesInfo">BCP 225</span>, <span class="seriesInfo">RFC 8725</span>, <span class="seriesInfo">DOI 10.17487/RFC8725</span>, <time datetime="2020-02" class="refDate">February 2020</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8725">https://www.rfc-editor.org/rfc/rfc8725</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9111">[RFC9111]</dt>
+        <dd>
+<span class="refAuthor">Fielding, R., Ed.</span>, <span class="refAuthor">Nottingham, M., Ed.</span>, and <span class="refAuthor">J. Reschke, Ed.</span>, <span class="refTitle">"HTTP Caching"</span>, <span class="seriesInfo">STD 98</span>, <span class="seriesInfo">RFC 9111</span>, <span class="seriesInfo">DOI 10.17487/RFC9111</span>, <time datetime="2022-06" class="refDate">June 2022</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9111">https://www.rfc-editor.org/rfc/rfc9111</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC2119">[RFC2119]</dt>
+        <dd>
+<span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2119">https://www.rfc-editor.org/rfc/rfc2119</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8174">[RFC8174]</dt>
+      <dd>
+<span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8174">https://www.rfc-editor.org/rfc/rfc8174</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="sec-informative-references">
+<section id="section-9.2">
+        <h3 id="name-informative-references">
+<a href="#section-9.2" class="section-number selfRef">9.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
+        </h3>
+<dl class="references">
+<dt id="RFC9449">[RFC9449]</dt>
+        <dd>
+<span class="refAuthor">Fett, D.</span>, <span class="refAuthor">Campbell, B.</span>, <span class="refAuthor">Bradley, J.</span>, <span class="refAuthor">Lodderstedt, T.</span>, <span class="refAuthor">Jones, M.</span>, and <span class="refAuthor">D. Waite</span>, <span class="refTitle">"OAuth 2.0 Demonstrating Proof of Possession (DPoP)"</span>, <span class="seriesInfo">RFC 9449</span>, <span class="seriesInfo">DOI 10.17487/RFC9449</span>, <time datetime="2023-09" class="refDate">September 2023</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9449">https://www.rfc-editor.org/rfc/rfc9449</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="SPIFFE-OAUTH">[SPIFFE-OAUTH]</dt>
+        <dd>
+<span class="refAuthor">Schwenkschuster, A.</span>, <span class="refAuthor">Kasselman, P.</span>, <span class="refAuthor">Rose, S.</span>, <span class="refAuthor">Thorgersen, S.</span>, and <span class="refAuthor">N. Cam-Winget</span>, <span class="refTitle">"OAuth SPIFFE Client Authentication"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-oauth-spiffe-client-auth-02</span>, <time datetime="2026-06-15" class="refDate">15 June 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-spiffe-client-auth-02">https://datatracker.ietf.org/doc/html/draft-ietf-oauth-spiffe-client-auth-02</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="INSTANCE-ID">[INSTANCE-ID]</dt>
+      <dd>
+<span class="refAuthor">McGuinness, K.</span>, <span class="refTitle">"Client Instance Identification for Attestation-Based Client Authentication"</span>, <time datetime="2026-09-14" class="refDate">14 September 2026</time>, <span>&lt;<a href="https://mcguinness.github.io/draft-mcguinness-oauth-client-instance-id/draft-mcguinness-oauth-client-instance-id.html">https://mcguinness.github.io/draft-mcguinness-oauth-client-instance-id/draft-mcguinness-oauth-client-instance-id.html</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</div>
+</section>
+</div>
+<div id="example">
+<section id="appendix-A">
+      <h2 id="name-cimd-deployment-example">
+<a href="#name-cimd-deployment-example" class="section-name selfRef">CIMD Deployment Example</a>
+      </h2>
+<p id="appendix-A-1">This example is informative. The AS has the following local configuration;
+these are policy settings, not new protocol metadata:<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+<table class="center" id="table-2">
+        <caption><a href="#table-2" class="selfRef">Table 2</a></caption>
+<thead>
+          <tr>
+            <th class="text-left" rowspan="1" colspan="1">Setting</th>
+            <th class="text-left" rowspan="1" colspan="1">Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">Permitted CIMD publisher origin</td>
+            <td class="text-left" rowspan="1" colspan="1">
+              <code>https://platform.example</code>
+</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">Independently trusted attester</td>
+            <td class="text-left" rowspan="1" colspan="1">
+              <code>https://attester.example/tenant/acme</code>
+</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">Key-trust policy for that attester</td>
+            <td class="text-left" rowspan="1" colspan="1">AS-configured attester trust</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">Configured key source for that attester</td>
+            <td class="text-left" rowspan="1" colspan="1">
+              <code>https://attester.example/tenant/acme/jwks</code>
+</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">Maximum metadata and key cache ages</td>
+            <td class="text-left" rowspan="1" colspan="1">3600 seconds each</td>
+          </tr>
+        </tbody>
+      </table>
+<p id="appendix-A-3">At <code>https://platform.example/oauth-client</code>, the publisher serves:<a href="#appendix-A-3" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="appendix-A-4">
+<pre>
+{
+  "client_id": "https://platform.example/oauth-client",
+  "client_name": "Managed Agent Harness",
+  "redirect_uris": ["https://platform.example/callback"],
+  "grant_types": ["authorization_code"],
+  "response_types": ["code"],
+  "token_endpoint_auth_method": "attest_jwt_client_auth_dpop",
+  "client_attesters": [
+    {
+      "issuer": "https://attester.example/tenant/acme",
+      "jwks_uri": "https://attester.example/tenant/acme/jwks"
+    }
+  ]
+}
+</pre><a href="#appendix-A-4" class="pilcrow">¶</a>
+</div>
+<p id="appendix-A-5">The attester's configured key endpoint publishes this illustrative JWK
+Set. This signing key is distinct from the runtime key in <code>cnf.jwk</code>:<a href="#appendix-A-5" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="appendix-A-6">
+<pre>
+{
+  "keys": [{
+    "kty": "EC",
+    "crv": "P-256",
+    "kid": "attester-1",
+    "use": "sig",
+    "alg": "ES256",
+    "x": "axfR8uEsQkf4vOblY6RA8ncDfYEt6zOg9KE5RdiYwpY",
+    "y": "T-NC4v4af5uO5-tKfA-eFivOM1drMV7Oy7ZAaDe_UfU"
+  }]
+}
+</pre><a href="#appendix-A-6" class="pilcrow">¶</a>
+</div>
+<p id="appendix-A-7">The decoded Client Attestation header selects that key:<a href="#appendix-A-7" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="appendix-A-8">
+<pre>
+{
+  "typ": "oauth-client-attestation+jwt",
+  "alg": "ES256",
+  "kid": "attester-1"
+}
+</pre><a href="#appendix-A-8" class="pilcrow">¶</a>
+</div>
+<ol start="1" type="1" class="normal type-1" id="appendix-A-9">
+<li id="appendix-A-9.1">
+          <p id="appendix-A-9.1.1">The runtime proves its authorization to use this client identifier
+and possession of its instance key to the attester.<a href="#appendix-A-9.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="appendix-A-9.2">
+          <p id="appendix-A-9.2.1">The attester issues an ATTEST credential with
+<code>iss=https://attester.example/tenant/acme</code>,
+<code>sub=https://platform.example/oauth-client</code>, an expiration, and the
+instance public key in <code>cnf.jwk</code>.<a href="#appendix-A-9.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="appendix-A-9.3">
+          <p id="appendix-A-9.3.1">After obtaining user authorization, the runtime redeems its code
+with that <code>client_id</code>, the Client Attestation, and a combined
+Demonstrating Proof of Possession (DPoP) proof <span>[<a href="#RFC9449" class="cite xref">RFC9449</a>]</span>.<a href="#appendix-A-9.3.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="appendix-A-9.4">
+          <p id="appendix-A-9.4.1">The AS validates the CIMD, accepted endorsement, attestation,
+proof, and grant before issuing the access token.<a href="#appendix-A-9.4.1" class="pilcrow">¶</a></p>
+</li>
+      </ol>
+<p id="appendix-A-10">There is one client metadata document, not one per installation.
+An endorsement for this client does not let the attester authenticate
+another client, even if both use the same attestation service.
+The flow does not require <code>client_instance_id</code> or an <code>act</code> claim.<a href="#appendix-A-10" class="pilcrow">¶</a></p>
+<p id="appendix-A-11">Because the AS applies AS-configured attester trust, the endorsed
+<code>jwks_uri</code> is informational here: keys come only from the configured
+source, and the publisher could omit <code>jwks_uri</code> without changing the
+outcome. An attestation from an unendorsed issuer, or one whose <code>kid</code>
+resolves to no key in the configured source, produces:<a href="#appendix-A-11" class="pilcrow">¶</a></p>
+<div class="lang-http-message sourcecode" id="appendix-A-12">
+<pre>
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+Cache-Control: no-store
+Pragma: no-cache
+
+{"error": "invalid_client_attestation"}
+</pre><a href="#appendix-A-12" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="registered-client-example">
+<section id="appendix-B">
+      <h2 id="name-registered-client-example">
+<a href="#name-registered-client-example" class="section-name selfRef">Registered Client Example</a>
+      </h2>
+<p id="appendix-B-1">An authenticated, authorized administrator registers <code>s6BhdRkqt3</code> with the
+same <code>client_attesters</code> and <code>token_endpoint_auth_method</code> as <a href="#example" class="auto internal xref">Appendix "CIMD Deployment Example"</a>. The AS
+applies the same AS-configured attester trust and key source.<a href="#appendix-B-1" class="pilcrow">¶</a></p>
+<p id="appendix-B-2">The client sends <code>client_id=s6BhdRkqt3</code> with an attestation whose
+<code>sub</code> is <code>s6BhdRkqt3</code> and <code>iss</code> is <code>https://attester.example/tenant/acme</code>,
+plus its DPoP proof. The AS loads the registered metadata and applies
+the same endorsement and proof checks; no CIMD is fetched.<a href="#appendix-B-2" class="pilcrow">¶</a></p>
+<p id="appendix-B-3">Had the administrator instead registered the URL <code>client_id</code> from
+<a href="#example" class="auto internal xref">Appendix "CIMD Deployment Example"</a>, the AS would process the request from the single source its
+policy selected in step 1, the registration or the CIMD, and never from a
+union of both. An endorsement failure from the selected source produces
+<code>invalid_client_attestation</code>. The AS does not then consult the other
+source.<a href="#appendix-B-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="document-history">
+<section id="appendix-C">
+      <h2 id="name-document-history">
+<a href="#name-document-history" class="section-name selfRef">Document History</a>
+      </h2>
+<p id="appendix-C-1"><em>RFC EDITOR: Remove this section before publication.</em><a href="#appendix-C-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="appendix-C-2.1">
+          <p id="appendix-C-2.1.1">Initial draft.<a href="#appendix-C-2.1.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+</section>
+</div>
+<div id="authors-addresses">
+<section id="appendix-D">
+      <h2 id="name-authors-address">
+<a href="#name-authors-address" class="section-name selfRef">Author's Address</a>
+      </h2>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Karl McGuinness</span></div>
+<div dir="auto" class="left"><span class="org">Independent</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:public@karlmcguinness.com" class="email">public@karlmcguinness.com</a>
+</div>
+</address>
+</section>
+</div>
+<script>const toc = document.getElementById("toc");
+toc.querySelector("h2").addEventListener("click", e => {
+  toc.classList.toggle("active");
+});
+toc.querySelector("nav").addEventListener("click", e => {
+  toc.classList.remove("active");
+});
+</script>
+</body>
+</html>
