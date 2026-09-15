@@ -226,7 +226,9 @@ that ignore them.
 
 Every entry carries a complete issuer-to-key-location mapping, so an
 endorsement has the same meaning regardless of the AS policy that
-evaluates it, which the publisher cannot know. Under AS-configured
+evaluates it, which the publisher cannot know. An endorsement
+therefore identifies a Client Attester by both its issuer and its key
+location. Under AS-configured
 attester trust the AS does not treat that location as the key source;
 it retrieves keys from the configured source and uses the endorsed
 value only to confirm that the two agree ({{key-resolution}}).
@@ -344,7 +346,10 @@ endorsement fails.
   MUST equal that source's URI or one of its configured aliases. An
   alias is an endorsed URI that the AS is configured to treat as
   equivalent to the issuer's configured source; it does not change
-  where keys are retrieved. This check surfaces disagreement
+  where keys are retrieved. Configured aliases MUST preserve the
+  endorsed attestation authority, including tenant scope; a shared
+  issuer or origin alone does not establish equivalence. This check
+  surfaces disagreement
   between the endorsement and AS configuration, including endorsement
   of a different key set behind a shared issuer string, instead of
   resolving it silently. An endorsed `jwks_uri` MUST NOT select,
@@ -361,8 +366,10 @@ endorsement fails.
 A non-HTTPS issuer requires AS-configured attester trust because it has
 no HTTPS origin binding.
 
-Issuer and client identifiers MUST use exact, case-sensitive comparison
-without URI normalization. Key selection and caches MUST bind keys to
+Issuer and client identifiers, and endorsed `jwks_uri` values compared
+with configured source URIs and aliases, MUST use exact, case-sensitive
+string comparison without URI normalization; an alternative spelling of
+a location requires an explicit alias. Key selection and caches MUST bind keys to
 the client identifier, issuer, selected key source, and applicable trust
 policy; `kid` alone or a union of keys from different entries is
 insufficient. Token-controlled key locations MUST NOT override that
@@ -460,10 +467,12 @@ The considerations in {{ATTEST}}, {{CIMD}}, and {{RFC8725}} apply.
 * **Attester compromise:** attesters serving several clients or tenants
   need issuance controls preventing one from obtaining attestations
   for another. Under AS-configured attester trust, the configured key
-  source determines whose keys are accepted, and the required agreement
-  with the endorsed `jwks_uri` ({{key-resolution}}) keeps the AS from
-  accepting a tenant the publisher did not endorse behind a shared
-  issuer string.
+  source determines whose keys are accepted. The required agreement
+  with the endorsed `jwks_uri` ({{key-resolution}}) detects
+  disagreement between the endorsement and AS configuration; it
+  establishes tenant isolation only if the configured source and its
+  aliases preserve the endorsed tenant scope, which remains the AS
+  operator's responsibility.
 * **Key retrieval:** the AS MUST authenticate HTTPS servers, limit
   response sizes and request time, and prevent retrieval from prohibited
   network destinations. It MUST NOT follow redirects for JWK Set
