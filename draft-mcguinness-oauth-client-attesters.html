@@ -8,8 +8,8 @@
 <meta content="Karl McGuinness" name="author">
 <meta content="
        This specification profiles OAuth 2.0 Attestation-Based Client
-Authentication with client metadata identifying endorsed attesters and,
-optionally, their verification-key locations. It defines authorization-server
+Authentication with client metadata identifying endorsed attesters and
+their verification-key locations. It defines authorization-server
 validation and withdrawal rules for endorsements in registered client
 metadata or Client ID Metadata Documents, and an authorization-server
 metadata parameter advertising support. It introduces no new credential
@@ -1085,8 +1085,8 @@ svg {
 <section id="section-abstract">
       <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
 <p id="section-abstract-1">This specification profiles OAuth 2.0 Attestation-Based Client
-Authentication with client metadata identifying endorsed attesters and,
-optionally, their verification-key locations. It defines authorization-server
+Authentication with client metadata identifying endorsed attesters and
+their verification-key locations. It defines authorization-server
 validation and withdrawal rules for endorsements in registered client
 metadata or Client ID Metadata Documents, and an authorization-server
 metadata parameter advertising support. It introduces no new credential
@@ -1263,7 +1263,7 @@ attesters, for example across platforms or during migration. Deployments
 that manage attester trust entirely through authorization server (AS)
 configuration can continue to use ATTEST without this profile.<a href="#section-1-2" class="pilcrow">¶</a></p>
 <p id="section-1-3">This profile adds <code>client_attesters</code>: the client's endorsements of
-attesters and, optionally, their verification-key locations, generalizing SPIFFE client
+attesters and their verification-key locations, generalizing SPIFFE client
 authentication's bundle endpoint <span>[<a href="#SPIFFE-OAUTH" class="cite xref">SPIFFE-OAUTH</a>]</span>. An AS accepts an
 endorsement only under its own trust policy. The resulting chain is:<a href="#section-1-3" class="pilcrow">¶</a></p>
 <div class="alignLeft art-ascii-art art-text artwork" id="section-1-4">
@@ -1294,7 +1294,9 @@ Client Instance ID (optional)  Which persistent instance is this?
 does not establish attester trust. Neither establishes user delegation.<a href="#section-1-8" class="pilcrow">¶</a></p>
 <p id="section-1-9">Resource servers validating Client Attestations directly rely on
 configured attester trust; this profile does not define endorsement
-discovery or acceptance for those endpoints.<a href="#section-1-9" class="pilcrow">¶</a></p>
+discovery or acceptance for those endpoints. This keeps client metadata
+resolution and endorsement-policy evaluation at the AS rather than
+distributing those functions to resource servers.<a href="#section-1-9" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="trust">
@@ -1313,8 +1315,9 @@ the authoritative metadata for a <code>client_id</code>.<a href="#section-2-2" c
         <dt id="section-2-3.1">Client Attester Endorsement</dt>
         <dd style="margin-left: 1.5em" id="section-2-3.2">
           <p id="section-2-3.2.1">A statement in the authoritative client metadata for a <code>client_id</code>
-that a specified Client Attester is authorized to issue Client
-Attestations naming that <code>client_id</code>. An endorsement delegates
+expressing the publisher's authorization for a specified Client
+Attester to issue Client Attestations naming that <code>client_id</code>. An
+endorsement delegates
 attestation authority for the named client only. It does not delegate
 OAuth authorization, user authority, or authority to further delegate
 attestation, and it does not extend to any other client.<a href="#section-2-3.2.1" class="pilcrow">¶</a></p>
@@ -1364,8 +1367,8 @@ other publishers.<a href="#section-2.1-5.1.1" class="pilcrow">¶</a></p>
             <p id="section-2.1-5.2.1"><strong>AS-configured attester trust:</strong> the AS independently trusts a
 particular attester and configures its key source. The endorsement
 authorizes that attester to act for the client; it cannot supply the
-trust anchor, and an endorsed <code>jwks_uri</code> does not select the key
-source.<a href="#section-2.1-5.2.1" class="pilcrow">¶</a></p>
+trust anchor, and the endorsed <code>jwks_uri</code> is checked against the
+configured source rather than used to select it (<a href="#key-resolution" class="auto internal xref">Section 5.3</a>).<a href="#section-2.1-5.2.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 <p id="section-2.1-6">When combined with <span>[<a href="#INSTANCE-ID" class="cite xref">INSTANCE-ID</a>]</span>, the same two requirements establish
@@ -1459,8 +1462,9 @@ metadata (including <span>[<a href="#RFC7591" class="cite xref">RFC7591</a>]</sp
               <code>jwks_uri</code>
 </td>
             <td class="text-left" rowspan="1" colspan="1">
-              <span class="bcp14">OPTIONAL</span>, HTTPS URL without userinfo or fragment</td>
-            <td class="text-left" rowspan="1" colspan="1">Location of the attester's public JSON Web Key (JWK) Set <span>[<a href="#RFC7517" class="cite xref">RFC7517</a>]</span>, used only under publisher-authorized key selection (<a href="#key-resolution" class="auto internal xref">Section 5.3</a>)</td>
+              <span class="bcp14">REQUIRED</span>, HTTPS URL without userinfo or fragment</td>
+            <td class="text-left" rowspan="1" colspan="1">Location of the attester's public JSON Web Key (JWK) Set <span>[<a href="#RFC7517" class="cite xref">RFC7517</a>]</span>
+</td>
           </tr>
         </tbody>
       </table>
@@ -1477,19 +1481,21 @@ issuer occurs more than once, without accepting a partial list; and<a href="#sec
       </ul>
 <p id="section-3-5">Extensions <span class="bcp14">MUST NOT</span> weaken an endorsement's meaning for implementations
 that ignore them.<a href="#section-3-5" class="pilcrow">¶</a></p>
-<p id="section-3-6">An entry without <code>jwks_uri</code> is acceptable only under AS-configured
-attester trust; under publisher-authorized key selection its absence is
-an endorsement validation failure. Publishers <span class="bcp14">SHOULD</span> include <code>jwks_uri</code>
-unless every relying AS is known to configure the attester
-independently, because omitting it narrows the set of authorization
-servers that can accept the client.<a href="#section-3-6" class="pilcrow">¶</a></p>
+<p id="section-3-6">Every entry carries a complete issuer-to-key-location mapping, so an
+endorsement has the same meaning regardless of the AS policy that
+evaluates it, which the publisher cannot know. An endorsement
+therefore identifies a Client Attester by both its issuer and its key
+location. Under AS-configured
+attester trust the AS does not treat that location as the key source;
+it retrieves keys from the configured source and uses the endorsed
+value only to confirm that the two agree (<a href="#key-resolution" class="auto internal xref">Section 5.3</a>).<a href="#section-3-6" class="pilcrow">¶</a></p>
 <p id="section-3-7">Each entry is a Client Attester Endorsement (<a href="#trust" class="auto internal xref">Section 2</a>) for the
 <code>client_id</code> whose metadata contains it. An <code>issuer</code> identifies a
 namespace, not a discovery endpoint. Key-source constraints are
 specified in <a href="#key-resolution" class="auto internal xref">Section 5.3</a>.<a href="#section-3-7" class="pilcrow">¶</a></p>
 <p id="section-3-8"><span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-10.8" class="relref">Section 10.8</a></span> recommends, among other options, resolving <code>kid</code>
 through client metadata <code>jwks_uri</code>. This profile extends that option
-with an optional separate key location for each endorsed issuer. A top-level
+with a separate key location for each endorsed issuer. A top-level
 <code>jwks_uri</code> can contain several issuers' keys, but does not associate
 them with named attesters or separate them from client authentication
 keys. It does not replace <code>client_attesters</code> under this profile.<a href="#section-3-8" class="pilcrow">¶</a></p>
@@ -1558,10 +1564,15 @@ the scope of this specification.<a href="#section-5.1-2" class="pilcrow">¶</a><
 signing key.<a href="#section-5.1-4.3.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-5.1-5">This profile retains the default <code>client_id</code> to <code>sub</code> equality of
+<p id="section-5.1-5"><span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-4" class="relref">Section 4</a></span> does not require <code>iss</code>. This profile requires it
+because a client can endorse several Client Attesters with independent
+key sets: the issuer selects the applicable endorsement and key source
+before <code>kid</code> is resolved, and <code>kid</code> alone identifies a key within a
+set, not a Client Attester or a trust relationship.<a href="#section-5.1-5" class="pilcrow">¶</a></p>
+<p id="section-5.1-6">This profile retains the default <code>client_id</code> to <code>sub</code> equality of
 <span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-7.5" class="relref">Section 7.5</a></span> and does not relax it. The binding prevents an
 endorsement for one client from validating an attestation naming
-another. Other claims and proof requirements follow ATTEST.<a href="#section-5.1-5" class="pilcrow">¶</a></p>
+another. Other claims and proof requirements follow ATTEST.<a href="#section-5.1-6" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="as-processing">
@@ -1612,32 +1623,45 @@ that method.<a href="#section-5.2-2.4.1" class="pilcrow">¶</a></p>
 <a href="#section-5.3" class="section-number selfRef">5.3. </a><a href="#name-key-source-selection" class="section-name selfRef">Key Source Selection</a>
         </h3>
 <p id="section-5.3-1">The AS <span class="bcp14">MUST</span> select keys according to the key-trust policy governing
-the client-to-attester association (<a href="#trust" class="auto internal xref">Section 2</a>):<a href="#section-5.3-1" class="pilcrow">¶</a></p>
+the client-to-attester association (<a href="#trust" class="auto internal xref">Section 2</a>). If AS-configured
+attester trust applies to the issuer, it governs regardless of whether
+the publisher is also authorized to select keys. Otherwise,
+publisher-authorized key selection applies if the publisher is so
+authorized. If neither applies, no key source is available and the
+endorsement fails.<a href="#section-5.3-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-5.3-2.1">
             <p id="section-5.3-2.1.1"><strong>AS-configured attester trust:</strong> use only the independently
-configured key source for the exact issuer, even when the publisher
-is also authorized to select keys. An endorsed <code>jwks_uri</code> <span class="bcp14">MUST NOT</span>
-select, override, or provide a fallback for that source. An otherwise
-valid endorsed <code>jwks_uri</code> that differs from the configured source has
-no effect on acceptance and can be logged as a configuration
-discrepancy. The configured key source <span class="bcp14">MAY</span> use a different HTTPS
-origin from the issuer, and the entry <span class="bcp14">MAY</span> omit <code>jwks_uri</code>.<a href="#section-5.3-2.1.1" class="pilcrow">¶</a></p>
+configured key source for the exact issuer. The endorsed <code>jwks_uri</code>
+              <span class="bcp14">MUST</span> equal that source's URI or one of its configured aliases. An
+alias is an endorsed URI that the AS is configured to treat as
+equivalent to the issuer's configured source; it does not change
+where keys are retrieved. Configured aliases <span class="bcp14">MUST</span> preserve the
+endorsed attestation authority, including tenant scope; a shared
+issuer or origin alone does not establish equivalence. This check
+surfaces disagreement
+between the endorsement and AS configuration, including endorsement
+of a different key set behind a shared issuer string, instead of
+resolving it silently. An endorsed <code>jwks_uri</code> <span class="bcp14">MUST NOT</span> select,
+override, or provide a fallback for the configured source. The
+configured key source <span class="bcp14">MAY</span> use a different HTTPS origin from the
+issuer.<a href="#section-5.3-2.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-5.3-2.2">
             <p id="section-5.3-2.2.1"><strong>Publisher-authorized key selection:</strong> use the endorsed <code>jwks_uri</code>.
-The entry <span class="bcp14">MUST</span> include <code>jwks_uri</code>, the <code>issuer</code> <span class="bcp14">MUST</span> be an HTTPS URL,
-and <code>jwks_uri</code> <span class="bcp14">MUST</span> have the same origin <span>[<a href="#RFC6454" class="cite xref">RFC6454</a>]</span>. This origin
-check neither isolates tenants sharing an origin nor establishes trust
-in an issuer name. Publisher-selected keys <span class="bcp14">MUST NOT</span> inherit an
-independently trusted attester's assurance merely because issuer
-strings match.<a href="#section-5.3-2.2.1" class="pilcrow">¶</a></p>
+The <code>issuer</code> <span class="bcp14">MUST</span> be an HTTPS URL and <code>jwks_uri</code> <span class="bcp14">MUST</span> have the same
+origin <span>[<a href="#RFC6454" class="cite xref">RFC6454</a>]</span>. This origin check neither isolates tenants sharing
+an origin nor establishes trust in an issuer name. Publisher-selected
+keys <span class="bcp14">MUST NOT</span> inherit an independently trusted attester's assurance
+merely because issuer strings match.<a href="#section-5.3-2.2.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 <p id="section-5.3-3">A non-HTTPS issuer requires AS-configured attester trust because it has
 no HTTPS origin binding.<a href="#section-5.3-3" class="pilcrow">¶</a></p>
-<p id="section-5.3-4">Issuer and client identifiers <span class="bcp14">MUST</span> use exact, case-sensitive comparison
-without URI normalization. Key selection and caches <span class="bcp14">MUST</span> bind keys to
+<p id="section-5.3-4">Issuer and client identifiers, and endorsed <code>jwks_uri</code> values compared
+with configured source URIs and aliases, <span class="bcp14">MUST</span> use exact, case-sensitive
+string comparison without URI normalization; an alternative spelling of
+a location requires an explicit alias. Key selection and caches <span class="bcp14">MUST</span> bind keys to
 the client identifier, issuer, selected key source, and applicable trust
 policy; <code>kid</code> alone or a union of keys from different entries is
 insufficient. Token-controlled key locations <span class="bcp14">MUST NOT</span> override that
@@ -1653,9 +1677,9 @@ source. Origin comparison does not change identifier comparison.<a href="#sectio
 without exposing policy details. Endorsement validation covers selecting
 a permitted endorsement in step 2 of <a href="#as-processing" class="auto internal xref">Section 5.2</a> and selecting the
 key source and resolving <code>kid</code> in step 3 under <a href="#key-resolution" class="auto internal xref">Section 5.3</a>,
-including an entry without <code>jwks_uri</code> under publisher-authorized key
-selection and the case where no eligible key is available after any
-refresh permitted by <a href="#updates" class="auto internal xref">Section 6</a>. Signature verification with a resolved key and
+including an endorsed <code>jwks_uri</code> that matches neither the configured
+source nor a configured alias, and the case where no eligible key is
+available after any refresh permitted by <a href="#updates" class="auto internal xref">Section 6</a>. Signature verification with a resolved key and
 the remaining attestation and proof checks follow <span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-7.4" class="relref">Section 7.4</a></span>,
 including challenge and freshness responses. A companion client
 authentication method that fails, or that authenticates a different
@@ -1718,10 +1742,11 @@ policy denial <span class="bcp14">MUST</span> take effect immediately on subsequ
 without waiting for cache expiration.<a href="#section-6.2-1" class="pilcrow">¶</a></p>
 <p id="section-6.2-2">For planned key rotation, publish the new key and allow the applicable
 JWK Set cache lifetimes to elapse before using it. Retain the old key while
-attestations signed with it should remain acceptable. Under
-publisher-authorized key selection, changes to key locations also need
-time for metadata-cache propagation. The AS's configured maximum ages
-bound stale acceptance.<a href="#section-6.2-2" class="pilcrow">¶</a></p>
+attestations signed with it should remain acceptable. Changes to
+endorsed key locations need time for metadata-cache propagation and,
+under AS-configured attester trust, cause endorsement failures until
+the AS configures a matching alias or updates its configured source.
+The AS's configured maximum ages bound stale acceptance.<a href="#section-6.2-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="existing-grants">
@@ -1764,9 +1789,12 @@ independent trust basis; this profile defines no such mechanism.<a href="#sectio
           <p id="section-7-2.2.1"><strong>Attester compromise:</strong> attesters serving several clients or tenants
 need issuance controls preventing one from obtaining attestations
 for another. Under AS-configured attester trust, the configured key
-source, not the endorsed <code>jwks_uri</code>, determines whose keys are
-accepted; pinning a tenant's key set is the AS operator's
-responsibility in that policy.<a href="#section-7-2.2.1" class="pilcrow">¶</a></p>
+source determines whose keys are accepted. The required agreement
+with the endorsed <code>jwks_uri</code> (<a href="#key-resolution" class="auto internal xref">Section 5.3</a>) detects
+disagreement between the endorsement and AS configuration; it
+establishes tenant isolation only if the configured source and its
+aliases preserve the endorsed tenant scope, which remains the AS
+operator's responsibility.<a href="#section-7-2.2.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-7-2.3">
           <p id="section-7-2.3.1"><strong>Key retrieval:</strong> the AS <span class="bcp14">MUST</span> authenticate HTTPS servers, limit
@@ -1804,8 +1832,7 @@ Registration Metadata registry established by <span>[<a href="#RFC7591" class="c
 </li>
         <li class="normal" id="section-8-2.2">
           <p id="section-8-2.2.1">Client Metadata Description: Attesters endorsed to issue Client
-Attestations for this client, optionally with their verification-key
-locations<a href="#section-8-2.2.1" class="pilcrow">¶</a></p>
+Attestations for this client, with their verification-key locations<a href="#section-8-2.2.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-8-2.3">
           <p id="section-8-2.3.1">Change Controller: IETF<a href="#section-8-2.3.1" class="pilcrow">¶</a></p>
@@ -2041,11 +2068,11 @@ proof, and grant before issuing the access token.<a href="#appendix-A-9.4.1" cla
 An endorsement for this client does not let the attester authenticate
 another client, even if both use the same attestation service.
 The flow does not require <code>client_instance_id</code> or an <code>act</code> claim.<a href="#appendix-A-10" class="pilcrow">¶</a></p>
-<p id="appendix-A-11">Because the AS applies AS-configured attester trust, the endorsed
-<code>jwks_uri</code> is informational here: keys come only from the configured
-source, and the publisher could omit <code>jwks_uri</code> without changing the
-outcome. An attestation from an unendorsed issuer, or one whose <code>kid</code>
-resolves to no key in the configured source, produces:<a href="#appendix-A-11" class="pilcrow">¶</a></p>
+<p id="appendix-A-11">Because the AS applies AS-configured attester trust, keys come only
+from the configured source, and the endorsed <code>jwks_uri</code> is required to
+equal it, as it does here. An attestation from an unendorsed issuer, an
+endorsement naming the trusted issuer with a different key location, or
+a <code>kid</code> that resolves to no key in the configured source, produces:<a href="#appendix-A-11" class="pilcrow">¶</a></p>
 <div class="lang-http-message sourcecode" id="appendix-A-12">
 <pre>
 HTTP/1.1 400 Bad Request
