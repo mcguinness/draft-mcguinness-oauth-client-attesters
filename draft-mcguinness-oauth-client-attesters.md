@@ -224,7 +224,7 @@ The attester MUST include:
 
 Other claims and proof requirements follow ATTEST.
 
-## Authorization Server Processing
+## Authorization Server Processing {#as-processing}
 
 For each presentation, the AS MUST:
 
@@ -238,13 +238,17 @@ For each presentation, the AS MUST:
    exactly matches the attestation's nonempty `iss`. Verify AS policy
    permits that client-to-attester association.
 3. Select the key source under {{key-resolution}}. Resolve `kid` to one
-   eligible public key and verify the signature using an acceptable
-   asymmetric algorithm. Symmetric keys, private keys, and `alg=none`
-   MUST NOT be accepted under this profile.
+   eligible public key, refreshing on an unknown `kid` only as {{updates}}
+   permits, and verify the signature using an acceptable asymmetric
+   algorithm. Symmetric keys, private keys, and `alg=none` MUST NOT be
+   accepted under this profile.
 4. Verify `sub` exactly equals the requested `client_id`, then validate
    the remaining attestation and proof under the selected ATTEST method.
-   If another client authentication method accompanies the attestation,
-   verify that it authenticates that same client identifier.
+   When the attestation is an additional security signal alongside
+   another client authentication method ({{ATTEST, Section 7.6}}),
+   validate that method under its own specification and verify that it
+   authenticates that same client identifier. A mismatch is a failure of
+   that method.
 5. Apply grant and authorization policy independently of the endorsement.
 
 ## Key Source Selection {#key-resolution}
@@ -278,8 +282,15 @@ source. Origin comparison does not change identifier comparison.
 ## Errors
 
 Endorsement validation failures MUST produce `invalid_client_attestation`,
-without exposing policy details. Attestation and proof validation errors
-follow {{ATTEST, Section 7.4}}, including challenge and freshness responses.
+without exposing policy details. Endorsement validation covers selecting
+a permitted endorsement in step 2 of {{as-processing}} and selecting the
+key source and resolving `kid` in step 3 under {{key-resolution}},
+including the case where no eligible key is available after any refresh
+permitted by {{updates}}. Signature verification with a resolved key and
+the remaining attestation and proof checks follow {{ATTEST, Section 7.4}},
+including challenge and freshness responses. A companion client
+authentication method that fails, or that authenticates a different
+client identifier, produces the error defined by its own specification.
 Other metadata-discovery, registration, authentication, and grant errors
 follow their base specifications. The no-fallback rule in {{trust}} applies.
 
@@ -477,6 +488,13 @@ The client sends `client_id=s6BhdRkqt3` with an attestation whose
 `sub` is `s6BhdRkqt3` and `iss` is `https://attester.example/tenant/acme`,
 plus its DPoP proof. The AS loads the registered metadata and applies
 the same endorsement and proof checks; no CIMD is fetched.
+
+Had the administrator instead registered the URL `client_id` from
+{{example}}, the AS would process the request from the single source its
+policy selected in step 1, the registration or the CIMD, and never from a
+union of both. An endorsement failure from the selected source produces
+`invalid_client_attestation`. The AS does not then consult the other
+source.
 
 # Document History
 {:numbered="false"}
