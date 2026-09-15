@@ -1251,22 +1251,16 @@ Client Attester (<span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href
 established to deployments (<span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-10.8" class="relref">Section 10.8</a></span>). Client ID Metadata
 Documents <span>[<a href="#CIMD" class="cite xref">CIMD</a>]</span> publish client metadata but do not specify how the client
 endorses an attester for this purpose.<a href="#section-1-1" class="pilcrow">¶</a></p>
-<p id="section-1-2">This profile exists for clients that cannot rely on a registration
-channel at the authorization server (AS) through which an operator could
-configure attester trust per client. A client identified by a Client ID
-Metadata Document is the primary case: the AS learns of the client by
-fetching its metadata, so that document is the only per-client channel
-the client controls. A registered client that uses more than one attester,
-across platforms or during an attester migration, is the second case
-when its registration channel does not support configuring those attester
-relationships. Where an operator can configure attester trust per client
-at the AS, ATTEST's existing key-resolution options suffice and this
-profile adds nothing.<a href="#section-1-2" class="pilcrow">¶</a></p>
+<p id="section-1-2">This profile targets clients without a registration channel for configuring
+attester trust at the authorization server (AS): primarily CIMD clients,
+and registered clients whose registration cannot express multiple attesters
+across platforms or during migration. Where operators can configure
+attester trust per client, ATTEST's existing key-resolution options suffice
+and this profile adds nothing.<a href="#section-1-2" class="pilcrow">¶</a></p>
 <p id="section-1-3">This profile adds <code>client_attesters</code>: the client's endorsements of
-attesters and their verification keys, generalizing the single-attester
-key location that SPIFFE client authentication already publishes. An AS
-accepts an endorsement only under its own trust policy. The resulting chain
-is:<a href="#section-1-3" class="pilcrow">¶</a></p>
+attesters and their verification keys, generalizing SPIFFE client
+authentication's bundle endpoint <span>[<a href="#SPIFFE-OAUTH" class="cite xref">SPIFFE-OAUTH</a>]</span>. An AS accepts an
+endorsement only under its own trust policy. The resulting chain is:<a href="#section-1-3" class="pilcrow">¶</a></p>
 <div class="alignLeft art-ascii-art art-text artwork" id="section-1-4">
 <pre>
 Client metadata --endorses--&gt; Attester --attests--&gt; Client Instance
@@ -1352,11 +1346,9 @@ presence or absence of <code>client_attesters</code>. ATTEST authentication-meth
 discovery does not signal this trust policy; deployments relying on
 client endorsement enforcement establish that the AS applies this
 profile through their trust agreement.<a href="#section-2.3-1" class="pilcrow">¶</a></p>
-<p id="section-2.3-2">Client ID Metadata Documents do not yet specify how an AS treats metadata
-members it does not recognize. This profile does not depend on that
-outcome. An AS that ignores <code>client_attesters</code> does not apply this profile;
-an AS that applies it does so by configured policy. Publishing the member
-obligates no AS.<a href="#section-2.3-2" class="pilcrow">¶</a></p>
+<p id="section-2.3-2">CIMD leaves handling of unrecognized metadata unspecified; this profile
+is independent of that choice. Publishing <code>client_attesters</code> does not
+require an AS to apply this profile.<a href="#section-2.3-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="conformance">
@@ -1444,12 +1436,10 @@ with a separate key location for each endorsed issuer. A top-level
 <code>jwks_uri</code> can contain several issuers' keys, but does not associate
 them with named attesters or separate them from client authentication
 keys. It does not replace <code>client_attesters</code> under this profile.<a href="#section-3-7" class="pilcrow">¶</a></p>
-<p id="section-3-8">SPIFFE client authentication <span>[<a href="#SPIFFE-OAUTH" class="cite xref">SPIFFE-OAUTH</a>]</span> already lets a client publish
-<code>spiffe_bundle_endpoint</code>, the location of the keys that validate its SVIDs,
-for one SPIFFE trust domain. <code>client_attesters</code> generalizes that pattern
-to any Client Attester: the issuer is named explicitly, several attesters
-can be endorsed, and the AS's approval policy decides whether the
-published key location or an independently configured one is used.<a href="#section-3-8" class="pilcrow">¶</a></p>
+<p id="section-3-8">SPIFFE's <code>spiffe_bundle_endpoint</code> publishes a verification-key location
+for one trust domain. <code>client_attesters</code> extends this pattern to multiple
+named attesters, with AS approval policy selecting the published or
+independently configured key source (<a href="#key-resolution" class="auto internal xref">Section 4.3</a>).<a href="#section-3-8" class="pilcrow">¶</a></p>
 <p id="section-3-9">Clients using attestation as client authentication select
 <code>attest_jwt_client_auth</code> or <code>attest_jwt_client_auth_dpop</code> under
 <span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-9" class="relref">Section 9</a></span>. When attestation supplements another method,
@@ -1929,12 +1919,6 @@ Pragma: no-cache
 <ul class="normal">
 <li class="normal" id="appendix-B-2.1">
           <p id="appendix-B-2.1.1">Initial draft.<a href="#appendix-B-2.1.1" class="pilcrow">¶</a></p>
-</li>
-        <li class="normal" id="appendix-B-2.2">
-          <p id="appendix-B-2.2.1">Stated the target population, cited ATTEST's trust requirement and
-out-of-scope statement, positioned <code>client_attesters</code> against SPIFFE's
-bundle endpoint, and noted independence from CIMD's handling of
-unrecognized metadata.<a href="#appendix-B-2.2.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
 </section>
