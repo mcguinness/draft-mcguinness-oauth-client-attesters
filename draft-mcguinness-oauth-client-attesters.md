@@ -48,8 +48,8 @@ informative:
 --- abstract
 
 This specification profiles OAuth 2.0 Attestation-Based Client
-Authentication with client metadata identifying endorsed attesters and,
-optionally, their verification-key locations. It defines authorization-server
+Authentication with client metadata identifying endorsed attesters and
+their verification-key locations. It defines authorization-server
 validation and withdrawal rules for endorsements in registered client
 metadata or Client ID Metadata Documents, and an authorization-server
 metadata parameter advertising support. It introduces no new credential
@@ -73,7 +73,7 @@ that manage attester trust entirely through authorization server (AS)
 configuration can continue to use ATTEST without this profile.
 
 This profile adds `client_attesters`: the client's endorsements of
-attesters and, optionally, their verification-key locations, generalizing SPIFFE client
+attesters and their verification-key locations, generalizing SPIFFE client
 authentication's bundle endpoint {{SPIFFE-OAUTH}}. An AS accepts an
 endorsement only under its own trust policy. The resulting chain is:
 
@@ -106,7 +106,9 @@ does not establish attester trust. Neither establishes user delegation.
 
 Resource servers validating Client Attestations directly rely on
 configured attester trust; this profile does not define endorsement
-discovery or acceptance for those endpoints.
+discovery or acceptance for those endpoints. This keeps client metadata
+resolution and endorsement-policy evaluation at the AS rather than
+distributing those functions to resource servers.
 
 # Conventions and Trust Model {#trust}
 
@@ -118,8 +120,9 @@ the authoritative metadata for a `client_id`.
 
 Client Attester Endorsement
 : A statement in the authoritative client metadata for a `client_id`
-  that a specified Client Attester is authorized to issue Client
-  Attestations naming that `client_id`. An endorsement delegates
+  expressing the publisher's authorization for a specified Client
+  Attester to issue Client Attestations naming that `client_id`. An
+  endorsement delegates
   attestation authority for the named client only. It does not delegate
   OAuth authorization, user authority, or authority to further delegate
   attestation, and it does not extend to any other client.
@@ -158,8 +161,8 @@ individually:
 * **AS-configured attester trust:** the AS independently trusts a
   particular attester and configures its key source. The endorsement
   authorizes that attester to act for the client; it cannot supply the
-  trust anchor, and an endorsed `jwks_uri` does not select the key
-  source.
+  trust anchor, and the endorsed `jwks_uri` is checked against the
+  configured source rather than used to select it ({{key-resolution}}).
 
 When combined with {{INSTANCE-ID}}, the same two requirements establish
 attester authority; instance continuity remains independent. Other ATTEST
@@ -209,7 +212,7 @@ metadata (including {{RFC7591}}) or a CIMD. Its value is an array of objects:
 | Member | Requirement | Meaning |
 |---|---|---|
 | `issuer` | REQUIRED, nonempty StringOrURI {{RFC7519}} | Exact `iss` of the endorsed Client Attester |
-| `jwks_uri` | OPTIONAL, HTTPS URL without userinfo or fragment | Location of the attester's public JSON Web Key (JWK) Set {{RFC7517}}, used only under publisher-authorized key selection ({{key-resolution}}) |
+| `jwks_uri` | REQUIRED, HTTPS URL without userinfo or fragment | Location of the attester's public JSON Web Key (JWK) Set {{RFC7517}} |
 
 An issuer occurs at most once in the array. A missing or empty array
 authorizes no attester. The AS MUST:
@@ -221,12 +224,14 @@ authorizes no attester. The AS MUST:
 Extensions MUST NOT weaken an endorsement's meaning for implementations
 that ignore them.
 
-An entry without `jwks_uri` is acceptable only under AS-configured
-attester trust; under publisher-authorized key selection its absence is
-an endorsement validation failure. Publishers SHOULD include `jwks_uri`
-unless every relying AS is known to configure the attester
-independently, because omitting it narrows the set of authorization
-servers that can accept the client.
+Every entry carries a complete issuer-to-key-location mapping, so an
+endorsement has the same meaning regardless of the AS policy that
+evaluates it, which the publisher cannot know. An endorsement
+therefore identifies a Client Attester by both its issuer and its key
+location. Under AS-configured
+attester trust the AS does not treat that location as the key source;
+it retrieves keys from the configured source and uses the endorsed
+value only to confirm that the two agree ({{key-resolution}}).
 
 Each entry is a Client Attester Endorsement ({{trust}}) for the
 `client_id` whose metadata contains it. An `issuer` identifies a
@@ -235,7 +240,7 @@ specified in {{key-resolution}}.
 
 {{ATTEST, Section 10.8}} recommends, among other options, resolving `kid`
 through client metadata `jwks_uri`. This profile extends that option
-with an optional separate key location for each endorsed issuer. A top-level
+with a separate key location for each endorsed issuer. A top-level
 `jwks_uri` can contain several issuers' keys, but does not associate
 them with named attesters or separate them from client authentication
 keys. It does not replace `client_attesters` under this profile.
@@ -288,6 +293,12 @@ The attester MUST include:
 * `kid`: a nonempty header parameter {{RFC7515}} identifying its
   signing key.
 
+{{ATTEST, Section 4}} does not require `iss`. This profile requires it
+because a client can endorse several Client Attesters with independent
+key sets: the issuer selects the applicable endorsement and key source
+before `kid` is resolved, and `kid` alone identifies a key within a
+set, not a Client Attester or a trust relationship.
+
 This profile retains the default `client_id` to `sub` equality of
 {{ATTEST, Section 7.5}} and does not relax it. The binding prevents an
 endorsement for one client from validating an attestation naming
@@ -323,29 +334,42 @@ For each presentation, the AS MUST:
 ## Key Source Selection {#key-resolution}
 
 The AS MUST select keys according to the key-trust policy governing
-the client-to-attester association ({{trust}}):
+the client-to-attester association ({{trust}}). If AS-configured
+attester trust applies to the issuer, it governs regardless of whether
+the publisher is also authorized to select keys. Otherwise,
+publisher-authorized key selection applies if the publisher is so
+authorized. If neither applies, no key source is available and the
+endorsement fails.
 
 * **AS-configured attester trust:** use only the independently
-  configured key source for the exact issuer, even when the publisher
-  is also authorized to select keys. An endorsed `jwks_uri` MUST NOT
-  select, override, or provide a fallback for that source. An otherwise
-  valid endorsed `jwks_uri` that differs from the configured source has
-  no effect on acceptance and can be logged as a configuration
-  discrepancy. The configured key source MAY use a different HTTPS
-  origin from the issuer, and the entry MAY omit `jwks_uri`.
+  configured key source for the exact issuer. The endorsed `jwks_uri`
+  MUST equal that source's URI or one of its configured aliases. An
+  alias is an endorsed URI that the AS is configured to treat as
+  equivalent to the issuer's configured source; it does not change
+  where keys are retrieved. Configured aliases MUST preserve the
+  endorsed attestation authority, including tenant scope; a shared
+  issuer or origin alone does not establish equivalence. This check
+  surfaces disagreement
+  between the endorsement and AS configuration, including endorsement
+  of a different key set behind a shared issuer string, instead of
+  resolving it silently. An endorsed `jwks_uri` MUST NOT select,
+  override, or provide a fallback for the configured source. The
+  configured key source MAY use a different HTTPS origin from the
+  issuer.
 * **Publisher-authorized key selection:** use the endorsed `jwks_uri`.
-  The entry MUST include `jwks_uri`, the `issuer` MUST be an HTTPS URL,
-  and `jwks_uri` MUST have the same origin {{RFC6454}}. This origin
-  check neither isolates tenants sharing an origin nor establishes trust
-  in an issuer name. Publisher-selected keys MUST NOT inherit an
-  independently trusted attester's assurance merely because issuer
-  strings match.
+  The `issuer` MUST be an HTTPS URL and `jwks_uri` MUST have the same
+  origin {{RFC6454}}. This origin check neither isolates tenants sharing
+  an origin nor establishes trust in an issuer name. Publisher-selected
+  keys MUST NOT inherit an independently trusted attester's assurance
+  merely because issuer strings match.
 
 A non-HTTPS issuer requires AS-configured attester trust because it has
 no HTTPS origin binding.
 
-Issuer and client identifiers MUST use exact, case-sensitive comparison
-without URI normalization. Key selection and caches MUST bind keys to
+Issuer and client identifiers, and endorsed `jwks_uri` values compared
+with configured source URIs and aliases, MUST use exact, case-sensitive
+string comparison without URI normalization; an alternative spelling of
+a location requires an explicit alias. Key selection and caches MUST bind keys to
 the client identifier, issuer, selected key source, and applicable trust
 policy; `kid` alone or a union of keys from different entries is
 insufficient. Token-controlled key locations MUST NOT override that
@@ -357,9 +381,9 @@ Endorsement validation failures MUST produce `invalid_client_attestation`,
 without exposing policy details. Endorsement validation covers selecting
 a permitted endorsement in step 2 of {{as-processing}} and selecting the
 key source and resolving `kid` in step 3 under {{key-resolution}},
-including an entry without `jwks_uri` under publisher-authorized key
-selection and the case where no eligible key is available after any
-refresh permitted by {{updates}}. Signature verification with a resolved key and
+including an endorsed `jwks_uri` that matches neither the configured
+source nor a configured alias, and the case where no eligible key is
+available after any refresh permitted by {{updates}}. Signature verification with a resolved key and
 the remaining attestation and proof checks follow {{ATTEST, Section 7.4}},
 including challenge and freshness responses. A companion client
 authentication method that fails, or that authenticates a different
@@ -408,10 +432,11 @@ without waiting for cache expiration.
 
 For planned key rotation, publish the new key and allow the applicable
 JWK Set cache lifetimes to elapse before using it. Retain the old key while
-attestations signed with it should remain acceptable. Under
-publisher-authorized key selection, changes to key locations also need
-time for metadata-cache propagation. The AS's configured maximum ages
-bound stale acceptance.
+attestations signed with it should remain acceptable. Changes to
+endorsed key locations need time for metadata-cache propagation and,
+under AS-configured attester trust, cause endorsement failures until
+the AS configures a matching alias or updates its configured source.
+The AS's configured maximum ages bound stale acceptance.
 
 ## Existing Grants
 
@@ -442,9 +467,12 @@ The considerations in {{ATTEST}}, {{CIMD}}, and {{RFC8725}} apply.
 * **Attester compromise:** attesters serving several clients or tenants
   need issuance controls preventing one from obtaining attestations
   for another. Under AS-configured attester trust, the configured key
-  source, not the endorsed `jwks_uri`, determines whose keys are
-  accepted; pinning a tenant's key set is the AS operator's
-  responsibility in that policy.
+  source determines whose keys are accepted. The required agreement
+  with the endorsed `jwks_uri` ({{key-resolution}}) detects
+  disagreement between the endorsement and AS configuration; it
+  establishes tenant isolation only if the configured source and its
+  aliases preserve the endorsed tenant scope, which remains the AS
+  operator's responsibility.
 * **Key retrieval:** the AS MUST authenticate HTTPS servers, limit
   response sizes and request time, and prevent retrieval from prohibited
   network destinations. It MUST NOT follow redirects for JWK Set
@@ -467,8 +495,7 @@ Registration Metadata registry established by {{RFC7591}}:
 
 * Client Metadata Name: `client_attesters`
 * Client Metadata Description: Attesters endorsed to issue Client
-  Attestations for this client, optionally with their verification-key
-  locations
+  Attestations for this client, with their verification-key locations
 * Change Controller: IETF
 * Specification Document(s): {{metadata}} of this document
 
@@ -560,11 +587,11 @@ An endorsement for this client does not let the attester authenticate
 another client, even if both use the same attestation service.
 The flow does not require `client_instance_id` or an `act` claim.
 
-Because the AS applies AS-configured attester trust, the endorsed
-`jwks_uri` is informational here: keys come only from the configured
-source, and the publisher could omit `jwks_uri` without changing the
-outcome. An attestation from an unendorsed issuer, or one whose `kid`
-resolves to no key in the configured source, produces:
+Because the AS applies AS-configured attester trust, keys come only
+from the configured source, and the endorsed `jwks_uri` is required to
+equal it, as it does here. An attestation from an unendorsed issuer, an
+endorsement naming the trusted issuer with a different key location, or
+a `kid` that resolves to no key in the configured source, produces:
 
 ~~~ http-message
 HTTP/1.1 400 Bad Request
