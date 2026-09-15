@@ -1480,7 +1480,7 @@ signing key.<a href="#section-4.1-4.3.1" class="pilcrow">¶</a></p>
 <p id="section-4.1-5">Other claims and proof requirements follow ATTEST.<a href="#section-4.1-5" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="authorization-server-processing">
+<div id="as-processing">
 <section id="section-4.2">
         <h3 id="name-authorization-server-proces">
 <a href="#section-4.2" class="section-number selfRef">4.2. </a><a href="#name-authorization-server-proces" class="section-name selfRef">Authorization Server Processing</a>
@@ -1502,15 +1502,19 @@ permits that client-to-attester association.<a href="#section-4.2-2.2.1" class="
 </li>
           <li id="section-4.2-2.3">
             <p id="section-4.2-2.3.1">Select the key source under <a href="#key-resolution" class="auto internal xref">Section 4.3</a>. Resolve <code>kid</code> to one
-eligible public key and verify the signature using an acceptable
-asymmetric algorithm. Symmetric keys, private keys, and <code>alg=none</code>
-              <span class="bcp14">MUST NOT</span> be accepted under this profile.<a href="#section-4.2-2.3.1" class="pilcrow">¶</a></p>
+eligible public key, refreshing on an unknown <code>kid</code> only as <a href="#updates" class="auto internal xref">Section 5</a>
+permits, and verify the signature using an acceptable asymmetric
+algorithm. Symmetric keys, private keys, and <code>alg=none</code> <span class="bcp14">MUST NOT</span> be
+accepted under this profile.<a href="#section-4.2-2.3.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-4.2-2.4">
             <p id="section-4.2-2.4.1">Verify <code>sub</code> exactly equals the requested <code>client_id</code>, then validate
 the remaining attestation and proof under the selected ATTEST method.
-If another client authentication method accompanies the attestation,
-verify that it authenticates that same client identifier.<a href="#section-4.2-2.4.1" class="pilcrow">¶</a></p>
+When the attestation is an additional security signal alongside
+another client authentication method (<span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-7.6" class="relref">Section 7.6</a></span>),
+validate that method under its own specification and verify that it
+authenticates that same client identifier. A mismatch is a failure of
+that method.<a href="#section-4.2-2.4.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-4.2-2.5">
             <p id="section-4.2-2.5.1">Apply grant and authorization policy independently of the endorsement.<a href="#section-4.2-2.5.1" class="pilcrow">¶</a></p>
@@ -1559,8 +1563,15 @@ source. Origin comparison does not change identifier comparison.<a href="#sectio
 <a href="#section-4.4" class="section-number selfRef">4.4. </a><a href="#name-errors" class="section-name selfRef">Errors</a>
         </h3>
 <p id="section-4.4-1">Endorsement validation failures <span class="bcp14">MUST</span> produce <code>invalid_client_attestation</code>,
-without exposing policy details. Attestation and proof validation errors
-follow <span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-7.4" class="relref">Section 7.4</a></span>, including challenge and freshness responses.
+without exposing policy details. Endorsement validation covers selecting
+a permitted endorsement in step 2 of <a href="#as-processing" class="auto internal xref">Section 4.2</a> and selecting the
+key source and resolving <code>kid</code> in step 3 under <a href="#key-resolution" class="auto internal xref">Section 4.3</a>,
+including the case where no eligible key is available after any refresh
+permitted by <a href="#updates" class="auto internal xref">Section 5</a>. Signature verification with a resolved key and
+the remaining attestation and proof checks follow <span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-7.4" class="relref">Section 7.4</a></span>,
+including challenge and freshness responses. A companion client
+authentication method that fails, or that authenticates a different
+client identifier, produces the error defined by its own specification.
 Other metadata-discovery, registration, authentication, and grant errors
 follow their base specifications. The no-fallback rule in <a href="#trust" class="auto internal xref">Section 2</a> applies.<a href="#section-4.4-1" class="pilcrow">¶</a></p>
 </section>
@@ -1931,6 +1942,12 @@ uses the same independently configured attester and key source.<a href="#appendi
 <code>sub</code> is <code>s6BhdRkqt3</code> and <code>iss</code> is <code>https://attester.example/tenant/acme</code>,
 plus its DPoP proof. The AS loads the registered metadata and applies
 the same endorsement and proof checks; no CIMD is fetched.<a href="#appendix-B-2" class="pilcrow">¶</a></p>
+<p id="appendix-B-3">Had the administrator instead registered the URL <code>client_id</code> from
+<a href="#example" class="auto internal xref">Appendix "CIMD Deployment Example"</a>, the AS would process the request from the single source its
+policy selected in step 1, the registration or the CIMD, and never from a
+union of both. An endorsement failure from the selected source produces
+<code>invalid_client_attestation</code>. The AS does not then consult the other
+source.<a href="#appendix-B-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="document-history">
