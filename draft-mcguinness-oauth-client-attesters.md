@@ -37,6 +37,7 @@ normative:
   RFC9111:
 informative:
   RFC9449:
+  SPIFFE-OAUTH: I-D.ietf-oauth-spiffe-client-auth
   INSTANCE-ID:
     title: "Client Instance Identification for Attestation-Based Client Authentication"
     target: https://mcguinness.github.io/draft-mcguinness-oauth-client-instance-id/draft-mcguinness-oauth-client-instance-id.html
@@ -58,15 +59,24 @@ or authentication method.
 
 A client identified by one metadata URL can have many installations,
 each holding a different key. Attestation-Based Client Authentication
-{{ATTEST}} allows an attester to authenticate those instances, but
-leaves attester trust establishment to deployments. Client ID Metadata
-Documents {{CIMD}} publish client metadata but do not specify how the
-client endorses an attester for this purpose.
+{{ATTEST}} allows an attester to authenticate those instances. ATTEST
+requires an attestation to verify under the key of a known and trusted
+Client Attester ({{ATTEST, Section 7.1}}) and leaves how that trust is
+established to deployments ({{ATTEST, Section 10.8}}). Client ID Metadata
+Documents {{CIMD}} publish client metadata but do not specify how the client
+endorses an attester for this purpose.
+
+This profile targets clients without a registration channel for configuring
+attester trust at the authorization server (AS): primarily CIMD clients,
+and registered clients whose registration cannot express multiple attesters
+across platforms or during migration. Where operators can configure
+attester trust per client, ATTEST's existing key-resolution options suffice
+and this profile adds nothing.
 
 This profile adds `client_attesters`: the client's endorsements of
-attesters and their verification keys. An authorization server (AS)
-accepts an endorsement only under its own trust policy. The resulting
-chain is:
+attesters and their verification keys, generalizing SPIFFE client
+authentication's bundle endpoint {{SPIFFE-OAUTH}}. An AS accepts an
+endorsement only under its own trust policy. The resulting chain is:
 
 ~~~ ascii-art
 Client metadata --endorses--> Attester --attests--> Client Instance
@@ -135,6 +145,10 @@ discovery does not signal this trust policy; deployments relying on
 client endorsement enforcement establish that the AS applies this
 profile through their trust agreement.
 
+CIMD leaves handling of unrecognized metadata unspecified; this profile
+is independent of that choice. Publishing `client_attesters` does not
+require an AS to apply this profile.
+
 ## Conformance
 
 Conformance is role-specific:
@@ -179,6 +193,11 @@ with a separate key location for each endorsed issuer. A top-level
 `jwks_uri` can contain several issuers' keys, but does not associate
 them with named attesters or separate them from client authentication
 keys. It does not replace `client_attesters` under this profile.
+
+SPIFFE's `spiffe_bundle_endpoint` publishes a verification-key location
+for one trust domain. `client_attesters` extends this pattern to multiple
+named attesters, with AS approval policy selecting the published or
+independently configured key source ({{key-resolution}}).
 
 Clients using attestation as client authentication select
 `attest_jwt_client_auth` or `attest_jwt_client_auth_dpop` under
