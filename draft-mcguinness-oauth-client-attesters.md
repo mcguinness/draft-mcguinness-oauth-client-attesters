@@ -142,8 +142,11 @@ the endorsed set; it MUST NOT add an unendorsed attester or fall back to
 another trust mechanism. An endorsement MUST NOT by itself establish
 that the client is trusted or authorized to access a resource.
 
-The AS MUST configure, for each accepted attester, which of two
-key-trust policies governs it:
+The AS MUST determine, from its configured policy, which of two
+key-trust policies governs each client-to-attester association.
+Publisher-authorized key selection MAY be established by a policy
+covering the client publisher, without configuring each attester
+individually:
 
 * **Publisher-authorized key selection:** the AS authorizes the
   publisher of specified clients to select both the attester and its
@@ -155,8 +158,8 @@ key-trust policies governs it:
 * **AS-configured attester trust:** the AS independently trusts a
   particular attester and configures its key source. The endorsement
   authorizes that attester to act for the client; it cannot supply the
-  trust anchor, and an endorsed `jwks_uri` is not used for key
-  retrieval.
+  trust anchor, and an endorsed `jwks_uri` does not select the key
+  source.
 
 When combined with {{INSTANCE-ID}}, the same two requirements establish
 attester authority; instance continuity remains independent. Other ATTEST
@@ -319,17 +322,17 @@ For each presentation, the AS MUST:
 
 ## Key Source Selection {#key-resolution}
 
-The AS MUST select keys according to the key-trust policy configured
-for the accepted attester ({{trust}}):
+The AS MUST select keys according to the key-trust policy governing
+the client-to-attester association ({{trust}}):
 
-* **AS-configured attester trust:** use the independently configured key
-  source for the exact issuer. The AS MUST NOT retrieve keys from, or
-  fall back to, an endorsed `jwks_uri`, even when the publisher is also
-  authorized to select keys. An endorsed `jwks_uri` that differs from
-  the configured source has no effect on acceptance and can be logged
-  as a configuration discrepancy. The configured key source MAY use a
-  different HTTPS origin from the issuer, and the entry MAY omit
-  `jwks_uri`.
+* **AS-configured attester trust:** use only the independently
+  configured key source for the exact issuer, even when the publisher
+  is also authorized to select keys. An endorsed `jwks_uri` MUST NOT
+  select, override, or provide a fallback for that source. An otherwise
+  valid endorsed `jwks_uri` that differs from the configured source has
+  no effect on acceptance and can be logged as a configuration
+  discrepancy. The configured key source MAY use a different HTTPS
+  origin from the issuer, and the entry MAY omit `jwks_uri`.
 * **Publisher-authorized key selection:** use the endorsed `jwks_uri`.
   The entry MUST include `jwks_uri`, the `issuer` MUST be an HTTPS URL,
   and `jwks_uri` MUST have the same origin {{RFC6454}}. This origin
