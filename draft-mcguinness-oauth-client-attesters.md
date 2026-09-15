@@ -224,24 +224,31 @@ The attester MUST include:
 
 Other claims and proof requirements follow ATTEST.
 
-## Authorization Server Processing
+## Authorization Server Processing {#as-processing}
 
 For each presentation, the AS MUST:
 
-1. Obtain authoritative metadata, from a fresh cache or by retrieval,
-   for the requested `client_id`, following CIMD resolution and validation
-   or its registered metadata policy, including {{trust}}.
-   Selection between registered and fetched metadata follows CIMD;
-   the AS MUST NOT combine their endorsement lists.
+1. Select the authoritative metadata source for the requested `client_id`
+   using AS registration or discovery policy, before evaluating endorsements.
+   Obtain metadata from that source or a fresh cache, following CIMD
+   resolution and validation or registered metadata policy, including
+   {{trust}}. The AS MUST NOT combine endorsement lists from different
+   sources or switch sources because endorsement validation fails.
 2. Validate `client_attesters` and select the entry whose `issuer`
    exactly matches the attestation's nonempty `iss`. Verify AS policy
    permits that client-to-attester association.
 3. Select the key source under {{key-resolution}}. Resolve `kid` to one
-   eligible public key and verify the signature using an acceptable
-   asymmetric algorithm. Symmetric keys, private keys, and `alg=none`
-   MUST NOT be accepted under this profile.
+   eligible public key, refreshing on an unknown `kid` only as {{updates}}
+   permits, and verify the signature using an acceptable asymmetric
+   algorithm. Symmetric keys, private keys, and `alg=none` MUST NOT be
+   accepted under this profile.
 4. Verify `sub` exactly equals the requested `client_id`, then validate
    the remaining attestation and proof under the selected ATTEST method.
+   When the attestation is an additional security signal alongside
+   another client authentication method ({{ATTEST, Section 7.6}}),
+   validate that method under its own specification and verify that it
+   authenticates that same client identifier. A mismatch is a failure of
+   that method.
 5. Apply grant and authorization policy independently of the endorsement.
 
 ## Key Source Selection {#key-resolution}
@@ -274,12 +281,18 @@ source. Origin comparison does not change identifier comparison.
 
 ## Errors
 
-Endorsement or attestation validation failures MUST produce
-`invalid_client_attestation`, without exposing policy details. This
-profile deliberately reuses that error when an otherwise valid
-attestation lacks an accepted endorsement. Other metadata-discovery,
-registration, authentication, and grant errors follow their base
-specifications. The no-fallback rule in {{trust}} applies.
+Endorsement validation failures MUST produce `invalid_client_attestation`,
+without exposing policy details. Endorsement validation covers selecting
+a permitted endorsement in step 2 of {{as-processing}} and selecting the
+key source and resolving `kid` in step 3 under {{key-resolution}},
+including the case where no eligible key is available after any refresh
+permitted by {{updates}}. Signature verification with a resolved key and
+the remaining attestation and proof checks follow {{ATTEST, Section 7.4}},
+including challenge and freshness responses. A companion client
+authentication method that fails, or that authenticates a different
+client identifier, produces the error defined by its own specification.
+Other metadata-discovery, registration, authentication, and grant errors
+follow their base specifications. The no-fallback rule in {{trust}} applies.
 
 # Updates and Withdrawal {#updates}
 
@@ -287,7 +300,7 @@ specifications. The no-fallback rule in {{trust}} applies.
 
 The AS MUST:
 
-* enforce configured finite maximum ages for endorsement metadata and
+* enforce configured finite maximum ages for cached endorsement metadata and
   JWK Sets, applying CIMD and HTTP caching constraints {{RFC9111}} when
   stricter; and
 * revalidate or refresh expired entries before use, rejecting stale
@@ -295,6 +308,12 @@ The AS MUST:
 
 Maximum ages SHOULD NOT exceed one hour; longer intervals increase
 withdrawal delay. Fresh entries do not require retrieval on each request.
+These limits expire cached copies, not authoritative client registrations.
+
+On an unknown `kid`, the AS SHOULD refresh the approved JWK Set once and
+retry key selection, subject to rate limits. The AS MUST rate-limit these
+refreshes per approved key source, independently of `kid`, and MUST reject
+the attestation if no eligible key is available.
 
 On observing that a CIMD has been removed (HTTP 404 or 410), the AS MUST
 stop using previously cached endorsements from that document. Removal
@@ -309,10 +328,11 @@ or key, including for attestations issued before the update. Local
 policy denial MUST take effect immediately on subsequent requests,
 without waiting for cache expiration.
 
-For planned key rotation, publish the new key before using it and
-retain the old key while attestations signed with it should remain
-acceptable. Metadata caches and JWK Set caches have separate propagation
-windows; the AS's configured maximum ages bound stale acceptance.
+For planned key rotation, publish the new key and allow the applicable
+JWK Set cache lifetimes to elapse before using it. Retain the old key while
+attestations signed with it should remain acceptable. Changes to key
+locations also need time for metadata-cache propagation. The AS's configured
+maximum ages bound stale acceptance.
 
 ## Existing Grants
 
@@ -331,9 +351,10 @@ revocation mechanism or token expiration.
 
 The considerations in {{ATTEST}}, {{CIMD}}, and {{RFC8725}} apply.
 
-* **Publisher compromise:** control of a CIMD URL permits changing its
-  endorsements, within AS policy. The AS SHOULD monitor and alert on
-  endorsement changes and evaluate new attesters as policy changes.
+* **Publisher compromise:** control of a CIMD host or a client's registration
+  administration permits changing endorsements, within AS policy. The AS
+  SHOULD monitor and alert on endorsement changes and evaluate new attesters
+  as policy changes.
   A separately specified signed-metadata mechanism could bind publisher
   intent independently of the HTTPS host, if its signing keys have an
   independent trust basis; this profile defines no such mechanism.
@@ -455,6 +476,25 @@ Pragma: no-cache
 
 {"error": "invalid_client_attestation"}
 ~~~
+
+# Registered Client Example
+{:numbered="false"}
+
+An authenticated, authorized administrator registers `s6BhdRkqt3` with the
+same `client_attesters` and `token_endpoint_auth_method` as {{example}}. The AS
+uses the same independently configured attester and key source.
+
+The client sends `client_id=s6BhdRkqt3` with an attestation whose
+`sub` is `s6BhdRkqt3` and `iss` is `https://attester.example/tenant/acme`,
+plus its DPoP proof. The AS loads the registered metadata and applies
+the same endorsement and proof checks; no CIMD is fetched.
+
+Had the administrator instead registered the URL `client_id` from
+{{example}}, the AS would process the request from the single source its
+policy selected in step 1, the registration or the CIMD, and never from a
+union of both. An endorsement failure from the selected source produces
+`invalid_client_attestation`. The AS does not then consult the other
+source.
 
 # Document History
 {:numbered="false"}
