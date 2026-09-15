@@ -1,14 +1,15 @@
-<!-- regenerate: on (set to off if you edit this file) -->
+<!-- regenerate: off -->
 
 # OAuth 2.0 Client Attester Endorsement
 
 This is the working area for the individual Internet-Draft, "OAuth 2.0 Client Attester Endorsement".
 
-* [Editor's Copy](https://mcguinness.github.io/draft-mcguinness-oauth-client-attesters/#go.draft-mcguinness-oauth-client-attesters.html)
-* [Datatracker Page](https://datatracker.ietf.org/doc/draft-mcguinness-oauth-client-attesters)
-* [Individual Draft](https://datatracker.ietf.org/doc/html/draft-mcguinness-oauth-client-attesters)
-* [Compare Editor's Copy to Individual Draft](https://mcguinness.github.io/draft-mcguinness-oauth-client-attesters/#go.draft-mcguinness-oauth-client-attesters.diff)
+* [Editor's Draft (HTML)](https://mcguinness.github.io/draft-mcguinness-oauth-client-attesters/draft-mcguinness-oauth-client-attesters.html)
+* [Plain text](https://mcguinness.github.io/draft-mcguinness-oauth-client-attesters/draft-mcguinness-oauth-client-attesters.txt)
+* [Draft source](draft-mcguinness-oauth-client-attesters.md)
+* [Companion profile](https://github.com/mcguinness/draft-mcguinness-oauth-client-instance-id)
 
+This draft has not yet been submitted to the IETF.
 
 ## Contributing
 
