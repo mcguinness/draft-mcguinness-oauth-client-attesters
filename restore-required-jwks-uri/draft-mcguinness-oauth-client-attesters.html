@@ -1483,7 +1483,9 @@ issuer occurs more than once, without accepting a partial list; and<a href="#sec
 that ignore them.<a href="#section-3-5" class="pilcrow">¶</a></p>
 <p id="section-3-6">Every entry carries a complete issuer-to-key-location mapping, so an
 endorsement has the same meaning regardless of the AS policy that
-evaluates it, which the publisher cannot know. Under AS-configured
+evaluates it, which the publisher cannot know. An endorsement
+therefore identifies a Client Attester by both its issuer and its key
+location. Under AS-configured
 attester trust the AS does not treat that location as the key source;
 it retrieves keys from the configured source and uses the endorsed
 value only to confirm that the two agree (<a href="#key-resolution" class="auto internal xref">Section 5.3</a>).<a href="#section-3-6" class="pilcrow">¶</a></p>
@@ -1634,7 +1636,10 @@ configured key source for the exact issuer. The endorsed <code>jwks_uri</code>
               <span class="bcp14">MUST</span> equal that source's URI or one of its configured aliases. An
 alias is an endorsed URI that the AS is configured to treat as
 equivalent to the issuer's configured source; it does not change
-where keys are retrieved. This check surfaces disagreement
+where keys are retrieved. Configured aliases <span class="bcp14">MUST</span> preserve the
+endorsed attestation authority, including tenant scope; a shared
+issuer or origin alone does not establish equivalence. This check
+surfaces disagreement
 between the endorsement and AS configuration, including endorsement
 of a different key set behind a shared issuer string, instead of
 resolving it silently. An endorsed <code>jwks_uri</code> <span class="bcp14">MUST NOT</span> select,
@@ -1653,8 +1658,10 @@ merely because issuer strings match.<a href="#section-5.3-2.2.1" class="pilcrow"
         </ul>
 <p id="section-5.3-3">A non-HTTPS issuer requires AS-configured attester trust because it has
 no HTTPS origin binding.<a href="#section-5.3-3" class="pilcrow">¶</a></p>
-<p id="section-5.3-4">Issuer and client identifiers <span class="bcp14">MUST</span> use exact, case-sensitive comparison
-without URI normalization. Key selection and caches <span class="bcp14">MUST</span> bind keys to
+<p id="section-5.3-4">Issuer and client identifiers, and endorsed <code>jwks_uri</code> values compared
+with configured source URIs and aliases, <span class="bcp14">MUST</span> use exact, case-sensitive
+string comparison without URI normalization; an alternative spelling of
+a location requires an explicit alias. Key selection and caches <span class="bcp14">MUST</span> bind keys to
 the client identifier, issuer, selected key source, and applicable trust
 policy; <code>kid</code> alone or a union of keys from different entries is
 insufficient. Token-controlled key locations <span class="bcp14">MUST NOT</span> override that
@@ -1782,10 +1789,12 @@ independent trust basis; this profile defines no such mechanism.<a href="#sectio
           <p id="section-7-2.2.1"><strong>Attester compromise:</strong> attesters serving several clients or tenants
 need issuance controls preventing one from obtaining attestations
 for another. Under AS-configured attester trust, the configured key
-source determines whose keys are accepted, and the required agreement
-with the endorsed <code>jwks_uri</code> (<a href="#key-resolution" class="auto internal xref">Section 5.3</a>) keeps the AS from
-accepting a tenant the publisher did not endorse behind a shared
-issuer string.<a href="#section-7-2.2.1" class="pilcrow">¶</a></p>
+source determines whose keys are accepted. The required agreement
+with the endorsed <code>jwks_uri</code> (<a href="#key-resolution" class="auto internal xref">Section 5.3</a>) detects
+disagreement between the endorsement and AS configuration; it
+establishes tenant isolation only if the configured source and its
+aliases preserve the endorsed tenant scope, which remains the AS
+operator's responsibility.<a href="#section-7-2.2.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-7-2.3">
           <p id="section-7-2.3.1"><strong>Key retrieval:</strong> the AS <span class="bcp14">MUST</span> authenticate HTTPS servers, limit
