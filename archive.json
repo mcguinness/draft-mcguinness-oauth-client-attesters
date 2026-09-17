@@ -1,0 +1,228 @@
+{
+  "magic": "E!vIA5L86J2I",
+  "timestamp": "2026-09-17T02:09:30.929861+00:00",
+  "repo": "mcguinness/draft-mcguinness-oauth-client-attesters",
+  "labels": [
+    {
+      "name": "accessibility",
+      "description": "Barrier affecting people with disabilities",
+      "color": "f143ab"
+    },
+    {
+      "name": "bug",
+      "description": "Something isn't working",
+      "color": "d73a4a"
+    },
+    {
+      "name": "documentation",
+      "description": "Improvements or additions to documentation",
+      "color": "0075ca"
+    },
+    {
+      "name": "duplicate",
+      "description": "This issue or pull request already exists",
+      "color": "cfd3d7"
+    },
+    {
+      "name": "enhancement",
+      "description": "New feature or request",
+      "color": "a2eeef"
+    },
+    {
+      "name": "good first issue",
+      "description": "Good for newcomers",
+      "color": "7057ff"
+    },
+    {
+      "name": "help wanted",
+      "description": "Extra attention is needed",
+      "color": "008672"
+    },
+    {
+      "name": "invalid",
+      "description": "This doesn't seem right",
+      "color": "e4e669"
+    },
+    {
+      "name": "question",
+      "description": "Further information is requested",
+      "color": "d876e3"
+    },
+    {
+      "name": "wontfix",
+      "description": "This will not be worked on",
+      "color": "ffffff"
+    }
+  ],
+  "issues": [],
+  "pulls": [
+    {
+      "number": 1,
+      "id": "PR_kwDOUbZtSc8AAAABDjlH5g",
+      "title": "Clarify endorsement scope and SPIFFE precedent",
+      "url": "https://github.com/mcguinness/draft-mcguinness-oauth-client-attesters/pull/1",
+      "state": "MERGED",
+      "author": "mcguinness",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "Clarify the profile's target population and acknowledge that ATTEST's existing key-resolution options suffice where operators can configure attester trust per client. Cite ATTEST Sections 7.1 and 10.8, introduce SPIFFE's bundle endpoint as precedent, and state independence from CIMD's handling of unrecognized metadata.\n\nThe change adds 139 net words. Document History remains \"Initial draft.\"\n\nValidation: `make all lint` and `git diff --check` pass; the rendered ATTEST section links and SPIFFE-OAUTH reference resolve correctly.\n",
+      "createdAt": "2026-09-15T05:30:51Z",
+      "updatedAt": "2026-09-15T05:35:49Z",
+      "baseRepository": "mcguinness/draft-mcguinness-oauth-client-attesters",
+      "baseRefName": "main",
+      "baseRefOid": "49217d4d62bb9a2ff6aed039c9c699e11b9ad099",
+      "headRepository": "mcguinness/draft-mcguinness-oauth-client-attesters",
+      "headRefName": "clarify-endorsement-scope",
+      "headRefOid": "ed9a9524d445b0c1e986ceb99383bf98d7e51d0d",
+      "closedAt": "2026-09-15T05:35:47Z",
+      "mergedAt": "2026-09-15T05:35:47Z",
+      "mergedBy": "mcguinness",
+      "mergeCommit": {
+        "oid": "9ba94e0f85a7c27908341ef9010325e1979e24b0"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 2,
+      "id": "PR_kwDOUbZtSc8AAAABDjnlzA",
+      "title": "Clarify equal applicability to registered and CIMD clients",
+      "url": "https://github.com/mcguinness/draft-mcguinness-oauth-client-attesters/pull/2",
+      "state": "MERGED",
+      "author": "mcguinness",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "The Introduction currently frames this profile as primarily for CIMD and limits registered clients to cases where registration cannot express multiple attesters. State that it applies equally to registered clients and CIMD clients, either of which can endorse one or more attesters.\n\nGeneralize the opening beyond metadata URLs and clarify that registered client metadata includes dynamic registration. Keep AS configuration as an alternative deployment choice rather than a restriction on applicability.\n\nValidation: `make all lint` and `git diff --check` pass; inspected the rendered scope paragraph and retained ATTEST section links.\n",
+      "createdAt": "2026-09-15T05:38:00Z",
+      "updatedAt": "2026-09-15T05:39:03Z",
+      "baseRepository": "mcguinness/draft-mcguinness-oauth-client-attesters",
+      "baseRefName": "main",
+      "baseRefOid": "9ba94e0f85a7c27908341ef9010325e1979e24b0",
+      "headRepository": "mcguinness/draft-mcguinness-oauth-client-attesters",
+      "headRefName": "clarify-registered-client-scope",
+      "headRefOid": "7342fa9f04b5db11a1e542fd36bf0b54514e4366",
+      "closedAt": "2026-09-15T05:39:00Z",
+      "mergedAt": "2026-09-15T05:39:00Z",
+      "mergedBy": "mcguinness",
+      "mergeCommit": {
+        "oid": "85387ac58c93b8da28f7df8a1d223db545d2e528"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 3,
+      "id": "PR_kwDOUbZtSc8AAAABDjqZcw",
+      "title": "Resolve attester endorsement implementer review",
+      "url": "https://github.com/mcguinness/draft-mcguinness-oauth-client-attesters/pull/3",
+      "state": "MERGED",
+      "author": "mcguinness",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "## Summary\n\nThe blanket attestation error rule overrides ATTEST's recovery responses, and supplemental attestation processing does not explicitly bind the attested client to the identity established by another authentication method. Preserve ATTEST Section 7.4 errors and require both methods to identify the same client.\n\n- Select the authoritative metadata source by AS policy before evaluating endorsements; prohibit combining lists or switching sources after endorsement failure.\n- Recommend one rate-limited refresh on an unknown `kid`, with limits per approved key source rather than per key ID, and reject when no eligible key is available.\n- Account for cache propagation during rotation and clarify that cache expiry does not expire authoritative registrations.\n- Cover registration-administration compromise and add a short registered-client example using the existing attester configuration.\n\n## Validation\n\n- `make all lint` \u2014 text and HTML builds and template lint pass.\n- `git diff --check` \u2014 passes.\n- Inspected rendered processing, error, cache, and registered-client example text, including the ATTEST Section 7.4 cross-reference.\n",
+      "createdAt": "2026-09-15T05:45:53Z",
+      "updatedAt": "2026-09-15T14:27:43Z",
+      "baseRepository": "mcguinness/draft-mcguinness-oauth-client-attesters",
+      "baseRefName": "main",
+      "baseRefOid": "85387ac58c93b8da28f7df8a1d223db545d2e528",
+      "headRepository": "mcguinness/draft-mcguinness-oauth-client-attesters",
+      "headRefName": "resolve-implementer-review",
+      "headRefOid": "145e39328b77b3e70d3ca85d097f9c14702a07cf",
+      "closedAt": "2026-09-15T14:27:40Z",
+      "mergedAt": "2026-09-15T14:27:40Z",
+      "mergedBy": "mcguinness",
+      "mergeCommit": {
+        "oid": "5260772912c7bf6df645b2eee3de0f0b29cf4992"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 4,
+      "id": "PR_kwDOUbZtSc8AAAABDpZYaw",
+      "title": "Incorporate editor's copy review feedback",
+      "url": "https://github.com/mcguinness/draft-mcguinness-oauth-client-attesters/pull/4",
+      "state": "MERGED",
+      "author": "mcguinness",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "Adopts the review of the 15 September editor's copy. All eleven points accepted; three with adjustments noted below.\n\n## Normative changes\n- **`jwks_uri` is now OPTIONAL** in `client_attesters` entries (review items 2 and 3). An entry without it is acceptable only under AS-configured attester trust; under publisher-authorized key selection its absence is an endorsement validation failure. Publishers SHOULD include it unless every relying AS configures the attester independently.\n- **Removed the exact-match/alias check** on the endorsed `jwks_uri` under AS-configured trust. The configured key source alone determines acceptance. Consequence: the CIMD example's \"unapproved key location\" error case is gone, replaced by the unresolvable-`kid` case.\n- **New OPTIONAL AS metadata parameter** `client_attester_endorsement_supported` (item 8), with an RFC 8414 registry request. It advertises support only; it does not indicate key-trust policy or per-client enforcement.\n- **Cache freshness** (item 9): the one-hour SHOULD becomes a requirement that the AS be configured with maximum ages bounding withdrawal latency, with one hour as an example.\n\n## Reframing and editorial\n- **Acceptance Policy** (items 1 and 4) leads with the two required predicates and renames the modes **publisher-authorized key selection** and **AS-configured attester trust**. Named by who selects keys, since the publisher chooses the issuer in both modes.\n- **Client Attester Endorsement** is now formally defined (item 5), stating that it delegates attestation authority for the named client only.\n- **Attester enrollment** (item 6) keeps the invariant, including the newly-generated-key clause, and drops mechanism language.\n- **`sub` == `client_id`** (item 7) is framed as retaining the ATTEST Section 7.5 default, with the cross-client rationale stated.\n- **Withdrawal is prospective** for authentication (item 10).\n- **Layered framing** of Endorsement / ATTEST / Client Instance ID added to the Introduction (item 11). The mirror text belongs in the client-instance-id repository.\n\nBuilds cleanly; all cross-references resolve; no rendered line exceeds 72 columns.\n",
+      "createdAt": "2026-09-15T17:16:37Z",
+      "updatedAt": "2026-09-15T17:23:14Z",
+      "baseRepository": "mcguinness/draft-mcguinness-oauth-client-attesters",
+      "baseRefName": "main",
+      "baseRefOid": "5260772912c7bf6df645b2eee3de0f0b29cf4992",
+      "headRepository": "mcguinness/draft-mcguinness-oauth-client-attesters",
+      "headRefName": "incorporate-editor-review",
+      "headRefOid": "e770703c0bd46a7f98c16f7ea1a7f0cff9340d77",
+      "closedAt": "2026-09-15T17:23:12Z",
+      "mergedAt": "2026-09-15T17:23:12Z",
+      "mergedBy": "mcguinness",
+      "mergeCommit": {
+        "oid": "900387058abe1bfa72fd4023115341fb2f773c8c"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 5,
+      "id": "PR_kwDOUbZtSc8AAAABDpk4tw",
+      "title": "Restore required jwks_uri and add iss and precedence rationale",
+      "url": "https://github.com/mcguinness/draft-mcguinness-oauth-client-attesters/pull/5",
+      "state": "MERGED",
+      "author": "mcguinness",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "Adopts the second review of the September 15 editor's copy. That review re-read the draft from scratch and withdrew its earlier recommendation, merged in #4, to make `jwks_uri` optional and drop the URI equality check. This PR restores those rules and records why, and adds the review's five clarifications.\n\n## Why reverse #4 on `jwks_uri`\n- **The optional schema was conditional on policy the publisher cannot know.** #4 had to add \"publishers SHOULD include `jwks_uri` unless every relying AS configures the attester independently\", which no publisher can determine. Every entry now carries a complete issuer-to-key-location mapping with the same meaning under any AS policy.\n- **Issuer strings under-identify multi-tenant attesters.** The draft already concedes the origin check does not isolate tenants sharing an origin. When one issuer string fronts several tenants with separate key sets, the endorsed `jwks_uri` is the publisher's only disambiguator. Under AS-configured attester trust, requiring it to equal the configured source (or a configured alias) keeps the AS from authenticating a client through a tenant the publisher never endorsed. Both reviews and the #4 analysis underweighted this the first time.\n- **\"Alias\" is now defined** rather than assumed: an endorsed URI the AS is configured to treat as equivalent to the issuer's configured source, without changing where keys are retrieved. Mismatch is an endorsement validation failure.\n\n## Kept from #4\nThe two-predicate Acceptance Policy, the names \"publisher-authorized key selection\" and \"AS-configured attester trust\" (the review's item 2 asks that publisher approval be described as delegating key-source selection, which the name already does), the formal definition, `client_attester_endorsement_supported`, the cache-latency wording, the prospective-withdrawal sentence, the `sub` rationale, the enrollment invariant, and the layered diagram.\n\n## Clarifications from the review\n- **Why `iss` is required** although ATTEST Section 4 does not require it (ATTEST's changelog shows it was removed from the base assertion). With several endorsed attesters, the issuer selects the endorsement and key source before `kid` is resolved; `kid` alone identifies a key within a set, not an attester.\n- **Explicit precedence** when both policies could apply, stated at the top of Key Source Selection.\n- The definition says an endorsement **expresses the publisher's authorization**.\n- One sentence on why endorsement evaluation **stays at the AS** rather than resource servers.\n\nBuilds cleanly; all cross-references resolve; no rendered line exceeds 72 columns. An independent consistency pass found and I fixed three wording issues (an overstated \"does not retrieve from that location\", the key-location-change consequence, and an ambiguous antecedent in the alias definition).\n",
+      "createdAt": "2026-09-15T17:38:21Z",
+      "updatedAt": "2026-09-15T18:53:21Z",
+      "baseRepository": "mcguinness/draft-mcguinness-oauth-client-attesters",
+      "baseRefName": "main",
+      "baseRefOid": "900387058abe1bfa72fd4023115341fb2f773c8c",
+      "headRepository": "mcguinness/draft-mcguinness-oauth-client-attesters",
+      "headRefName": "restore-required-jwks-uri",
+      "headRefOid": "aa1f0d6ccb6efceac487a310a1307ce3d0a2b3c1",
+      "closedAt": "2026-09-15T18:53:18Z",
+      "mergedAt": "2026-09-15T18:53:18Z",
+      "mergedBy": "mcguinness",
+      "mergeCommit": {
+        "oid": "17bd4bc72cfdaf319b5c9d4737a3add196af1b05"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 6,
+      "id": "PR_kwDOUbZtSc8AAAABDqg2oA",
+      "title": "Resolve fresh-eyes security and implementer reviews",
+      "url": "https://github.com/mcguinness/draft-mcguinness-oauth-client-attesters/pull/6",
+      "state": "MERGED",
+      "author": "mcguinness",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "Resolves the consolidated findings from two independent from-scratch reviews (protocol/security and implementer) of the merged draft.\n\n## Decision taken: scope of AS-configured attester trust\nAcceptance Policy said the key-trust policy is determined per client-to-attester association; Key Source Selection said AS-configured trust governs \"if it applies to the issuer\". Under the per-association reading, a client whose publisher is covered by a blanket publisher-authorized policy could endorse an issuer string the AS independently trusts for another client and supply its own keys. The sentence meant to stop this (\"MUST NOT inherit an independently trusted attester's assurance\") had no implementable test.\n\nRule adopted: **AS-configured attester trust, once configured for an exact issuer string for any client, governs that string for every client.** Per-association determination is kept for publisher-authorized selection. The old MUST NOT is now a consequence statement. The cost is that a second tenant behind a shared issuer string cannot use publisher-selected keys at that AS without operator configuration.\n\n## Normative fixes\n- **JOSE header parameters.** The AS MUST ignore `jku`, `x5u`, `x5c`, and `jwk` and resolve only `kid` against the selected source. \"Token-controlled key locations\" did not obviously cover embedded key material, and ATTEST \u00a710.8 blesses `x5c`.\n- **Eligible key** is defined once: the only key with a matching `kid` (octet comparison), an asymmetric public key consistent with the header `alg`, with `use`, `key_ops`, and `alg` constraints. More than one match is a failure; no candidate trials.\n- **Step 2** evaluates AS policy on the entry's `issuer` and `jwks_uri` together, closing the same-origin any-path case under publisher-authorized selection.\n- **Registered clients** now have a stated publisher-authorization mechanism, tied to the Registered Endorsements section.\n- **Profile Selection** discharges ATTEST \u00a713 explicitly and defines \"trust agreement\". The AS Metadata cross-reference now points there instead of to a section that never used the phrase.\n- **`client_attester_endorsement_supported`** is redefined as a capability signal, removing the self-contradiction about per-client enforcement.\n- **Unmatched `iss`** MUST NOT trigger a client-metadata refresh, closing an attacker-triggerable CIMD fetch amplifier by omission.\n- **Errors** states that `invalid_client_attestation` is the more specific code ATTEST \u00a77.4 permits in place of `invalid_client`, with HTTP status per RFC 6749 \u00a75.2. (Pushed back on the reviewer claim that RFC 6749 requires `invalid_client` here; ATTEST registered the specific code as a token error code.)\n\n## Editorial\n- Retrieval MUSTs moved from Security Considerations into Key Source Selection; the endorsed-equals-configured, retrieval, and withdrawal-latency rules now have one normative statement each with cross-references elsewhere.\n- Security Considerations gains **Omitted attestation** and **Unscoped endorsement** bullets.\n- Client Metadata: uniqueness is a MUST NOT, \"malformed\" is defined, and rejection is scoped to this profile without invalidating the CIMD.\n- Examples: decoded attestation payload shown as JSON (the one claim this profile adds was prose-only), a publisher-authorized variant paragraph (the novel half had no example), config row renamed so it does not read as selecting the other policy, obsolete `Pragma` dropped, \"runtime\" replaced by ATTEST's \"Client Instance\".\n- RFC 7662 moved to informative.\n\nNot adopted: per-entry audience restriction (a feature, not a defect), a runtime test for the registered-endorsement provenance MUST, and changing \"Extensions MUST NOT weaken\".\n\nBuilds cleanly; all cross-references resolve; no rendered line exceeds 72 columns; an independent consistency pass found no problems.\n",
+      "createdAt": "2026-09-15T19:32:15Z",
+      "updatedAt": "2026-09-15T19:33:13Z",
+      "baseRepository": "mcguinness/draft-mcguinness-oauth-client-attesters",
+      "baseRefName": "main",
+      "baseRefOid": "17bd4bc72cfdaf319b5c9d4737a3add196af1b05",
+      "headRepository": "mcguinness/draft-mcguinness-oauth-client-attesters",
+      "headRefName": "resolve-fresh-eyes-review",
+      "headRefOid": "deb480aeeb9d3f2045140ae07af69defdc9c8be9",
+      "closedAt": "2026-09-15T19:33:11Z",
+      "mergedAt": "2026-09-15T19:33:11Z",
+      "mergedBy": "mcguinness",
+      "mergeCommit": {
+        "oid": "babc7c2204131738429814fc1283b3a8327c7fbd"
+      },
+      "comments": [],
+      "reviews": []
+    }
+  ]
+}
