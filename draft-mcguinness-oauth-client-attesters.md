@@ -184,7 +184,7 @@ The same restriction applies to endorsement updates.
 ## Profile Selection {#profile-selection}
 
 The AS determines that this profile applies to a request by local
-policy, which MAY be scoped per client; this out-of-band determination
+policy, which can be scoped per client; this out-of-band determination
 satisfies {{ATTEST, Section 13}}. Applicability is not selected by the
 presence or absence of `client_attesters`. An AS advertises the
 capability with `client_attester_endorsement_supported`
