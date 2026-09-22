@@ -32,11 +32,12 @@ normative:
   RFC7517:
   RFC7519:
   RFC7591:
+  RFC7662:
   RFC8414:
   RFC8725:
   RFC9111:
 informative:
-  RFC7662:
+  RFC7592:
   RFC9449:
   SPIFFE-OAUTH: I-D.ietf-oauth-spiffe-client-auth
   INSTANCE-ID:
@@ -184,7 +185,18 @@ authorized to set them for that client, or be covered by a validated
 software statement from an issuer approved for that purpose under
 {{RFC7591}}. Open registration alone supplies neither assurance; issuing
 a client credential does not retroactively approve its endorsements.
-The same restriction applies to endorsement updates.
+The same restriction applies to endorsement updates, including updates
+made through the registration management protocol {{RFC7592}}.
+Possession of a registration access token establishes control of the
+registration, not authority to endorse, and MUST NOT by itself
+authorize setting or replacing `client_attesters`.
+
+An AS that does not accept a submitted endorsement MUST either reject
+the request with `invalid_client_metadata`
+({{RFC7591, Section 3.2.2}}) or omit `client_attesters` from the
+stored metadata and from the client information response
+({{RFC7591, Section 3.2.1}}), so that the response never shows an
+endorsement the AS has not accepted.
 
 ## Profile Selection {#profile-selection}
 
@@ -454,10 +466,22 @@ Attestation plays in the request.
 
 Attestation is the client authentication method:
 : An endorsement validation failure MUST produce
-  `invalid_client_attestation`, the more specific code that
-  {{ATTEST, Section 7.4}} permits in place of `invalid_client`, with
-  the HTTP status that {{RFC6749, Section 5.2}} assigns to client
-  authentication failures, and without exposing policy details.
+  `invalid_client_attestation`. {{ATTEST, Section 7.4}} defines that
+  code for use in addition to the more general `invalid_client`; this
+  profile narrows the choice to the specific code so an endorsement
+  failure is distinguishable from an ordinary credential failure. The
+  response MUST NOT expose policy details.
+
+  This profile does not change the HTTP status any endpoint assigns to
+  a client authentication failure. At the token endpoint
+  {{RFC6749, Section 5.2}} responds 400 by default and requires 401
+  only where the client authenticated through the `Authorization`
+  header field, which carrying a Client Attestation does not do. At the
+  introspection endpoint {{RFC7662, Section 2.3}} requires 401. Other
+  endpoints follow their own specifications.
+
+  A Client library that recognizes only `invalid_client` treats this as
+  an unrecognized failure rather than a credential failure.
 
 Attestation is an additional security signal:
 : Where the deployment uses the Client Attestation alongside another
@@ -466,6 +490,14 @@ Attestation is an additional security signal:
   available for that request. The AS MUST NOT treat the failed
   attestation as a satisfied signal, and whether the request proceeds
   on the companion method alone is AS policy.
+
+An endorsement failure caused by disagreement between the endorsement
+and AS configuration, such as an endorsed `jwks_uri` matching neither
+the configured source nor a configured alias ({{key-resolution}}), is
+not corrected by obtaining a fresh attestation. Because the response
+deliberately carries no policy detail, a Client cannot tell that case
+apart from one a fresh attestation would fix; it is resolved through
+the operational channels in {{security}} rather than by client retry.
 
 Everything else keeps its own error. Signature verification with a
 resolved key and the remaining attestation and proof checks follow
