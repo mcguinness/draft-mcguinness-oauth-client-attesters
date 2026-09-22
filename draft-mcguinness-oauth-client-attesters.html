@@ -1261,7 +1261,7 @@ established to deployments (<span>[<a href="#ATTEST" class="cite xref">ATTEST</a
 Client ID Metadata Documents <span>[<a href="#CIMD" class="cite xref">CIMD</a>]</span>. Either can endorse one or more
 attesters, for example across platforms or during migration. Deployments
 that manage attester trust entirely through authorization server (AS)
-configuration can continue to use ATTEST without this profile.<a href="#section-1-2" class="pilcrow">¶</a></p>
+configuration can continue to use <span>[<a href="#ATTEST" class="cite xref">ATTEST</a>]</span> without this profile.<a href="#section-1-2" class="pilcrow">¶</a></p>
 <p id="section-1-3">This profile adds <code>client_attesters</code>: the client's endorsements of
 attesters and their verification-key locations. Under AS-configured
 attester trust this plays the role that the bundle endpoint of SPIFFE
@@ -1282,8 +1282,8 @@ Client metadata --endorses--&gt; Attester --attests--&gt; Client Instance
 client authentication or as an additional security signal, using the
 profiling hook in <span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-13" class="relref">Section 13</a></span>. It retains ATTEST's wire
 format, proof methods, and token binding.<a href="#section-1-5" class="pilcrow">¶</a></p>
-<p id="section-1-6">This profile, ATTEST, and <span>[<a href="#INSTANCE-ID" class="cite xref">INSTANCE-ID</a>]</span> answer three separate questions
-in layers:<a href="#section-1-6" class="pilcrow">¶</a></p>
+<p id="section-1-6">This profile, <span>[<a href="#ATTEST" class="cite xref">ATTEST</a>]</span>, and <span>[<a href="#INSTANCE-ID" class="cite xref">INSTANCE-ID</a>]</span> answer three separate
+questions in layers:<a href="#section-1-6" class="pilcrow">¶</a></p>
 <div class="alignLeft art-ascii-art art-text artwork" id="section-1-7">
 <pre>
 Client Attester Endorsement    Who may attest for this client?
@@ -1592,7 +1592,7 @@ set, not a Client Attester or a trust relationship.<a href="#section-5.1-5" clas
 <p id="section-5.1-6">This profile retains the default <code>client_id</code> to <code>sub</code> equality of
 <span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-7.5" class="relref">Section 7.5</a></span> and does not relax it. The binding prevents an
 endorsement for one client from validating an attestation naming
-another. Other claims and proof requirements follow ATTEST.<a href="#section-5.1-6" class="pilcrow">¶</a></p>
+another. Other claims and proof requirements follow <span>[<a href="#ATTEST" class="cite xref">ATTEST</a>]</span>.<a href="#section-5.1-6" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="as-processing">

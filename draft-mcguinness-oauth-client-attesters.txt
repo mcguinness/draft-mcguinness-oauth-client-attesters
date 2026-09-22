@@ -113,7 +113,7 @@ Table of Contents
    identified by Client ID Metadata Documents [CIMD].  Either can
    endorse one or more attesters, for example across platforms or during
    migration.  Deployments that manage attester trust entirely through
-   authorization server (AS) configuration can continue to use ATTEST
+   authorization server (AS) configuration can continue to use [ATTEST]
    without this profile.
 
    This profile adds client_attesters: the client's endorsements of
@@ -135,7 +135,7 @@ Table of Contents
    profiling hook in [ATTEST], Section 13.  It retains ATTEST's wire
    format, proof methods, and token binding.
 
-   This profile, ATTEST, and [INSTANCE-ID] answer three separate
+   This profile, [ATTEST], and [INSTANCE-ID] answer three separate
    questions in layers:
 
    Client Attester Endorsement    Who may attest for this client?
@@ -386,7 +386,7 @@ Table of Contents
    This profile retains the default client_id to sub equality of
    [ATTEST], Section 7.5 and does not relax it.  The binding prevents an
    endorsement for one client from validating an attestation naming
-   another.  Other claims and proof requirements follow ATTEST.
+   another.  Other claims and proof requirements follow [ATTEST].
 
 5.2.  Authorization Server Processing
 
