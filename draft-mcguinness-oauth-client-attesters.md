@@ -387,7 +387,7 @@ trust would instead hand key selection to the publisher.
   an origin nor establishes trust in an issuer name. Because
   AS-configured trust governs any issuer string it is configured for,
   publisher-selected keys are never accepted under an issuer string the
-  AS independently trusts.
+  AS trusts or has configured.
 
 A non-HTTPS issuer requires AS-configured attester trust because it has
 no HTTPS origin binding.
