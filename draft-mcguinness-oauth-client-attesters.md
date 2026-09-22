@@ -720,10 +720,14 @@ endorsement validation with the same error.
 
 This example is informative. It runs {{example}} again with an opaque
 client identifier instead of a URL, to show that nothing in this
-profile depends on the identifier's shape: `client_attesters` travels
-with the client's metadata either way, and the endorsement names the
-attester's key location outright, so no origin has to be derived from
-the client identifier. The AS configuration is the one in {{example}}.
+endorsement and key selection depend on the identifier's shape under
+this policy: `client_attesters` travels with the client's metadata
+either way, and the endorsement names the attester's key location
+outright, so no origin has to be derived from the client identifier.
+How a publisher is authorized does differ between the two forms
+({{trust}}), but that question does not arise here because the AS
+trusts this attester independently. The AS configuration is the one in
+{{example}}.
 
 An authenticated, authorized administrator registers this metadata,
 for example through {{RFC7591}}:
