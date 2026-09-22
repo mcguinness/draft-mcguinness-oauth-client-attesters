@@ -93,8 +93,8 @@ client authentication or as an additional security signal, using the
 profiling hook in {{ATTEST, Section 13}}. It retains ATTEST's wire
 format, proof methods, and token binding.
 
-This profile, {{ATTEST}}, and {{INSTANCE-ID}} answer three separate questions
-in layers:
+This profile, {{ATTEST}}, and {{INSTANCE-ID}} answer three separate
+questions in layers:
 
 ~~~ ascii-art
 Client Attester Endorsement    Who may attest for this client?
