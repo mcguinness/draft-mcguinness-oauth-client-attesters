@@ -372,9 +372,9 @@ trust would instead hand key selection to the publisher.
   where keys are retrieved. An alias belongs to the issuer's configured
   key source, so it applies to every client that endorses that issuer
   and is not scoped to the client whose endorsement prompted it.
-  Configured aliases MUST preserve the endorsed attestation authority,
-  including tenant scope; a shared
-  issuer or origin alone does not establish equivalence. This check
+  An alias preserves the endorsed attestation authority, including
+  tenant scope, only if the AS operator configures it that way; a
+  shared issuer or origin alone does not establish equivalence. This check
   surfaces disagreement between the endorsement and AS configuration,
   including endorsement
   of a different key set behind a shared issuer string, instead of
