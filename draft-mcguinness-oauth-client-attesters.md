@@ -201,7 +201,9 @@ require an AS to apply this profile.
 
 Conformance is role-specific:
 
-* Client publishers implement {{metadata}} and {{updates}}.
+* Client publishers publish and maintain `client_attesters` under
+  {{metadata}}, and withdraw an endorsement by updating that metadata
+  ({{updates}}).
 * Client Attesters and clients implement their issuance and presentation
   requirements in {{processing}}.
 * Authorization servers implement trust-policy selection, metadata and
