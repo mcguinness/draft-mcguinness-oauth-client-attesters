@@ -390,9 +390,10 @@ trust would instead hand key selection to the publisher.
   including endorsement
   of a different key set behind a shared issuer string, instead of
   resolving it silently. An endorsed `jwks_uri` MUST NOT select,
-  override, or provide a fallback for the configured source, and the
-  AS MUST NOT retrieve it: under this policy the endorsed value is
-  compared, never fetched. No origin relationship is required between
+  override, or provide a fallback for the configured source. The AS
+  MUST NOT retrieve the endorsed `jwks_uri` under this policy; the
+  endorsed value is compared, never fetched. No origin relationship is
+  required between
   the configured key source and the issuer.
 * **Publisher-authorized key selection:** use the endorsed `jwks_uri`.
   The `issuer` MUST be an HTTPS URL and `jwks_uri` MUST have the same
