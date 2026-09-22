@@ -420,7 +420,8 @@ algorithm restrictions in step 3 of {{as-processing}}
 
 ## Errors
 
-Endorsement validation failures MUST produce `invalid_client_attestation`,
+Where the Client Attestation is the client authentication method, an
+endorsement validation failure MUST produce `invalid_client_attestation`,
 the more specific code that {{ATTEST, Section 7.4}} permits in place of
 `invalid_client`, with the HTTP status that {{RFC6749, Section 5.2}}
 assigns to client authentication failures, and without exposing policy
