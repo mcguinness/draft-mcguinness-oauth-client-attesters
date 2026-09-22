@@ -434,8 +434,7 @@ algorithm restrictions in step 3 of {{as-processing}}
 
 ## Errors
 
-Endorsement validation is the part of {{as-processing}} this profile
-adds. It covers:
+Endorsement validation covers these parts of {{as-processing}}:
 
 * selecting a permitted endorsement in step 2;
 * selecting the key source and resolving `kid` in step 3 under
