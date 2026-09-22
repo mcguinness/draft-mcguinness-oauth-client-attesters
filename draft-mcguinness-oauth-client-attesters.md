@@ -844,10 +844,10 @@ from the configured source, and the endorsed `jwks_uri` is required to
 equal it, as it does here. An attestation from an unendorsed issuer, an
 endorsement naming the trusted issuer with a different key location, or
 a `kid` that resolves to no key in the configured source, produces the
-response below. {{RFC6749, Section 5.2}} reserves 401 for a client that
-authenticated through the `Authorization` header field; this client
-presents its attestation in the ATTEST header fields instead, so the
-status here is 400:
+response below. {{RFC6749, Section 5.2}} responds 400 by default and
+requires 401 only for a client that authenticated through the
+`Authorization` header field, which this client does not use; this
+example therefore shows the default:
 
 ~~~ http-message
 HTTP/1.1 400 Bad Request
