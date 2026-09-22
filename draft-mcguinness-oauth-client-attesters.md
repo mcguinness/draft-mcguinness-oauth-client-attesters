@@ -70,7 +70,7 @@ This profile applies to both registered clients and clients identified by
 Client ID Metadata Documents {{CIMD}}. Either can endorse one or more
 attesters, for example across platforms or during migration. Deployments
 that manage attester trust entirely through authorization server (AS)
-configuration can continue to use ATTEST without this profile.
+configuration can continue to use {{ATTEST}} without this profile.
 
 This profile adds `client_attesters`: the client's endorsements of
 attesters and their verification-key locations. Under AS-configured
@@ -93,8 +93,8 @@ client authentication or as an additional security signal, using the
 profiling hook in {{ATTEST, Section 13}}. It retains ATTEST's wire
 format, proof methods, and token binding.
 
-This profile, ATTEST, and {{INSTANCE-ID}} answer three separate questions
-in layers:
+This profile, {{ATTEST}}, and {{INSTANCE-ID}} answer three separate
+questions in layers:
 
 ~~~ ascii-art
 Client Attester Endorsement    Who may attest for this client?
@@ -324,7 +324,7 @@ set, not a Client Attester or a trust relationship.
 This profile retains the default `client_id` to `sub` equality of
 {{ATTEST, Section 7.5}} and does not relax it. The binding prevents an
 endorsement for one client from validating an attestation naming
-another. Other claims and proof requirements follow ATTEST.
+another. Other claims and proof requirements follow {{ATTEST}}.
 
 ## Authorization Server Processing {#as-processing}
 
