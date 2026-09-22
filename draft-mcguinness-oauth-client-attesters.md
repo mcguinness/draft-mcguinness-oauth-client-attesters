@@ -729,10 +729,10 @@ from the configured source, and the endorsed `jwks_uri` is required to
 equal it, as it does here. An attestation from an unendorsed issuer, an
 endorsement naming the trusted issuer with a different key location, or
 a `kid` that resolves to no key in the configured source, produces the
-response below. The status is the one {{RFC6749, Section 5.2}} assigns
-to client authentication failures, which is 401 when the client used an
-authentication scheme in the request and 400 otherwise; this client
-authenticates with the attestation itself:
+response below. {{RFC6749, Section 5.2}} reserves 401 for a client that
+authenticated through the `Authorization` header field; this client
+presents its attestation in the ATTEST header fields instead, so the
+status here is 400:
 
 ~~~ http-message
 HTTP/1.1 400 Bad Request
