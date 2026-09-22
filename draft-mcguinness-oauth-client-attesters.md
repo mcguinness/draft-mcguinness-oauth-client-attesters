@@ -853,10 +853,11 @@ endorsement validation with the same error.
 
 # Registered Client Example {#registered-example}
 
-This example is informative. It runs {{example}} again with an opaque
-client identifier instead of a URL, to show that neither endorsement
-nor key selection depends on the identifier's shape under this
-policy: `client_attesters` travels with the client's metadata
+This example is informative. It repeats {{example}} with an opaque
+client identifier instead of a URL. The repetition shows that, under
+this policy, neither endorsement nor key selection depends on the
+identifier's shape: `client_attesters` travels with the client's
+metadata
 either way, and the endorsement names the attester's key location
 outright, so no origin has to be derived from the client identifier.
 How a publisher is authorized does differ between the two forms
