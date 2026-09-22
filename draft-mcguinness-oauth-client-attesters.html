@@ -15,25 +15,25 @@ metadata or Client ID Metadata Documents, and an authorization-server
 metadata parameter advertising support. It introduces no new credential
 or authentication method. 
     " name="description">
-<meta content="xml2rfc 3.34.0" name="generator">
+<meta content="xml2rfc 3.34.1" name="generator">
 <meta content="OAuth" name="keyword">
 <meta content="client attestation" name="keyword">
 <meta content="client metadata" name="keyword">
 <meta content="draft-mcguinness-oauth-client-attesters-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.34.0
+  xml2rfc 3.34.1
     Python 3.14.7
-    ConfigArgParse 1.7.5
+    ConfigArgParse 1.7.7
     google-i18n-address 3.1.1
     intervaltree 3.2.1
     Jinja2 3.1.6
     lxml 6.1.1
     natsort 8.4.0
-    platformdirs 4.11.7
+    platformdirs 4.11.10
     pycountry 24.6.1
     PyYAML 6.0.3
     requests 2.33.1
-    wcwidth 0.8.3
+    wcwidth 0.8.4
 -->
 <link href="draft-mcguinness-oauth-client-attesters.xml" rel="alternate" type="application/rfc+xml">
 <link href="#copyright" rel="license">
@@ -1053,7 +1053,7 @@ svg {
 </tr></thead>
 <tfoot><tr>
 <td class="left">McGuinness</td>
-<td class="center">Expires 19 March 2027</td>
+<td class="center">Expires 26 March 2027</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1066,12 +1066,12 @@ svg {
 <dd class="internet-draft">draft-mcguinness-oauth-client-attesters-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-09-15" class="published">15 September 2026</time>
+<time datetime="2026-09-22" class="published">22 September 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2027-03-19">19 March 2027</time></dd>
+<dd class="expires"><time datetime="2027-03-26">26 March 2027</time></dd>
 <dt class="label-authors">Author:</dt>
 <dd class="authors">
 <div class="author">
@@ -1127,7 +1127,7 @@ or authentication method.<a href="#section-abstract-1" class="pilcrow">¶</a></p
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 19 March 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 26 March 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1348,13 +1348,14 @@ attester alone does not authorize it for a client. AS policy can narrow
 the endorsed set; it <span class="bcp14">MUST NOT</span> add an unendorsed attester or fall back to
 another trust mechanism. An endorsement <span class="bcp14">MUST NOT</span> by itself establish
 that the client is trusted or authorized to access a resource.<a href="#section-2.1-3" class="pilcrow">¶</a></p>
-<p id="section-2.1-4">The AS <span class="bcp14">MUST</span> determine, from its configured policy, which of two
-key-trust policies governs each client-to-attester association.
-Publisher-authorized key selection <span class="bcp14">MAY</span> be established by a policy
-covering the client publisher, without configuring each attester
-individually. AS-configured attester trust, once configured for an
-exact issuer string for any client, governs that issuer string for
-every client (<a href="#key-resolution" class="auto internal xref">Section 5.3</a>):<a href="#section-2.1-4" class="pilcrow">¶</a></p>
+<p id="section-2.1-4">Two key-trust policies exist, and the AS determines from its configured
+policy which one applies. The choice is not free per association:
+AS-configured attester trust is keyed by exact issuer string and, once
+configured for any client, governs that issuer string for every client.
+Publisher-authorized key selection is keyed by the client publisher and
+needs no per-attester configuration. The two policies are defined
+below; <a href="#key-resolution" class="auto internal xref">Section 5.3</a> gives the procedure that selects between
+them:<a href="#section-2.1-4" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-2.1-5.1">
             <p id="section-2.1-5.1.1"><strong>Publisher-authorized key selection:</strong> the AS authorizes the
@@ -1420,7 +1421,9 @@ require an AS to apply this profile.<a href="#section-2.3-2" class="pilcrow">¶<
 <p id="section-2.4-1">Conformance is role-specific:<a href="#section-2.4-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-2.4-2.1">
-            <p id="section-2.4-2.1.1">Client publishers implement <a href="#metadata" class="auto internal xref">Section 3</a> and <a href="#updates" class="auto internal xref">Section 6</a>.<a href="#section-2.4-2.1.1" class="pilcrow">¶</a></p>
+            <p id="section-2.4-2.1.1">Client publishers publish and maintain <code>client_attesters</code> under
+<a href="#metadata" class="auto internal xref">Section 3</a>, and withdraw an endorsement by updating that metadata
+(<a href="#updates" class="auto internal xref">Section 6</a>).<a href="#section-2.4-2.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-2.4-2.2">
             <p id="section-2.4-2.2.1">Client Attesters and clients implement their issuance and presentation
@@ -1640,15 +1643,24 @@ every client, regardless of whether the requesting client's publisher
 is also authorized to select keys. Otherwise, publisher-authorized key
 selection applies if the publisher is so authorized. If neither
 applies, no key source is available and the endorsement fails.<a href="#section-5.3-1" class="pilcrow">¶</a></p>
+<p id="section-5.3-2">Removing a configured entry <span class="bcp14">MUST NOT</span> by itself make its issuer eligible
+for publisher-authorized key selection. An issuer the AS has configured
+remains governed by AS-configured attester trust until an operator
+records a policy decision for that issuer; until then no key source is
+available and the endorsement fails. Otherwise an edit made to reduce
+trust would instead hand key selection to the publisher.<a href="#section-5.3-2" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-5.3-2.1">
-            <p id="section-5.3-2.1.1"><strong>AS-configured attester trust:</strong> use only the independently
+<li class="normal" id="section-5.3-3.1">
+            <p id="section-5.3-3.1.1"><strong>AS-configured attester trust:</strong> use only the independently
 configured key source for the exact issuer. The endorsed <code>jwks_uri</code>
               <span class="bcp14">MUST</span> equal that source's URI or one of its configured aliases. An
 alias is an endorsed URI that the AS is configured to treat as
 equivalent to the issuer's configured source; it does not change
-where keys are retrieved. Configured aliases <span class="bcp14">MUST</span> preserve the
-endorsed attestation authority, including tenant scope; a shared
+where keys are retrieved. An alias belongs to the issuer's configured
+key source, so it applies to every client that endorses that issuer
+and is not scoped to the client whose endorsement prompted it.
+Configured aliases <span class="bcp14">MUST</span> preserve the endorsed attestation authority,
+including tenant scope; a shared
 issuer or origin alone does not establish equivalence. This check
 surfaces disagreement between the endorsement and AS configuration,
 including endorsement
@@ -1656,21 +1668,21 @@ of a different key set behind a shared issuer string, instead of
 resolving it silently. An endorsed <code>jwks_uri</code> <span class="bcp14">MUST NOT</span> select,
 override, or provide a fallback for the configured source. The
 configured key source <span class="bcp14">MAY</span> use a different HTTPS origin from the
-issuer.<a href="#section-5.3-2.1.1" class="pilcrow">¶</a></p>
+issuer.<a href="#section-5.3-3.1.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-5.3-2.2">
-            <p id="section-5.3-2.2.1"><strong>Publisher-authorized key selection:</strong> use the endorsed <code>jwks_uri</code>.
+          <li class="normal" id="section-5.3-3.2">
+            <p id="section-5.3-3.2.1"><strong>Publisher-authorized key selection:</strong> use the endorsed <code>jwks_uri</code>.
 The <code>issuer</code> <span class="bcp14">MUST</span> be an HTTPS URL and <code>jwks_uri</code> <span class="bcp14">MUST</span> have the same
 origin <span>[<a href="#RFC6454" class="cite xref">RFC6454</a>]</span>. This origin check neither isolates tenants sharing
 an origin nor establishes trust in an issuer name. Because
 AS-configured trust governs any issuer string it is configured for,
 publisher-selected keys are never accepted under an issuer string the
-AS independently trusts.<a href="#section-5.3-2.2.1" class="pilcrow">¶</a></p>
+AS trusts or has configured.<a href="#section-5.3-3.2.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-5.3-3">A non-HTTPS issuer requires AS-configured attester trust because it has
-no HTTPS origin binding.<a href="#section-5.3-3" class="pilcrow">¶</a></p>
-<p id="section-5.3-4">Issuer and client identifiers, and endorsed <code>jwks_uri</code> values compared
+<p id="section-5.3-4">A non-HTTPS issuer requires AS-configured attester trust because it has
+no HTTPS origin binding.<a href="#section-5.3-4" class="pilcrow">¶</a></p>
+<p id="section-5.3-5">Issuer and client identifiers, and endorsed <code>jwks_uri</code> values compared
 with configured source URIs and aliases, <span class="bcp14">MUST</span> use exact, case-sensitive
 string comparison without URI normalization; an alternative spelling of
 a location requires an explicit alias. Key selection and caches <span class="bcp14">MUST</span> bind keys to
@@ -1679,21 +1691,21 @@ policy; <code>kid</code> alone or a union of keys from different entries is
 insufficient. The AS <span class="bcp14">MUST</span> ignore the <code>jku</code>, <code>x5u</code>, <code>x5c</code>, and <code>jwk</code>
 JOSE header parameters for key selection under this profile and <span class="bcp14">MUST</span>
 resolve only <code>kid</code> against the selected source. Origin comparison does
-not change identifier comparison.<a href="#section-5.3-4" class="pilcrow">¶</a></p>
-<p id="section-5.3-5">A key is eligible when it is the only key in the selected JWK Set
+not change identifier comparison.<a href="#section-5.3-5" class="pilcrow">¶</a></p>
+<p id="section-5.3-6">A key is eligible when it is the only key in the selected JWK Set
 whose <code>kid</code> equals the header <code>kid</code> by octet comparison, it is an
 asymmetric public key whose type is consistent with the header <code>alg</code>,
 its <code>use</code>, if present, is <code>sig</code>, its <code>key_ops</code>, if present, includes
 <code>verify</code>, and its <code>alg</code>, if present, equals the header <code>alg</code>. More
 than one key matching the <code>kid</code> is a failure; the AS <span class="bcp14">MUST NOT</span> try
-candidate keys in turn.<a href="#section-5.3-5" class="pilcrow">¶</a></p>
-<p id="section-5.3-6">When retrieving a JWK Set or client metadata, the AS <span class="bcp14">MUST</span> authenticate
+candidate keys in turn.<a href="#section-5.3-6" class="pilcrow">¶</a></p>
+<p id="section-5.3-7">When retrieving a JWK Set or client metadata, the AS <span class="bcp14">MUST</span> authenticate
 the HTTPS server, limit response size and request time, prevent
 retrieval from prohibited network destinations, and <span class="bcp14">MUST NOT</span> follow
 redirects. The AS <span class="bcp14">SHOULD</span> advertise
 <code>client_attestation_signing_alg_values_supported</code> consistent with the
 algorithm restrictions in step 3 of <a href="#as-processing" class="auto internal xref">Section 5.2</a>
-(<span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-8" class="relref">Section 8</a></span>).<a href="#section-5.3-6" class="pilcrow">¶</a></p>
+(<span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-8" class="relref">Section 8</a></span>).<a href="#section-5.3-7" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="errors">
@@ -1701,7 +1713,8 @@ algorithm restrictions in step 3 of <a href="#as-processing" class="auto interna
         <h3 id="name-errors">
 <a href="#section-5.4" class="section-number selfRef">5.4. </a><a href="#name-errors" class="section-name selfRef">Errors</a>
         </h3>
-<p id="section-5.4-1">Endorsement validation failures <span class="bcp14">MUST</span> produce <code>invalid_client_attestation</code>,
+<p id="section-5.4-1">Where the Client Attestation is the client authentication method, an
+endorsement validation failure <span class="bcp14">MUST</span> produce <code>invalid_client_attestation</code>,
 the more specific code that <span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-7.4" class="relref">Section 7.4</a></span> permits in place of
 <code>invalid_client</code>, with the HTTP status that <span>[<a href="#RFC6749" class="cite xref">RFC6749</a>], <a href="https://rfc-editor.org/rfc/rfc6749#section-5.2" class="relref">Section 5.2</a></span>
 assigns to client authentication failures, and without exposing policy
@@ -1712,7 +1725,13 @@ including an endorsed <code>jwks_uri</code> that matches neither the configured
 source nor a configured alias, and the case where no eligible key is
 available after any refresh permitted by <a href="#updates" class="auto internal xref">Section 6</a>. Signature verification with a resolved key and
 the remaining attestation and proof checks follow <span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-7.4" class="relref">Section 7.4</a></span>,
-including challenge and freshness responses. A companion client
+including challenge and freshness responses. Where the deployment uses
+the Client Attestation as an additional security signal rather than as
+the client authentication method (<span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-7.6" class="relref">Section 7.6</a></span>), an
+endorsement validation failure means no attestation signal is available
+for that request; the AS <span class="bcp14">MUST NOT</span> treat the failed attestation as a
+satisfied signal, and whether the request proceeds on the companion
+method alone is AS policy. A companion client
 authentication method that fails, or that authenticates a different
 client identifier, produces the error defined by its own specification.
 Other metadata-discovery, registration, authentication, and grant errors
@@ -1747,19 +1766,28 @@ entries if that operation fails.<a href="#section-6.1-2.2.1" class="pilcrow">¶<
 endorsement or key can remain acceptable until the applicable age
 expires. The AS <span class="bcp14">MUST</span> be configured with maximum ages that keep this
 latency within the deployment's security requirements; short ages, for
-example one hour, keep it small. Fresh entries do not require retrieval on each
-request. These limits expire cached copies, not authoritative client
+example one hour, keep it small. This profile specifies no ceiling, so
+a publisher cannot predict from the protocol alone how long a
+withdrawal takes to bite; deployments that need a predictable bound
+state one in their trust agreement. Fresh entries do not require
+retrieval on each request. These limits expire cached copies, not authoritative client
 registrations.<a href="#section-6.1-3" class="pilcrow">¶</a></p>
 <p id="section-6.1-4">On an unknown <code>kid</code>, the AS <span class="bcp14">SHOULD</span> refresh the selected key source's
 JWK Set once and retry key selection, subject to rate limits. The AS
 <span class="bcp14">MUST</span> rate-limit these refreshes per selected key source, independently
 of <code>kid</code>, and <span class="bcp14">MUST</span> reject the attestation if no eligible key is
-available. Rate-limit parameters are deployment-specific. An <code>iss</code>
+available. Where several clients or publishers endorse one key source,
+the AS <span class="bcp14">SHOULD</span> also limit refreshes per endorsing client and per
+publisher, so that no client or publisher can exhaust another's
+allowance. Rate-limit parameters are
+deployment-specific. An <code>iss</code>
 matching no endorsement <span class="bcp14">MUST NOT</span> cause a client-metadata refresh; the
 metadata maximum age bounds the delay before a newly published
 endorsement takes effect, as it bounds withdrawal.<a href="#section-6.1-4" class="pilcrow">¶</a></p>
 <p id="section-6.1-5">On observing that a CIMD has been removed (HTTP 404 or 410), the AS <span class="bcp14">MUST</span>
-stop using previously cached endorsements from that document. Removal
+stop using previously cached endorsements from that document, and <span class="bcp14">MUST NOT</span> use them again unless a later retrieval of that document succeeds.
+A retrieval failure that is not a removal, such as a timeout or a 5xx
+status, does not by itself invalidate an unexpired cached copy. Removal
 cannot be detected while the AS continues to use an unexpired cache.<a href="#section-6.1-5" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -1830,8 +1858,12 @@ which remains the AS operator's responsibility.<a href="#section-7-2.2.1" class=
         <li class="normal" id="section-7-2.3">
           <p id="section-7-2.3.1"><strong>Key retrieval:</strong> the retrieval rules in <a href="#key-resolution" class="auto internal xref">Section 5.3</a>
 deliberately extend CIMD's no-automatic-redirect rule to attester key
-retrieval. Endorsed URLs remain subject to SSRF defenses; endorsement
-does not make a network location safe.<a href="#section-7-2.3.1" class="pilcrow">¶</a></p>
+retrieval. Under publisher-authorized key selection the publisher
+chooses both the issuer and the key location, so an authorized
+publisher can cause the AS to issue an outbound request to an origin
+of the publisher's choosing; <a href="#key-resolution" class="auto internal xref">Section 5.3</a> bounds that request
+but does not remove it. Endorsed URLs remain subject to SSRF
+defenses; endorsement does not make a network location safe.<a href="#section-7-2.3.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-7-2.4">
           <p id="section-7-2.4.1"><strong>Withdrawal latency:</strong> cached acceptance persists as described in
