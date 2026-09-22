@@ -556,11 +556,20 @@ Attestation is an additional security signal:
   endorsement validation failure means no attestation signal is
   available for that request. The AS MUST NOT treat the failed
   attestation as a satisfied signal. Where the deployment requires an
-  attestation alongside that method, for example by advertising
-  `client_attestation_pop_methods_supported` ({{ATTEST, Section 7.6}}),
-  the request fails; where the attestation is optional under the
-  applicable policy, whether the request proceeds on the companion
+  attestation alongside that method, the request fails. A server
+  signals that requirement by advertising
+  `client_attestation_pop_methods_supported` without the value `none`;
+  a list containing `none` leaves the attestation optional
+  ({{ATTEST, Section 7.6}}). Where the attestation is optional under
+  the applicable policy, whether the request proceeds on the companion
   method alone is AS policy.
+
+Whenever an endorsement validation failure causes the AS to reject the
+request, the AS MUST return `invalid_client_attestation`, whether the
+Client Attestation served as the client authentication method or as an
+additional security signal. Signature verification with a resolved key
+and the remaining attestation and proof checks keep their own errors,
+as below.
 
 Obtaining a fresh attestation does not correct an endorsement failure
 caused by disagreement between the endorsement and AS configuration,
@@ -706,11 +715,12 @@ The considerations in {{ATTEST}}, {{CIMD}}, and {{RFC8725}} apply.
   authenticated without an attestation unless the deployment requires
   one. ATTEST offers two ways to require it: registering a
   `token_endpoint_auth_method` that is an attestation method, or
-  advertising `client_attestation_pop_methods_supported` to demand an
-  attestation alongside another client authentication method
-  ({{ATTEST, Section 7.6}}). Deployments relying on endorsement
-  enforcement use one of them; the second keeps mutual TLS or
-  `private_key_jwt` in place.
+  advertising `client_attestation_pop_methods_supported` without the
+  value `none`, which demands an attestation alongside another client
+  authentication method ({{ATTEST, Section 7.6}}). Deployments relying
+  on endorsement enforcement use one of them; the second keeps mutual
+  TLS or `private_key_jwt` in place. A list that includes `none` leaves
+  the attestation optional and does not prevent omission.
 * **Unscoped endorsement:** an endorsement carries no audience. Under
   publisher-authorized key selection, one public endorsement determines
   the attester and its keys at every AS whose policy covers that
