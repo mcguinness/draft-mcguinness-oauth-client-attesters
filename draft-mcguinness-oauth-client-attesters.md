@@ -520,11 +520,11 @@ endorsement takes effect, as it bounds withdrawal.
 On observing that a CIMD has been removed (HTTP 404 or 410), the AS MUST
 stop using previously cached endorsements from that document, and MUST
 NOT use them again unless a later retrieval of that document succeeds.
-Deleting a client's registration has the same effect for a registered
-client: its endorsements are gone with it.
 A retrieval failure that is not a removal, such as a timeout or a 5xx
 status, does not by itself invalidate an unexpired cached copy. Removal
 cannot be detected while the AS continues to use an unexpired cache.
+Deleting a registered client's registration removes its endorsements
+with it.
 
 ## Endorsement and Key Changes {#endorsement-changes}
 
