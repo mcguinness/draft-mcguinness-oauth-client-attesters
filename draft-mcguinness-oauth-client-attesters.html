@@ -1853,29 +1853,37 @@ client authentication method (<span>[<a href="#ATTEST" class="cite xref">ATTEST<
 endorsement validation failure means no attestation signal is
 available for that request. The AS <span class="bcp14">MUST NOT</span> treat the failed
 attestation as a satisfied signal. Where the deployment requires an
-attestation alongside that method, for example by advertising
-<code>client_attestation_pop_methods_supported</code> (<span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-7.6" class="relref">Section 7.6</a></span>),
-the request fails; where the attestation is optional under the
-applicable policy, whether the request proceeds on the companion
+attestation alongside that method, the request fails. A server
+signals that requirement by advertising
+<code>client_attestation_pop_methods_supported</code> without the value <code>none</code>;
+a list containing <code>none</code> leaves the attestation optional
+(<span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-7.6" class="relref">Section 7.6</a></span>). Where the attestation is optional under
+the applicable policy, whether the request proceeds on the companion
 method alone is AS policy.<a href="#section-5.4-4.4.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
 </dl>
-<p id="section-5.4-5">Obtaining a fresh attestation does not correct an endorsement failure
+<p id="section-5.4-5">Whenever an endorsement validation failure causes the AS to reject the
+request, the AS <span class="bcp14">MUST</span> return <code>invalid_client_attestation</code>, whether the
+Client Attestation served as the client authentication method or as an
+additional security signal. Signature verification with a resolved key
+and the remaining attestation and proof checks keep their own errors,
+as below.<a href="#section-5.4-5" class="pilcrow">¶</a></p>
+<p id="section-5.4-6">Obtaining a fresh attestation does not correct an endorsement failure
 caused by disagreement between the endorsement and AS configuration,
 such as an endorsed <code>jwks_uri</code> matching neither the configured source
 nor a configured alias (<a href="#key-resolution" class="auto internal xref">Section 5.3</a>). Because the response
 deliberately carries no policy detail, a Client cannot tell that case
 apart from one a fresh attestation would fix; it is resolved through
-the operational channels in <a href="#security" class="auto internal xref">Section 7</a> rather than by client retry.<a href="#section-5.4-5" class="pilcrow">¶</a></p>
-<p id="section-5.4-6">Everything else keeps its own error. Signature verification with a
+the operational channels in <a href="#security" class="auto internal xref">Section 7</a> rather than by client retry.<a href="#section-5.4-6" class="pilcrow">¶</a></p>
+<p id="section-5.4-7">Everything else keeps its own error. Signature verification with a
 resolved key and the remaining attestation and proof checks follow
 <span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-7.4" class="relref">Section 7.4</a></span>, including challenge and freshness responses. A
 companion client authentication method that fails, or that
 authenticates a different client identifier, produces the error defined
 by its own specification. Other metadata-discovery, registration,
 authentication, and grant errors follow their base specifications. The
-no-fallback rule in <a href="#trust" class="auto internal xref">Section 2</a> applies.<a href="#section-5.4-6" class="pilcrow">¶</a></p>
+no-fallback rule in <a href="#trust" class="auto internal xref">Section 2</a> applies.<a href="#section-5.4-7" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -2034,11 +2042,12 @@ attestation. A client whose other credentials are stolen can be
 authenticated without an attestation unless the deployment requires
 one. ATTEST offers two ways to require it: registering a
 <code>token_endpoint_auth_method</code> that is an attestation method, or
-advertising <code>client_attestation_pop_methods_supported</code> to demand an
-attestation alongside another client authentication method
-(<span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-7.6" class="relref">Section 7.6</a></span>). Deployments relying on endorsement
-enforcement use one of them; the second keeps mutual TLS or
-<code>private_key_jwt</code> in place.<a href="#section-7-2.5.1" class="pilcrow">¶</a></p>
+advertising <code>client_attestation_pop_methods_supported</code> without the
+value <code>none</code>, which demands an attestation alongside another client
+authentication method (<span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-7.6" class="relref">Section 7.6</a></span>). Deployments relying
+on endorsement enforcement use one of them; the second keeps mutual
+TLS or <code>private_key_jwt</code> in place. A list that includes <code>none</code> leaves
+the attestation optional and does not prevent omission.<a href="#section-7-2.5.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-7-2.6">
           <p id="section-7-2.6.1"><strong>Unscoped endorsement:</strong> an endorsement carries no audience. Under
