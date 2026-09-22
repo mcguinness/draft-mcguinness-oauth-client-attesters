@@ -95,8 +95,16 @@ Client metadata --endorses--> Attester --attests--> Client Instance
 
 The profile applies at AS endpoints accepting Client Attestations for
 client authentication or as an additional security signal, using the
-profiling hook in {{ATTEST, Section 13}}. It retains ATTEST's wire
-format, proof methods, and token binding.
+profiling hook in {{ATTEST, Section 13}}. In a typical deployment those
+are the token endpoint, the pushed authorization request endpoint
+{{RFC9126}}, the device authorization endpoint {{RFC8628}}, and the
+introspection {{RFC7662}} and revocation {{RFC7009}} endpoints; the
+authorization endpoint does not authenticate clients and is out of
+scope. A party authenticating at any of these is acting as a client,
+including a resource server presenting a Client Attestation to the
+introspection endpoint. Where a flow authenticates more than once, each
+presentation is evaluated on its own under {{as-processing}}. The
+profile retains ATTEST's wire format, proof methods, and token binding.
 
 This profile, {{ATTEST}}, and {{INSTANCE-ID}} answer three separate
 questions in layers:
