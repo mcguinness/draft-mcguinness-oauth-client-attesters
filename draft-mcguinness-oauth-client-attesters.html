@@ -1346,7 +1346,7 @@ trusted (<a href="#key-resolution" class="auto internal xref">Section 5.3</a>).<
 <p id="section-2.1-3">Endorsement alone does not make an attester trusted, and AS trust in an
 attester alone does not authorize it for a client. AS policy can narrow
 the endorsed set; it <span class="bcp14">MUST NOT</span> add an unendorsed attester or fall back to
-another trust mechanism. An endorsement <span class="bcp14">MUST NOT</span> by itself establish
+another trust mechanism. An endorsement does not by itself establish
 that the client is trusted or authorized to access a resource.<a href="#section-2.1-3" class="pilcrow">¶</a></p>
 <p id="section-2.1-4">Two key-trust policies exist, and the AS determines from its configured
 policy which one applies. The choice is not free per association:
@@ -1399,7 +1399,7 @@ The same restriction applies to endorsement updates.<a href="#section-2.2-1" cla
 <a href="#section-2.3" class="section-number selfRef">2.3. </a><a href="#name-profile-selection" class="section-name selfRef">Profile Selection</a>
         </h3>
 <p id="section-2.3-1">The AS determines that this profile applies to a request by local
-policy, which <span class="bcp14">MAY</span> be scoped per client; this out-of-band determination
+policy, which can be scoped per client; this out-of-band determination
 satisfies <span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-13" class="relref">Section 13</a></span>. Applicability is not selected by the
 presence or absence of <code>client_attesters</code>. An AS advertises the
 capability with <code>client_attester_endorsement_supported</code>
@@ -1494,8 +1494,9 @@ list; and<a href="#section-3-4.1.1" class="pilcrow">¶</a></p>
 <p id="section-3-5">Rejection under this profile does not affect the client's other
 authentication methods and does not by itself make a CIMD invalid or
 uncacheable under <span>[<a href="#CIMD" class="cite xref">CIMD</a>]</span>.<a href="#section-3-5" class="pilcrow">¶</a></p>
-<p id="section-3-6">Extensions <span class="bcp14">MUST NOT</span> weaken an endorsement's meaning for implementations
-that ignore them.<a href="#section-3-6" class="pilcrow">¶</a></p>
+<p id="section-3-6">An extension to this member is safe only if an implementation that
+ignores it reads the endorsement the same way. This profile defines no
+mechanism for marking an extension critical.<a href="#section-3-6" class="pilcrow">¶</a></p>
 <p id="section-3-7">Every entry carries a complete issuer-to-key-location mapping, so an
 endorsement has the same meaning regardless of the AS policy that
 evaluates it, which the publisher cannot know. An endorsement
@@ -1659,15 +1660,18 @@ equivalent to the issuer's configured source; it does not change
 where keys are retrieved. An alias belongs to the issuer's configured
 key source, so it applies to every client that endorses that issuer
 and is not scoped to the client whose endorsement prompted it.
-Configured aliases <span class="bcp14">MUST</span> preserve the endorsed attestation authority,
-including tenant scope; a shared
-issuer or origin alone does not establish equivalence. This check
+A configured alias <span class="bcp14">MUST</span> preserve the endorsed attestation authority,
+including tenant scope; a shared issuer or origin alone does not
+establish equivalence. Because an alias applies to every client
+endorsing the issuer, this bounds what an alias may map to, and it is
+the rule the tenant-isolation argument in <a href="#security" class="auto internal xref">Section 7</a> rests on.
+This check
 surfaces disagreement between the endorsement and AS configuration,
 including endorsement
 of a different key set behind a shared issuer string, instead of
 resolving it silently. An endorsed <code>jwks_uri</code> <span class="bcp14">MUST NOT</span> select,
-override, or provide a fallback for the configured source. The
-configured key source <span class="bcp14">MAY</span> use a different HTTPS origin from the
+override, or provide a fallback for the configured source. No origin
+relationship is required between the configured key source and the
 issuer.<a href="#section-5.3-3.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-5.3-3.2">
@@ -1700,9 +1704,9 @@ its <code>use</code>, if present, is <code>sig</code>, its <code>key_ops</code>,
 than one key matching the <code>kid</code> is a failure; the AS <span class="bcp14">MUST NOT</span> try
 candidate keys in turn.<a href="#section-5.3-6" class="pilcrow">¶</a></p>
 <p id="section-5.3-7">When retrieving a JWK Set or client metadata, the AS <span class="bcp14">MUST</span> authenticate
-the HTTPS server, limit response size and request time, prevent
-retrieval from prohibited network destinations, and <span class="bcp14">MUST NOT</span> follow
-redirects. The AS <span class="bcp14">SHOULD</span> advertise
+the HTTPS server and <span class="bcp14">MUST NOT</span> follow redirects. Bounding response size
+and request time, and blocking prohibited network destinations, are
+local defenses; see Security Considerations. The AS <span class="bcp14">SHOULD</span> advertise
 <code>client_attestation_signing_alg_values_supported</code> consistent with the
 algorithm restrictions in step 3 of <a href="#as-processing" class="auto internal xref">Section 5.2</a>
 (<span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-8" class="relref">Section 8</a></span>).<a href="#section-5.3-7" class="pilcrow">¶</a></p>
@@ -1764,9 +1768,9 @@ entries if that operation fails.<a href="#section-6.1-2.2.1" class="pilcrow">¶<
         </ul>
 <p id="section-6.1-3">Configured maximum ages bound withdrawal latency: a withdrawn
 endorsement or key can remain acceptable until the applicable age
-expires. The AS <span class="bcp14">MUST</span> be configured with maximum ages that keep this
-latency within the deployment's security requirements; short ages, for
-example one hour, keep it small. This profile specifies no ceiling, so
+expires. Configure maximum ages so that this latency stays within the
+deployment's security requirements; short ages, for example one hour,
+keep it small. This profile specifies no ceiling, so
 a publisher cannot predict from the protocol alone how long a
 withdrawal takes to bite; deployments that need a predictable bound
 state one in their trust agreement. Fresh entries do not require
@@ -1822,16 +1826,18 @@ endorsement but does not itself revoke existing grants or access tokens
 unless the deployment separately couples withdrawal to revocation.
 Refresh requests requiring a Client Attestation are checked again under
 <a href="#processing" class="auto internal xref">Section 5</a>.<a href="#section-6.3-1" class="pilcrow">¶</a></p>
-<p id="section-6.3-2">Deployments using withdrawal to terminate existing access <span class="bcp14">MUST</span> configure
-the AS to revoke affected grants, invalidate their access and refresh
-tokens, and prevent further refresh issuance. Introspection <span>[<a href="#RFC7662" class="cite xref">RFC7662</a>]</span>
+<p id="section-6.3-2">Withdrawal alone does not terminate existing access. A deployment that
+requires termination separately revokes the affected grants,
+invalidates their access and refresh tokens, and prevents further
+refresh issuance.
+Introspection <span>[<a href="#RFC7662" class="cite xref">RFC7662</a>]</span>
 reports revoked tokens inactive. Offline validation requires a separate
 revocation mechanism or token expiration.<a href="#section-6.3-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
 </div>
-<div id="security-considerations">
+<div id="security">
 <section id="section-7">
       <h2 id="name-security-considerations">
 <a href="#section-7" class="section-number selfRef">7. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
@@ -1841,8 +1847,8 @@ revocation mechanism or token expiration.<a href="#section-6.3-2" class="pilcrow
 <li class="normal" id="section-7-2.1">
           <p id="section-7-2.1.1"><strong>Publisher compromise:</strong> control of a CIMD host or a client's registration
 administration permits changing endorsements, within AS policy. The AS
-<span class="bcp14">SHOULD</span> monitor and alert on endorsement changes and evaluate new attesters
-as policy changes.
+has no protocol signal for this, so operators generally monitor
+endorsement changes and evaluate new attesters as policy changes.
 A separately specified signed-metadata mechanism could bind publisher
 intent independently of the HTTPS host, if its signing keys have an
 independent trust basis; this profile defines no such mechanism.<a href="#section-7-2.1.1" class="pilcrow">¶</a></p>
@@ -1861,9 +1867,12 @@ deliberately extend CIMD's no-automatic-redirect rule to attester key
 retrieval. Under publisher-authorized key selection the publisher
 chooses both the issuer and the key location, so an authorized
 publisher can cause the AS to issue an outbound request to an origin
-of the publisher's choosing; <a href="#key-resolution" class="auto internal xref">Section 5.3</a> bounds that request
-but does not remove it. Endorsed URLs remain subject to SSRF
-defenses; endorsement does not make a network location safe.<a href="#section-7-2.3.1" class="pilcrow">¶</a></p>
+of the publisher's choosing. <a href="#key-resolution" class="auto internal xref">Section 5.3</a> constrains where that
+request may go but does not remove it, and an AS defends itself
+further by bounding response
+size and request time and by blocking prohibited network
+destinations. Endorsed URLs remain subject to SSRF defenses;
+endorsement does not make a network location safe.<a href="#section-7-2.3.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-7-2.4">
           <p id="section-7-2.4.1"><strong>Withdrawal latency:</strong> cached acceptance persists as described in
@@ -1887,7 +1896,8 @@ of them until the endorsement is withdrawn.<a href="#section-7-2.6.1" class="pil
 </li>
         <li class="normal" id="section-7-2.7">
           <p id="section-7-2.7.1"><strong>Privacy:</strong> public metadata exposes client-to-attester relationships.
-It <span class="bcp14">SHOULD NOT</span> enumerate instances or their keys. Caching reduces the
+Such metadata need not enumerate instances or their keys, and this
+profile gives no reason to. Caching reduces the
 request-timing information observable at metadata and key endpoints.
 No stable instance identifier is required by this profile.<a href="#section-7-2.7.1" class="pilcrow">¶</a></p>
 </li>
