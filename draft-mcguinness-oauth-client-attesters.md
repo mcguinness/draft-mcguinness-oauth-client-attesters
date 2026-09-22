@@ -442,7 +442,7 @@ adds. It covers:
   {{key-resolution}}, including an endorsed `jwks_uri` that matches
   neither the configured source nor a configured alias; and
 * the case where no eligible key is available after any refresh
-  {{updates}} permits.
+  permitted by {{updates}}.
 
 Its outcome is reported differently depending on the role the Client
 Attestation plays in the request.
