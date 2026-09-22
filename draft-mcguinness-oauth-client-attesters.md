@@ -73,9 +73,14 @@ that manage attester trust entirely through authorization server (AS)
 configuration can continue to use ATTEST without this profile.
 
 This profile adds `client_attesters`: the client's endorsements of
-attesters and their verification-key locations, generalizing SPIFFE client
-authentication's bundle endpoint {{SPIFFE-OAUTH}}. An AS accepts an
-endorsement only under its own trust policy. The resulting chain is:
+attesters and their verification-key locations. Under AS-configured
+attester trust this plays the role that the bundle endpoint of SPIFFE
+client authentication plays {{SPIFFE-OAUTH}}, with the key source
+established out of band and the endorsed location only compared against
+it. Publisher-authorized key selection deliberately does the opposite,
+letting the publisher name the location, so it is not a substitute for
+SPIFFE bundle configuration. An AS accepts an endorsement only under
+its own trust policy. The resulting chain is:
 
 ~~~ ascii-art
 Client metadata --endorses--> Attester --attests--> Client Instance
