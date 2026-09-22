@@ -603,8 +603,8 @@ keep it small. This profile specifies no ceiling, so
 a publisher cannot predict from the protocol alone how long a
 withdrawal takes to take effect. A deployment that needs a predictable
 bound states one in its trust agreement. Fresh entries do not require
-retrieval on each request. These limits expire cached copies, not authoritative client
-registrations.
+retrieval on each request. These limits expire cached copies, not
+authoritative client registrations.
 
 On an unknown `kid`, the AS SHOULD refresh the selected key source's
 JWK Set once and retry key selection, subject to rate limits. The AS
