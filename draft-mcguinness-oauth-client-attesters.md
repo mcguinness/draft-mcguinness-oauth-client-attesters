@@ -413,9 +413,9 @@ than one key matching the `kid` is a failure; the AS MUST NOT try
 candidate keys in turn.
 
 When retrieving a JWK Set or client metadata, the AS MUST authenticate
-the HTTPS server, limit response size and request time, prevent
-retrieval from prohibited network destinations, and MUST NOT follow
-redirects. The AS SHOULD advertise
+the HTTPS server and MUST NOT follow redirects. Bounding response size
+and request time, and blocking prohibited network destinations, are
+local defenses; see Security Considerations. The AS SHOULD advertise
 `client_attestation_signing_alg_values_supported` consistent with the
 algorithm restrictions in step 3 of {{as-processing}}
 ({{ATTEST, Section 8}}).
@@ -544,8 +544,10 @@ The considerations in {{ATTEST}}, {{CIMD}}, and {{RFC8725}} apply.
   chooses both the issuer and the key location, so an authorized
   publisher can cause the AS to issue an outbound request to an origin
   of the publisher's choosing; {{key-resolution}} bounds that request
-  but does not remove it. Endorsed URLs remain subject to SSRF
-  defenses; endorsement does not make a network location safe.
+  but does not remove it. An AS defends itself by bounding response
+  size and request time and by blocking prohibited network
+  destinations. Endorsed URLs remain subject to SSRF defenses;
+  endorsement does not make a network location safe.
 * **Withdrawal latency:** cached acceptance persists as described in
   {{updates}}. Urgent incidents require local denial or another
   revocation channel; removing a key at its origin is not instantaneous
