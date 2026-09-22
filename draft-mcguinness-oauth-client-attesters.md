@@ -554,10 +554,10 @@ Attestation is an additional security signal:
   attestation as a satisfied signal, and whether the request proceeds
   on the companion method alone is AS policy.
 
-An endorsement failure caused by disagreement between the endorsement
-and AS configuration, such as an endorsed `jwks_uri` matching neither
-the configured source nor a configured alias ({{key-resolution}}), is
-not corrected by obtaining a fresh attestation. Because the response
+Obtaining a fresh attestation does not correct an endorsement failure
+caused by disagreement between the endorsement and AS configuration,
+such as an endorsed `jwks_uri` matching neither the configured source
+nor a configured alias ({{key-resolution}}). Because the response
 deliberately carries no policy detail, a Client cannot tell that case
 apart from one a fresh attestation would fix; it is resolved through
 the operational channels in {{security}} rather than by client retry.
