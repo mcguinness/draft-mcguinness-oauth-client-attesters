@@ -699,9 +699,14 @@ The considerations in {{ATTEST}}, {{CIMD}}, and {{RFC8725}} apply.
   revocation.
 * **Omitted attestation:** `client_attesters` does not itself require
   attestation. A client whose other credentials are stolen can be
-  authenticated without an attestation unless its registered
-  `token_endpoint_auth_method` requires one; deployments relying on
-  endorsement enforcement set that method accordingly.
+  authenticated without an attestation unless the deployment requires
+  one. ATTEST offers two ways to require it: registering a
+  `token_endpoint_auth_method` that is an attestation method, or
+  advertising `client_attestation_pop_methods_supported` to demand an
+  attestation alongside another client authentication method
+  ({{ATTEST, Section 7.6}}). Deployments relying on endorsement
+  enforcement use one of them; the second keeps mutual TLS or
+  `private_key_jwt` in place.
 * **Unscoped endorsement:** an endorsement carries no audience. Under
   publisher-authorized key selection, one public endorsement determines
   the attester and its keys at every AS whose policy covers that
