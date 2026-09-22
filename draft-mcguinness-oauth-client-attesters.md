@@ -122,11 +122,20 @@ Client Instance ID (optional)  Which persistent instance is this?
 Endorsement carries no instance semantics, and instance identification
 does not establish attester trust. Neither establishes user delegation.
 
-Resource servers validating Client Attestations directly rely on
-configured attester trust; this profile does not define endorsement
-discovery or acceptance for those endpoints. This keeps client metadata
-resolution and endorsement-policy evaluation at the AS rather than
-distributing those functions to resource servers.
+A resource server that accepts a Client Attestation presented to it
+({{ATTEST, Section 7.6}}) relies on configured attester trust; this
+profile does not define endorsement discovery or acceptance there. That
+keeps client metadata resolution and endorsement-policy evaluation at
+the AS rather than distributing those functions to resource servers,
+and it has a consequence: withdrawing an endorsement ({{updates}})
+does not reach a resource server validating attestations directly.
+This is distinct from a resource server authenticating to an AS
+endpoint, which acts as a client and is in scope above.
+
+The AS conveys what it decided through the artifacts it issues rather
+than through endorsement data: the confirmation claim of the issued
+token binds the key the attestation named {{RFC9449}}, and
+introspection {{RFC7662}} reports the token's current state.
 
 # Conventions and Trust Model {#trust}
 
