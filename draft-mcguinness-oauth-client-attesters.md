@@ -69,7 +69,14 @@ Attestation-Based Client Authentication
 {{ATTEST}} allows an attester to authenticate those instances. ATTEST
 requires an attestation to verify under the key of a known and trusted
 Client Attester ({{ATTEST, Section 7.1}}) and leaves how that trust is
-established to deployments ({{ATTEST, Section 10.8}}).
+established to deployments ({{ATTEST, Section 10.8}}). It does not
+define how a client
+identifies the attesters authorized to speak for it. Authorization
+server configuration alone can carry that association, but it does not
+let a client select or rotate its own attesters. This specification
+defines client metadata for expressing that endorsement while leaving
+the authorization server in control of whether an endorsement is
+accepted.
 
 This profile applies to both registered clients and clients identified by
 Client ID Metadata Documents (CIMDs) {{CIMD}}. Either can endorse one or
