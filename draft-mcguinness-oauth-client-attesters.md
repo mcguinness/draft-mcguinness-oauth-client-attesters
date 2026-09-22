@@ -287,9 +287,9 @@ policy applies to an attester, remain AS policy ({{profile-selection}}).
 
 # Attestation and AS Processing {#processing}
 
-This section covers what an attester puts in a Client Attestation, the
-order in which an AS validates one, how the AS selects the key that
-verifies it, and how failures are reported.
+This section covers what an attester must establish and put in a Client
+Attestation, the order in which an AS validates one, how the AS selects
+the key that verifies it, and how failures are reported.
 
 ## Issuance and Presentation
 
