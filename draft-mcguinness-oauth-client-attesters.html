@@ -1231,10 +1231,10 @@ or authentication method.<a href="#section-abstract-1" class="pilcrow">¶</a></p
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
-            <p id="section-toc.1-1.10.1"><a href="#appendix-A" class="auto internal xref"></a><a href="#name-cimd-deployment-example" class="internal xref">CIMD Deployment Example</a></p>
+            <p id="section-toc.1-1.10.1"><a href="#appendix-A" class="auto internal xref">Appendix A</a>.  <a href="#name-cimd-deployment-example" class="internal xref">CIMD Deployment Example</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11">
-            <p id="section-toc.1-1.11.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-registered-client-example" class="internal xref">Registered Client Example</a></p>
+            <p id="section-toc.1-1.11.1"><a href="#appendix-B" class="auto internal xref">Appendix B</a>.  <a href="#name-registered-client-example" class="internal xref">Registered Client Example</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12">
             <p id="section-toc.1-1.12.1"><a href="#appendix-C" class="auto internal xref"></a><a href="#name-document-history" class="internal xref">Document History</a></p>
@@ -1600,7 +1600,11 @@ using AS registration or discovery policy, before evaluating endorsements.
 Obtain metadata from that source or a fresh cache, following CIMD
 resolution and validation or registered metadata policy, including
 <a href="#trust" class="auto internal xref">Section 2</a>. The AS <span class="bcp14">MUST NOT</span> combine endorsement lists from different
-sources or switch sources because endorsement validation fails.<a href="#section-5.2-2.1.1" class="pilcrow">¶</a></p>
+sources or switch sources because endorsement validation fails. A
+client identifier that has both a registration and a reachable CIMD
+is resolved from whichever single source this step selects; an
+endorsement failure from that source is final, and the AS does not
+then consult the other.<a href="#section-5.2-2.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-5.2-2.2">
             <p id="section-5.2-2.2.1">Validate <code>client_attesters</code> and select the entry whose <code>issuer</code>
@@ -2041,7 +2045,7 @@ processing <code>client_attesters</code> under this profile<a href="#section-8-4
 <div id="example">
 <section id="appendix-A">
       <h2 id="name-cimd-deployment-example">
-<a href="#name-cimd-deployment-example" class="section-name selfRef">CIMD Deployment Example</a>
+<a href="#appendix-A" class="section-number selfRef">Appendix A. </a><a href="#name-cimd-deployment-example" class="section-name selfRef">CIMD Deployment Example</a>
       </h2>
 <p id="appendix-A-1">This example is informative. The AS has the following local configuration;
 these are policy settings, not new protocol metadata:<a href="#appendix-A-1" class="pilcrow">¶</a></p>
@@ -2194,24 +2198,78 @@ issuer's origin, and apply the same processing steps. An entry whose
 endorsement validation with the same error.<a href="#appendix-A-15" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="registered-client-example">
+<div id="registered-example">
 <section id="appendix-B">
       <h2 id="name-registered-client-example">
-<a href="#name-registered-client-example" class="section-name selfRef">Registered Client Example</a>
+<a href="#appendix-B" class="section-number selfRef">Appendix B. </a><a href="#name-registered-client-example" class="section-name selfRef">Registered Client Example</a>
       </h2>
-<p id="appendix-B-1">An authenticated, authorized administrator registers <code>s6BhdRkqt3</code> with the
-same <code>client_attesters</code> and <code>token_endpoint_auth_method</code> as <a href="#example" class="auto internal xref">Appendix "CIMD Deployment Example"</a>. The AS
-applies the same AS-configured attester trust and key source.<a href="#appendix-B-1" class="pilcrow">¶</a></p>
-<p id="appendix-B-2">The client sends <code>client_id=s6BhdRkqt3</code> with an attestation whose
-<code>sub</code> is <code>s6BhdRkqt3</code> and <code>iss</code> is <code>https://attester.example/tenant/acme</code>,
-plus its DPoP proof. The AS loads the registered metadata and applies
-the same endorsement and proof checks; no CIMD is fetched.<a href="#appendix-B-2" class="pilcrow">¶</a></p>
-<p id="appendix-B-3">Had the administrator instead registered the URL <code>client_id</code> from
-<a href="#example" class="auto internal xref">Appendix "CIMD Deployment Example"</a>, the AS would process the request from the single source its
-policy selected in step 1, the registration or the CIMD, and never from a
-union of both. An endorsement failure from the selected source produces
-<code>invalid_client_attestation</code>. The AS does not then consult the other
-source.<a href="#appendix-B-3" class="pilcrow">¶</a></p>
+<p id="appendix-B-1">This example is informative. It runs <a href="#example" class="auto internal xref">Appendix A</a> again with an opaque
+client identifier instead of a URL, to show that neither endorsement
+nor key selection depends on the identifier's shape under this
+policy: <code>client_attesters</code> travels with the client's metadata
+either way, and the endorsement names the attester's key location
+outright, so no origin has to be derived from the client identifier.
+How a publisher is authorized does differ between the two forms
+(<a href="#trust" class="auto internal xref">Section 2</a>), but that question does not arise here because the AS
+trusts this attester independently. The AS configuration is the one in
+<a href="#example" class="auto internal xref">Appendix A</a>.<a href="#appendix-B-1" class="pilcrow">¶</a></p>
+<p id="appendix-B-2">An authenticated, authorized administrator registers this metadata,
+for example through <span>[<a href="#RFC7591" class="cite xref">RFC7591</a>]</span>:<a href="#appendix-B-2" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="appendix-B-3">
+<pre>
+{
+  "client_id": "s6BhdRkqt3",
+  "client_name": "Managed Agent Harness",
+  "redirect_uris": ["https://app.example/callback"],
+  "grant_types": ["authorization_code"],
+  "response_types": ["code"],
+  "token_endpoint_auth_method": "attest_jwt_client_auth_dpop",
+  "client_attesters": [
+    {
+      "issuer": "https://attester.example/tenant/acme",
+      "jwks_uri": "https://attester.example/tenant/acme/jwks"
+    }
+  ]
+}
+</pre><a href="#appendix-B-3" class="pilcrow">¶</a>
+</div>
+<p id="appendix-B-4">The attester signs with the same key as in <a href="#example" class="auto internal xref">Appendix A</a>, so the
+attestation header is the same:<a href="#appendix-B-4" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="appendix-B-5">
+<pre>
+{
+  "typ": "oauth-client-attestation+jwt",
+  "alg": "ES256",
+  "kid": "attester-1"
+}
+</pre><a href="#appendix-B-5" class="pilcrow">¶</a>
+</div>
+<p id="appendix-B-6">In the payload only <code>sub</code> differs:<a href="#appendix-B-6" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="appendix-B-7">
+<pre>
+{
+  "iss": "https://attester.example/tenant/acme",
+  "sub": "s6BhdRkqt3",
+  "exp": 1789434000,
+  "cnf": {
+    "jwk": {
+      "kty": "EC",
+      "crv": "P-256",
+      "x": "JYcxlWx7A9YIcr3Bb94ZHqhUX6ea7leTAeGx_WWjs0A",
+      "y": "ppg4pVaOV7ANtw8fQoV8OWfe_6GhY13WPLpuWd_rHnc"
+    }
+  }
+}
+</pre><a href="#appendix-B-7" class="pilcrow">¶</a>
+</div>
+<p id="appendix-B-8">The client redeems its code with <code>client_id=s6BhdRkqt3</code>, that
+attestation, and a combined DPoP proof. The AS reads the registered
+metadata rather than fetching a CIMD, then runs the same steps of
+<a href="#as-processing" class="auto internal xref">Section 5.2</a>: the endorsed issuer matches the attestation's <code>iss</code>,
+AS-configured attester trust selects the configured key source, <code>kid</code>
+resolves to <code>attester-1</code> there, and <code>sub</code> equals the requested
+<code>client_id</code>. The failure cases and their error response are those of
+<a href="#example" class="auto internal xref">Appendix A</a>.<a href="#appendix-B-8" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="document-history">
