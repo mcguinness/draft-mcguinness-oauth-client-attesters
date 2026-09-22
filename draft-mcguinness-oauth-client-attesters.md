@@ -275,7 +275,8 @@ requirements. Instance identification is optional.
 
 # Client Metadata {#metadata}
 
-`client_attesters` is OPTIONAL client metadata, usable in registered client
+The `client_attesters` member is OPTIONAL client metadata, usable in
+registered client
 metadata (including {{RFC7591}}) or a CIMD. Its value is an array of objects:
 
 | Member | Requirement | Meaning |
@@ -332,7 +333,7 @@ Clients using attestation as client authentication select
 `attest_jwt_client_auth` or `attest_jwt_client_auth_dpop` under
 {{ATTEST, Section 9}}. When attestation supplements another method,
 that method remains required under {{ATTEST, Section 7.6}}.
-`client_attesters` does not select a grant, proof method, or the optional
+The member does not select a grant, proof method, or the optional
 instance-identification profile.
 
 # Authorization Server Metadata {#as-metadata}
