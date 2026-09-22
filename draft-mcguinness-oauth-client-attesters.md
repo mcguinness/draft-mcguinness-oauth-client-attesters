@@ -145,13 +145,13 @@ the endorsed set; it MUST NOT add an unendorsed attester or fall back to
 another trust mechanism. An endorsement MUST NOT by itself establish
 that the client is trusted or authorized to access a resource.
 
-The AS MUST determine, from its configured policy, which of two
-key-trust policies governs each client-to-attester association.
-Publisher-authorized key selection MAY be established by a policy
-covering the client publisher, without configuring each attester
-individually. AS-configured attester trust, once configured for an
-exact issuer string for any client, governs that issuer string for
-every client ({{key-resolution}}):
+Two key-trust policies exist, and the AS determines from its configured
+policy which one applies. The choice is not free per association:
+AS-configured attester trust is keyed by exact issuer string and, once
+configured for any client, governs that issuer string for every client.
+Publisher-authorized key selection is keyed by the client publisher and
+needs no per-attester configuration. {{key-resolution}} specifies which
+applies:
 
 * **Publisher-authorized key selection:** the AS authorizes the
   publisher of specified clients to select both the attester and its
