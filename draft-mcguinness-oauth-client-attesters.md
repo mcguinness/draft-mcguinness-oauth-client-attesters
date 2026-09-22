@@ -365,8 +365,11 @@ trust would instead hand key selection to the publisher.
   MUST equal that source's URI or one of its configured aliases. An
   alias is an endorsed URI that the AS is configured to treat as
   equivalent to the issuer's configured source; it does not change
-  where keys are retrieved. Configured aliases MUST preserve the
-  endorsed attestation authority, including tenant scope; a shared
+  where keys are retrieved. An alias belongs to the issuer's configured
+  key source, so it applies to every client that endorses that issuer
+  and is not scoped to the client whose endorsement prompted it.
+  Configured aliases MUST preserve the endorsed attestation authority,
+  including tenant scope; a shared
   issuer or origin alone does not establish equivalence. This check
   surfaces disagreement between the endorsement and AS configuration,
   including endorsement
