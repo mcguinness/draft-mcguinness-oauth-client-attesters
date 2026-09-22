@@ -597,7 +597,6 @@ Server Metadata registry established by {{RFC8414}}:
 --- back
 
 # CIMD Deployment Example {#example}
-{:numbered="false"}
 
 This example is informative. The AS has the following local configuration;
 these are policy settings, not new protocol metadata:
@@ -713,8 +712,7 @@ issuer's origin, and apply the same processing steps. An entry whose
 `jwks_uri` had a different origin from the issuer would then fail
 endorsement validation with the same error.
 
-# Registered Client Example
-{:numbered="false"}
+# Registered Client Example {#registered-example}
 
 An authenticated, authorized administrator registers `s6BhdRkqt3` with the
 same `client_attesters` and `token_endpoint_auth_method` as {{example}}. The AS
