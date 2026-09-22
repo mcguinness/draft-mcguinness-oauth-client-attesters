@@ -455,10 +455,19 @@ Attestation plays in the request.
 
 Attestation is the client authentication method:
 : An endorsement validation failure MUST produce
-  `invalid_client_attestation`, the more specific code that
-  {{ATTEST, Section 7.4}} permits in place of `invalid_client`, with
-  the HTTP status that {{RFC6749, Section 5.2}} assigns to client
-  authentication failures, and without exposing policy details.
+  `invalid_client_attestation`. {{ATTEST, Section 7.4}} defines that
+  code for use in addition to the more general `invalid_client`; this
+  profile narrows the choice to the specific code so an endorsement
+  failure is distinguishable from an ordinary credential failure. The
+  status is 400, because a client presenting a Client Attestation does
+  not authenticate through the `Authorization` header field
+  ({{RFC6749, Section 5.2}}). The response MUST NOT expose policy
+  details.
+
+  A Client library that recognizes only `invalid_client` treats this
+  as an unrecognized failure rather than a credential failure. An AS
+  concerned with that behavior can return `invalid_client` instead;
+  doing so loses the distinction and is not this profile's default.
 
 Attestation is an additional security signal:
 : Where the deployment uses the Client Attestation alongside another
