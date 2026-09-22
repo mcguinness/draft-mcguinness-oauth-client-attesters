@@ -518,8 +518,9 @@ Refresh requests requiring a Client Attestation are checked again under
 {{processing}}.
 
 Withdrawal alone does not terminate existing access. A deployment that
-needs it to separately revokes the affected grants, invalidates their
-access and refresh tokens, and prevents further refresh issuance.
+requires termination separately revokes the affected grants,
+invalidates their access and refresh tokens, and prevents further
+refresh issuance.
 Introspection {{RFC7662}}
 reports revoked tokens inactive. Offline validation requires a separate
 revocation mechanism or token expiration.
