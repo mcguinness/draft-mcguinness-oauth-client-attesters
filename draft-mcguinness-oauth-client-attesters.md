@@ -555,8 +555,12 @@ Attestation is an additional security signal:
   client authentication method ({{ATTEST, Section 7.6}}), an
   endorsement validation failure means no attestation signal is
   available for that request. The AS MUST NOT treat the failed
-  attestation as a satisfied signal, and whether the request proceeds
-  on the companion method alone is AS policy.
+  attestation as a satisfied signal. Where the deployment requires an
+  attestation alongside that method, for example by advertising
+  `client_attestation_pop_methods_supported` ({{ATTEST, Section 7.6}}),
+  the request fails; where the attestation is optional under the
+  applicable policy, whether the request proceeds on the companion
+  method alone is AS policy.
 
 Obtaining a fresh attestation does not correct an endorsement failure
 caused by disagreement between the endorsement and AS configuration,
