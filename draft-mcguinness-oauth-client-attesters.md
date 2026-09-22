@@ -150,8 +150,9 @@ policy which one applies. The choice is not free per association:
 AS-configured attester trust is keyed by exact issuer string and, once
 configured for any client, governs that issuer string for every client.
 Publisher-authorized key selection is keyed by the client publisher and
-needs no per-attester configuration. {{key-resolution}} specifies which
-applies:
+needs no per-attester configuration. The two policies are defined
+below; {{key-resolution}} gives the procedure that selects between
+them:
 
 * **Publisher-authorized key selection:** the AS authorizes the
   publisher of specified clients to select both the attester and its
