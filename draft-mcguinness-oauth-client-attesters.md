@@ -718,14 +718,60 @@ endorsement validation with the same error.
 
 # Registered Client Example {#registered-example}
 
-An authenticated, authorized administrator registers `s6BhdRkqt3` with the
-same `client_attesters` and `token_endpoint_auth_method` as {{example}}. The AS
-applies the same AS-configured attester trust and key source.
+This example is informative. It runs {{example}} again with an opaque
+client identifier instead of a URL, to show that nothing in this
+profile depends on the identifier's shape: `client_attesters` travels
+with the client's metadata either way, and the endorsement names the
+attester's key location outright, so no origin has to be derived from
+the client identifier. The AS configuration is the one in {{example}}.
 
-The client sends `client_id=s6BhdRkqt3` with an attestation whose
-`sub` is `s6BhdRkqt3` and `iss` is `https://attester.example/tenant/acme`,
-plus its DPoP proof. The AS loads the registered metadata and applies
-the same endorsement and proof checks; no CIMD is fetched.
+An authenticated, authorized administrator registers this metadata,
+for example through {{RFC7591}}:
+
+~~~ json
+{
+  "client_id": "s6BhdRkqt3",
+  "client_name": "Managed Agent Harness",
+  "redirect_uris": ["https://app.example/callback"],
+  "grant_types": ["authorization_code"],
+  "response_types": ["code"],
+  "token_endpoint_auth_method": "attest_jwt_client_auth_dpop",
+  "client_attesters": [
+    {
+      "issuer": "https://attester.example/tenant/acme",
+      "jwks_uri": "https://attester.example/tenant/acme/jwks"
+    }
+  ]
+}
+~~~
+
+The attester signs with the same key as in {{example}}, so the
+attestation header is unchanged. Only `sub` differs:
+
+~~~ json
+{
+  "iss": "https://attester.example/tenant/acme",
+  "sub": "s6BhdRkqt3",
+  "exp": 1789434000,
+  "cnf": {
+    "jwk": {
+      "kty": "EC",
+      "crv": "P-256",
+      "x": "JYcxlWx7A9YIcr3Bb94ZHqhUX6ea7leTAeGx_WWjs0A",
+      "y": "ppg4pVaOV7ANtw8fQoV8OWfe_6GhY13WPLpuWd_rHnc"
+    }
+  }
+}
+~~~
+
+The client redeems its code with `client_id=s6BhdRkqt3`, that
+attestation, and a combined DPoP proof. The AS reads the registered
+metadata rather than fetching a CIMD, then runs the same steps of
+{{as-processing}}: the endorsed issuer matches the attestation's `iss`,
+AS-configured attester trust selects the configured key source, `kid`
+resolves to `attester-1` there, and `sub` equals the requested
+`client_id`. The failure cases and their error response are those of
+{{example}}.
 
 If this client identifier also had a reachable CIMD, step 1 of
 {{as-processing}} would still resolve it from one source only.
