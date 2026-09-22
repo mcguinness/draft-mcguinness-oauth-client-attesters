@@ -510,7 +510,7 @@ A retrieval failure that is not a removal, such as a timeout or a 5xx
 status, does not by itself invalidate an unexpired cached copy. Removal
 cannot be detected while the AS continues to use an unexpired cache.
 
-## Endorsement and Key Changes
+## Endorsement and Key Changes {#endorsement-changes}
 
 Once a metadata or key update is accepted, the AS MUST use it on the
 next presentation. Removing an endorsement, removing a verification
@@ -527,7 +527,7 @@ under AS-configured attester trust, cause endorsement failures until
 the AS configures a matching alias or updates its configured source.
 The AS's configured maximum ages bound stale acceptance.
 
-## Existing Grants
+## Existing Grants {#existing-grants}
 
 Endorsement withdrawal is prospective with respect to client
 authentication: it prevents future authentication under the removed
