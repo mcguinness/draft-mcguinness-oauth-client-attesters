@@ -508,7 +508,7 @@ candidate keys in turn.
 When retrieving a JWK Set or client metadata, the AS MUST authenticate
 the HTTPS server and MUST NOT follow redirects. Bounding response size
 and request time, and blocking prohibited network destinations, are
-local defenses; see Security Considerations. The AS SHOULD advertise
+local defenses; see {{security}}. The AS SHOULD advertise
 `client_attestation_signing_alg_values_supported` consistent with the
 algorithm restrictions in step 3 of {{as-processing}}
 ({{ATTEST, Section 8}}).
