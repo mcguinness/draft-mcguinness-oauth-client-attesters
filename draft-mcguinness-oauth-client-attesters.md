@@ -524,7 +524,8 @@ Attestation is the client authentication method:
   failure is distinguishable from an ordinary credential failure. The
   response MUST NOT expose policy details.
 
-  This profile does not change the HTTP status any endpoint assigns to
+  This profile does not change the HTTP status code any endpoint
+  assigns to
   a client authentication failure. At the token endpoint
   {{RFC6749, Section 5.2}} responds 400 by default and requires 401
   only where the client authenticated through the `Authorization`
@@ -694,7 +695,7 @@ The considerations in {{ATTEST}}, {{CIMD}}, and {{RFC8725}} apply.
   of them until the endorsement is withdrawn.
 * **Privacy:** public metadata exposes client-to-attester relationships.
   Such metadata need not enumerate instances or their keys, and this
-  profile gives no reason to. Caching reduces the
+  profile gives no reason to do so. Caching reduces the
   request-timing information observable at metadata and key endpoints.
   No stable instance identifier is required by this profile.
 
@@ -753,7 +754,7 @@ At `https://platform.example/oauth-client`, the publisher serves:
 ~~~
 
 The attester's configured key endpoint publishes this illustrative JWK
-Set. This signing key is distinct from the Client Instance key in
+Set. This signing key is distinct from the Client Instance Key in
 `cnf.jwk`:
 
 ~~~ json
