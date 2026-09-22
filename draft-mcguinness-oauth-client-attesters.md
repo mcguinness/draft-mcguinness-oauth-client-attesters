@@ -140,9 +140,20 @@ This is distinct from a resource server authenticating to an AS
 endpoint, which acts as a client and is in scope above.
 
 The AS conveys what it decided through the artifacts it issues rather
-than through endorsement data: the confirmation claim of the issued
-token binds the key the attestation named {{RFC9449}}, and
-introspection {{RFC7662}} reports the token's current state.
+than through endorsement data, and what those artifacts carry depends
+on the token-binding method the deployment selects. In ATTEST's
+combined mode ({{ATTEST, Section 5.2}}) the DPoP key and the attested
+Client Instance Key are one key, so the issued token's confirmation
+claim names the attested key. Where DPoP {{RFC9449}} is used alongside
+a separate Client Attestation proof, that same section does not require
+the DPoP key to match the attestation's `cnf`, and the token is bound
+to the DPoP key instead.
+
+A confirmation claim reports a binding, not an endorsement verdict.
+Introspection {{RFC7662}} likewise reports the token's state rather
+than how the AS evaluated the endorsement. Neither tells a resource
+server whether an endorsement was accepted, which is why endorsement
+policy stays at the AS.
 
 # Conventions and Trust Model {#trust}
 
