@@ -380,9 +380,11 @@ For each presentation, the AS MUST:
    then consult the other.
 2. Validate `client_attesters` and select the entry whose `issuer`
    exactly matches the attestation's nonempty `iss`. Verify AS policy
-   permits that client-to-attester association, evaluated on the
-   entry's `issuer` and `jwks_uri` together rather than the issuer
-   alone.
+   permits that client-to-attester association. The entry's `issuer`
+   and `jwks_uri` are matched together rather than the issuer alone,
+   so that an endorsement naming a different key location behind a
+   shared issuer string does not match; the matching identifies the
+   entry and does not by itself authorize it.
 3. Select the key source under {{key-resolution}}. Resolve `kid` to one
    eligible public key, refreshing on an unknown `kid` only as {{updates}}
    permits, and verify the signature using an acceptable asymmetric
