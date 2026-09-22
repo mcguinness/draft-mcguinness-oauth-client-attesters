@@ -237,8 +237,9 @@ Rejection under this profile does not affect the client's other
 authentication methods and does not by itself make a CIMD invalid or
 uncacheable under {{CIMD}}.
 
-Extensions MUST NOT weaken an endorsement's meaning for implementations
-that ignore them.
+An extension to this member is safe only if an implementation that
+ignores it reads the endorsement the same way. This profile defines no
+mechanism for marking an extension critical.
 
 Every entry carries a complete issuer-to-key-location mapping, so an
 endorsement has the same meaning regardless of the AS policy that
