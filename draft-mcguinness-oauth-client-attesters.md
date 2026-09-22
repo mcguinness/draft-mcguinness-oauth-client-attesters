@@ -465,7 +465,10 @@ On an unknown `kid`, the AS SHOULD refresh the selected key source's
 JWK Set once and retry key selection, subject to rate limits. The AS
 MUST rate-limit these refreshes per selected key source, independently
 of `kid`, and MUST reject the attestation if no eligible key is
-available. Rate-limit parameters are deployment-specific. An `iss`
+available. Where several clients or publishers endorse one key source,
+the AS SHOULD also limit refreshes per client so that one cannot
+exhaust another's allowance. Rate-limit parameters are
+deployment-specific. An `iss`
 matching no endorsement MUST NOT cause a client-metadata refresh; the
 metadata maximum age bounds the delay before a newly published
 endorsement takes effect, as it bounds withdrawal.
