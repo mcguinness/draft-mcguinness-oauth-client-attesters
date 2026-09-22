@@ -807,8 +807,8 @@ The decoded payload names the endorsed issuer and the client:
     "jwk": {
       "kty": "EC",
       "crv": "P-256",
-      "x": "JYcxlWx7A9YIcr3Bb94ZHqhUX6ea7leTAeGx_WWjs0A",
-      "y": "ppg4pVaOV7ANtw8fQoV8OWfe_6GhY13WPLpuWd_rHnc"
+      "x": "9iHztmYIeKeyta94k1y5Dya5cab3-_H_yw_3v0p6K80",
+      "y": "NsrICJ4xFvOs5xaDM4sF1yDijCxN5LWailjw5EsERwI"
     }
   }
 }
@@ -912,8 +912,8 @@ In the payload only `sub` differs:
     "jwk": {
       "kty": "EC",
       "crv": "P-256",
-      "x": "JYcxlWx7A9YIcr3Bb94ZHqhUX6ea7leTAeGx_WWjs0A",
-      "y": "ppg4pVaOV7ANtw8fQoV8OWfe_6GhY13WPLpuWd_rHnc"
+      "x": "9iHztmYIeKeyta94k1y5Dya5cab3-_H_yw_3v0p6K80",
+      "y": "NsrICJ4xFvOs5xaDM4sF1yDijCxN5LWailjw5EsERwI"
     }
   }
 }
