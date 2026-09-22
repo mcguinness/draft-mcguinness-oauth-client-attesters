@@ -469,7 +469,7 @@ no-fallback rule in {{trust}} applies.
 
 # Updates and Withdrawal {#updates}
 
-## Cache Freshness
+## Cache Freshness and Removal
 
 The AS MUST:
 
