@@ -72,7 +72,8 @@ Client Attester ({{ATTEST, Section 7.1}}) and leaves how that trust is
 established to deployments ({{ATTEST, Section 10.8}}).
 
 This profile applies to both registered clients and clients identified by
-Client ID Metadata Documents {{CIMD}}. Either can endorse one or more
+Client ID Metadata Documents (CIMDs) {{CIMD}}. Either can endorse one or
+more
 attesters, for example across platforms or during migration.
 
 Publisher-authorized key selection exists for the case AS configuration
@@ -142,9 +143,10 @@ endpoint, which acts as a client and is in scope above.
 The AS conveys what it decided through the artifacts it issues rather
 than through endorsement data, and what those artifacts carry depends
 on the token-binding method the deployment selects. In ATTEST's
-combined mode ({{ATTEST, Section 5.2}}) the DPoP key and the attested
-Client Instance Key are one key, so the issued token's confirmation
-claim names the attested key. Where DPoP {{RFC9449}} is used alongside
+combined mode ({{ATTEST, Section 5.2}}) the Demonstrating Proof of
+Possession (DPoP) key {{RFC9449}} and the attested Client Instance Key
+are one key, so the issued token's confirmation claim names the
+attested key. Where DPoP is used alongside
 a separate Client Attestation proof, that same section does not require
 the DPoP key to match the attestation's `cnf`, and the token is bound
 to the DPoP key instead.
@@ -673,7 +675,8 @@ The considerations in {{ATTEST}}, {{CIMD}}, and {{RFC8725}} apply.
   request may go but does not remove it, and an AS defends itself
   further by bounding response
   size and request time and by blocking prohibited network
-  destinations. Endorsed URLs remain subject to SSRF defenses;
+  destinations. Endorsed URLs remain subject to server-side request
+  forgery (SSRF) defenses;
   endorsement does not make a network location safe.
 * **Withdrawal latency:** cached acceptance persists as described in
   {{updates}}. Urgent incidents require local denial or another
