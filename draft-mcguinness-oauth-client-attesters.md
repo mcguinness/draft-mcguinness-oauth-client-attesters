@@ -142,7 +142,7 @@ Attestation only when both of the following hold:
 Endorsement alone does not make an attester trusted, and AS trust in an
 attester alone does not authorize it for a client. AS policy can narrow
 the endorsed set; it MUST NOT add an unendorsed attester or fall back to
-another trust mechanism. An endorsement MUST NOT by itself establish
+another trust mechanism. An endorsement does not by itself establish
 that the client is trusted or authorized to access a resource.
 
 Two key-trust policies exist, and the AS determines from its configured
