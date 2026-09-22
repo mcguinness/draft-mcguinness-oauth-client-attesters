@@ -442,8 +442,8 @@ Removing a configured entry MUST NOT by itself make its issuer eligible
 for publisher-authorized key selection. An issuer the AS has configured
 remains governed by AS-configured attester trust until an operator
 records a policy decision for that issuer; until then no key source is
-available and the endorsement fails. Otherwise an edit made to reduce
-trust would instead hand key selection to the publisher.
+available and the endorsement fails. Without this rule, removing a
+configured entry would hand key selection to the publisher.
 
 * **AS-configured attester trust:** use only the independently
   configured key source for the exact issuer. The endorsed `jwks_uri`
