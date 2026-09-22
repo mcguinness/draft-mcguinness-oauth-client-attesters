@@ -145,13 +145,14 @@ the endorsed set; it MUST NOT add an unendorsed attester or fall back to
 another trust mechanism. An endorsement MUST NOT by itself establish
 that the client is trusted or authorized to access a resource.
 
-The AS MUST determine, from its configured policy, which of two
-key-trust policies governs each client-to-attester association.
-Publisher-authorized key selection MAY be established by a policy
-covering the client publisher, without configuring each attester
-individually. AS-configured attester trust, once configured for an
-exact issuer string for any client, governs that issuer string for
-every client ({{key-resolution}}):
+Two key-trust policies exist, and the AS determines from its configured
+policy which one applies. The choice is not free per association:
+AS-configured attester trust is keyed by exact issuer string and, once
+configured for any client, governs that issuer string for every client.
+Publisher-authorized key selection is keyed by the client publisher and
+needs no per-attester configuration. The two policies are defined
+below; {{key-resolution}} gives the procedure that selects between
+them:
 
 * **Publisher-authorized key selection:** the AS authorizes the
   publisher of specified clients to select both the attester and its
@@ -201,7 +202,9 @@ require an AS to apply this profile.
 
 Conformance is role-specific:
 
-* Client publishers implement {{metadata}} and {{updates}}.
+* Client publishers publish and maintain `client_attesters` under
+  {{metadata}}, and withdraw an endorsement by updating that metadata
+  ({{updates}}).
 * Client Attesters and clients implement their issuance and presentation
   requirements in {{processing}}.
 * Authorization servers implement trust-policy selection, metadata and
@@ -353,13 +356,23 @@ is also authorized to select keys. Otherwise, publisher-authorized key
 selection applies if the publisher is so authorized. If neither
 applies, no key source is available and the endorsement fails.
 
+Removing a configured entry MUST NOT by itself make its issuer eligible
+for publisher-authorized key selection. An issuer the AS has configured
+remains governed by AS-configured attester trust until an operator
+records a policy decision for that issuer; until then no key source is
+available and the endorsement fails. Otherwise an edit made to reduce
+trust would instead hand key selection to the publisher.
+
 * **AS-configured attester trust:** use only the independently
   configured key source for the exact issuer. The endorsed `jwks_uri`
   MUST equal that source's URI or one of its configured aliases. An
   alias is an endorsed URI that the AS is configured to treat as
   equivalent to the issuer's configured source; it does not change
-  where keys are retrieved. Configured aliases MUST preserve the
-  endorsed attestation authority, including tenant scope; a shared
+  where keys are retrieved. An alias belongs to the issuer's configured
+  key source, so it applies to every client that endorses that issuer
+  and is not scoped to the client whose endorsement prompted it.
+  Configured aliases MUST preserve the endorsed attestation authority,
+  including tenant scope; a shared
   issuer or origin alone does not establish equivalence. This check
   surfaces disagreement between the endorsement and AS configuration,
   including endorsement
@@ -374,7 +387,7 @@ applies, no key source is available and the endorsement fails.
   an origin nor establishes trust in an issuer name. Because
   AS-configured trust governs any issuer string it is configured for,
   publisher-selected keys are never accepted under an issuer string the
-  AS independently trusts.
+  AS trusts or has configured.
 
 A non-HTTPS issuer requires AS-configured attester trust because it has
 no HTTPS origin binding.
@@ -408,7 +421,8 @@ algorithm restrictions in step 3 of {{as-processing}}
 
 ## Errors
 
-Endorsement validation failures MUST produce `invalid_client_attestation`,
+Where the Client Attestation is the client authentication method, an
+endorsement validation failure MUST produce `invalid_client_attestation`,
 the more specific code that {{ATTEST, Section 7.4}} permits in place of
 `invalid_client`, with the HTTP status that {{RFC6749, Section 5.2}}
 assigns to client authentication failures, and without exposing policy
@@ -419,7 +433,13 @@ including an endorsed `jwks_uri` that matches neither the configured
 source nor a configured alias, and the case where no eligible key is
 available after any refresh permitted by {{updates}}. Signature verification with a resolved key and
 the remaining attestation and proof checks follow {{ATTEST, Section 7.4}},
-including challenge and freshness responses. A companion client
+including challenge and freshness responses. Where the deployment uses
+the Client Attestation as an additional security signal rather than as
+the client authentication method ({{ATTEST, Section 7.6}}), an
+endorsement validation failure means no attestation signal is available
+for that request; the AS MUST NOT treat the failed attestation as a
+satisfied signal, and whether the request proceeds on the companion
+method alone is AS policy. A companion client
 authentication method that fails, or that authenticates a different
 client identifier, produces the error defined by its own specification.
 Other metadata-discovery, registration, authentication, and grant errors
@@ -441,21 +461,31 @@ Configured maximum ages bound withdrawal latency: a withdrawn
 endorsement or key can remain acceptable until the applicable age
 expires. The AS MUST be configured with maximum ages that keep this
 latency within the deployment's security requirements; short ages, for
-example one hour, keep it small. Fresh entries do not require retrieval on each
-request. These limits expire cached copies, not authoritative client
+example one hour, keep it small. This profile specifies no ceiling, so
+a publisher cannot predict from the protocol alone how long a
+withdrawal takes to bite; deployments that need a predictable bound
+state one in their trust agreement. Fresh entries do not require
+retrieval on each request. These limits expire cached copies, not authoritative client
 registrations.
 
 On an unknown `kid`, the AS SHOULD refresh the selected key source's
 JWK Set once and retry key selection, subject to rate limits. The AS
 MUST rate-limit these refreshes per selected key source, independently
 of `kid`, and MUST reject the attestation if no eligible key is
-available. Rate-limit parameters are deployment-specific. An `iss`
+available. Where several clients or publishers endorse one key source,
+the AS SHOULD also limit refreshes per endorsing client and per
+publisher, so that no client or publisher can exhaust another's
+allowance. Rate-limit parameters are
+deployment-specific. An `iss`
 matching no endorsement MUST NOT cause a client-metadata refresh; the
 metadata maximum age bounds the delay before a newly published
 endorsement takes effect, as it bounds withdrawal.
 
 On observing that a CIMD has been removed (HTTP 404 or 410), the AS MUST
-stop using previously cached endorsements from that document. Removal
+stop using previously cached endorsements from that document, and MUST
+NOT use them again unless a later retrieval of that document succeeds.
+A retrieval failure that is not a removal, such as a timeout or a 5xx
+status, does not by itself invalidate an unexpired cached copy. Removal
 cannot be detected while the AS continues to use an unexpired cache.
 
 ## Endorsement and Key Changes
@@ -509,8 +539,12 @@ The considerations in {{ATTEST}}, {{CIMD}}, and {{RFC8725}} apply.
   which remains the AS operator's responsibility.
 * **Key retrieval:** the retrieval rules in {{key-resolution}}
   deliberately extend CIMD's no-automatic-redirect rule to attester key
-  retrieval. Endorsed URLs remain subject to SSRF defenses; endorsement
-  does not make a network location safe.
+  retrieval. Under publisher-authorized key selection the publisher
+  chooses both the issuer and the key location, so an authorized
+  publisher can cause the AS to issue an outbound request to an origin
+  of the publisher's choosing; {{key-resolution}} bounds that request
+  but does not remove it. Endorsed URLs remain subject to SSRF
+  defenses; endorsement does not make a network location safe.
 * **Withdrawal latency:** cached acceptance persists as described in
   {{updates}}. Urgent incidents require local denial or another
   revocation channel; removing a key at its origin is not instantaneous
