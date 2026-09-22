@@ -1259,10 +1259,16 @@ Client Attester (<span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href
 established to deployments (<span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-10.8" class="relref">Section 10.8</a></span>).<a href="#section-1-1" class="pilcrow">¶</a></p>
 <p id="section-1-2">This profile applies to both registered clients and clients identified by
 Client ID Metadata Documents <span>[<a href="#CIMD" class="cite xref">CIMD</a>]</span>. Either can endorse one or more
-attesters, for example across platforms or during migration. Deployments
-that manage attester trust entirely through authorization server (AS)
-configuration can continue to use <span>[<a href="#ATTEST" class="cite xref">ATTEST</a>]</span> without this profile.<a href="#section-1-2" class="pilcrow">¶</a></p>
-<p id="section-1-3">This profile adds <code>client_attesters</code>: the client's endorsements of
+attesters, for example across platforms or during migration.<a href="#section-1-2" class="pilcrow">¶</a></p>
+<p id="section-1-3">Publisher-authorized key selection exists for the case AS configuration
+does not reach: an AS serving many clients identified by metadata
+documents, each published by a different operator and attested by that
+operator's own platform attester, would otherwise need a configured
+entry for every attester of every client before any of them can
+authenticate. Deployments that can manage attester trust entirely
+through authorization server (AS) configuration do not need this
+profile and can continue to use <span>[<a href="#ATTEST" class="cite xref">ATTEST</a>]</span>.<a href="#section-1-3" class="pilcrow">¶</a></p>
+<p id="section-1-4">This profile adds <code>client_attesters</code>: the client's endorsements of
 attesters and their verification-key locations. Under AS-configured
 attester trust this plays the role that the bundle endpoint of SPIFFE
 client authentication plays <span>[<a href="#SPIFFE-OAUTH" class="cite xref">SPIFFE-OAUTH</a>]</span>, with the key source
@@ -1270,21 +1276,29 @@ established out of band and the endorsed location only compared against
 it. Publisher-authorized key selection deliberately does the opposite,
 letting the publisher name the location, so it is not a substitute for
 SPIFFE bundle configuration. An AS accepts an endorsement only under
-its own trust policy. The resulting chain is:<a href="#section-1-3" class="pilcrow">¶</a></p>
-<div class="alignLeft art-ascii-art art-text artwork" id="section-1-4">
+its own trust policy. The resulting chain is:<a href="#section-1-4" class="pilcrow">¶</a></p>
+<div class="alignLeft art-ascii-art art-text artwork" id="section-1-5">
 <pre>
 Client metadata --endorses--&gt; Attester --attests--&gt; Client Instance
        |                         |                       |
        +----- AS accepts endorsement and validates proof-+
-</pre><a href="#section-1-4" class="pilcrow">¶</a>
+</pre><a href="#section-1-5" class="pilcrow">¶</a>
 </div>
-<p id="section-1-5">The profile applies at AS endpoints accepting Client Attestations for
+<p id="section-1-6">The profile applies at AS endpoints accepting Client Attestations for
 client authentication or as an additional security signal, using the
-profiling hook in <span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-13" class="relref">Section 13</a></span>. It retains ATTEST's wire
-format, proof methods, and token binding.<a href="#section-1-5" class="pilcrow">¶</a></p>
-<p id="section-1-6">This profile, <span>[<a href="#ATTEST" class="cite xref">ATTEST</a>]</span>, and <span>[<a href="#INSTANCE-ID" class="cite xref">INSTANCE-ID</a>]</span> answer three separate
-questions in layers:<a href="#section-1-6" class="pilcrow">¶</a></p>
-<div class="alignLeft art-ascii-art art-text artwork" id="section-1-7">
+profiling hook in <span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-13" class="relref">Section 13</a></span>. In a typical deployment those
+are the token endpoint, the pushed authorization request endpoint
+<span>[<a href="#RFC9126" class="cite xref">RFC9126</a>]</span>, the device authorization endpoint <span>[<a href="#RFC8628" class="cite xref">RFC8628</a>]</span>, and the
+introspection <span>[<a href="#RFC7662" class="cite xref">RFC7662</a>]</span> and revocation <span>[<a href="#RFC7009" class="cite xref">RFC7009</a>]</span> endpoints; the
+authorization endpoint does not authenticate clients and is out of
+scope. A party authenticating at any of these is acting as a client,
+including a resource server presenting a Client Attestation to the
+introspection endpoint. Where a flow authenticates more than once, each
+presentation is evaluated on its own under <a href="#as-processing" class="auto internal xref">Section 5.2</a>. The
+profile retains ATTEST's wire format, proof methods, and token binding.<a href="#section-1-6" class="pilcrow">¶</a></p>
+<p id="section-1-7">This profile, <span>[<a href="#ATTEST" class="cite xref">ATTEST</a>]</span>, and <span>[<a href="#INSTANCE-ID" class="cite xref">INSTANCE-ID</a>]</span> answer three separate
+questions in layers:<a href="#section-1-7" class="pilcrow">¶</a></p>
+<div class="alignLeft art-ascii-art art-text artwork" id="section-1-8">
 <pre>
 Client Attester Endorsement    Who may attest for this client?
              |
@@ -1293,15 +1307,33 @@ ATTEST                         Is this a legitimate instance holding
              |                 this key now?
              v
 Client Instance ID (optional)  Which persistent instance is this?
-</pre><a href="#section-1-7" class="pilcrow">¶</a>
+</pre><a href="#section-1-8" class="pilcrow">¶</a>
 </div>
-<p id="section-1-8">Endorsement carries no instance semantics, and instance identification
-does not establish attester trust. Neither establishes user delegation.<a href="#section-1-8" class="pilcrow">¶</a></p>
-<p id="section-1-9">Resource servers validating Client Attestations directly rely on
-configured attester trust; this profile does not define endorsement
-discovery or acceptance for those endpoints. This keeps client metadata
-resolution and endorsement-policy evaluation at the AS rather than
-distributing those functions to resource servers.<a href="#section-1-9" class="pilcrow">¶</a></p>
+<p id="section-1-9">Endorsement carries no instance semantics, and instance identification
+does not establish attester trust. Neither establishes user delegation.<a href="#section-1-9" class="pilcrow">¶</a></p>
+<p id="section-1-10">A resource server that accepts a Client Attestation presented to it
+(<span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-7.6" class="relref">Section 7.6</a></span>) relies on configured attester trust; this
+profile does not define endorsement discovery or acceptance there. That
+keeps client metadata resolution and endorsement-policy evaluation at
+the AS rather than distributing those functions to resource servers,
+and it has a consequence: withdrawing an endorsement (<a href="#updates" class="auto internal xref">Section 6</a>)
+does not reach a resource server validating attestations directly.
+This is distinct from a resource server authenticating to an AS
+endpoint, which acts as a client and is in scope above.<a href="#section-1-10" class="pilcrow">¶</a></p>
+<p id="section-1-11">The AS conveys what it decided through the artifacts it issues rather
+than through endorsement data, and what those artifacts carry depends
+on the token-binding method the deployment selects. In ATTEST's
+combined mode (<span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-5.2" class="relref">Section 5.2</a></span>) the DPoP key and the attested
+Client Instance Key are one key, so the issued token's confirmation
+claim names the attested key. Where DPoP <span>[<a href="#RFC9449" class="cite xref">RFC9449</a>]</span> is used alongside
+a separate Client Attestation proof, that same section does not require
+the DPoP key to match the attestation's <code>cnf</code>, and the token is bound
+to the DPoP key instead.<a href="#section-1-11" class="pilcrow">¶</a></p>
+<p id="section-1-12">A confirmation claim reports a binding, not an endorsement verdict.
+Introspection <span>[<a href="#RFC7662" class="cite xref">RFC7662</a>]</span> likewise reports the token's state rather
+than how the AS evaluated the endorsement. Neither tells a resource
+server whether an endorsement was accepted, which is why endorsement
+policy stays at the AS.<a href="#section-1-12" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="trust">
@@ -1512,32 +1544,35 @@ uncacheable under <span>[<a href="#CIMD" class="cite xref">CIMD</a>]</span>.<a h
 <p id="section-3-6">An extension to this member is safe only if an implementation that
 ignores it reads the endorsement the same way. This profile defines no
 mechanism for marking an extension critical.<a href="#section-3-6" class="pilcrow">¶</a></p>
-<p id="section-3-7">Every entry carries a complete issuer-to-key-location mapping, so an
+<p id="section-3-7">Endorsed keys authenticate attesters, not clients. A key obtained from
+an endorsement <span class="bcp14">MUST NOT</span> be used to verify a client authentication
+assertion, and a key from the client's own <code>jwks</code> or <code>jwks_uri</code> <span class="bcp14">MUST NOT</span> be used to verify a Client Attestation.<a href="#section-3-7" class="pilcrow">¶</a></p>
+<p id="section-3-8">Every entry carries a complete issuer-to-key-location mapping, so an
 endorsement has the same meaning regardless of the AS policy that
 evaluates it, which the publisher cannot know. An endorsement
 therefore identifies a Client Attester by both its issuer and its key
 location. How each key-trust policy uses that location is specified in
-<a href="#key-resolution" class="auto internal xref">Section 5.3</a>.<a href="#section-3-7" class="pilcrow">¶</a></p>
-<p id="section-3-8">Each entry is a Client Attester Endorsement (<a href="#trust" class="auto internal xref">Section 2</a>) for the
+<a href="#key-resolution" class="auto internal xref">Section 5.3</a>.<a href="#section-3-8" class="pilcrow">¶</a></p>
+<p id="section-3-9">Each entry is a Client Attester Endorsement (<a href="#trust" class="auto internal xref">Section 2</a>) for the
 <code>client_id</code> whose metadata contains it. An <code>issuer</code> identifies a
 namespace, not a discovery endpoint. Key-source constraints are
-specified in <a href="#key-resolution" class="auto internal xref">Section 5.3</a>.<a href="#section-3-8" class="pilcrow">¶</a></p>
-<p id="section-3-9"><span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-10.8" class="relref">Section 10.8</a></span> recommends, among other options, resolving <code>kid</code>
+specified in <a href="#key-resolution" class="auto internal xref">Section 5.3</a>.<a href="#section-3-9" class="pilcrow">¶</a></p>
+<p id="section-3-10"><span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-10.8" class="relref">Section 10.8</a></span> recommends, among other options, resolving <code>kid</code>
 through client metadata <code>jwks_uri</code>. This profile extends that option
 with a separate key location for each endorsed issuer. A top-level
 <code>jwks_uri</code> can contain several issuers' keys, but does not associate
 them with named attesters or separate them from client authentication
-keys. It does not replace <code>client_attesters</code> under this profile.<a href="#section-3-9" class="pilcrow">¶</a></p>
-<p id="section-3-10">SPIFFE's <code>spiffe_bundle_endpoint</code> publishes a verification-key location
+keys. It does not replace <code>client_attesters</code> under this profile.<a href="#section-3-10" class="pilcrow">¶</a></p>
+<p id="section-3-11">SPIFFE's <code>spiffe_bundle_endpoint</code> publishes a verification-key location
 for one trust domain. <code>client_attesters</code> extends this pattern to multiple
 named attesters, with AS key-trust policy selecting the published or
-AS-configured key source (<a href="#key-resolution" class="auto internal xref">Section 5.3</a>).<a href="#section-3-10" class="pilcrow">¶</a></p>
-<p id="section-3-11">Clients using attestation as client authentication select
+AS-configured key source (<a href="#key-resolution" class="auto internal xref">Section 5.3</a>).<a href="#section-3-11" class="pilcrow">¶</a></p>
+<p id="section-3-12">Clients using attestation as client authentication select
 <code>attest_jwt_client_auth</code> or <code>attest_jwt_client_auth_dpop</code> under
 <span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-9" class="relref">Section 9</a></span>. When attestation supplements another method,
 that method remains required under <span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-7.6" class="relref">Section 7.6</a></span>.
 <code>client_attesters</code> does not select a grant, proof method, or the optional
-instance-identification profile.<a href="#section-3-11" class="pilcrow">¶</a></p>
+instance-identification profile.<a href="#section-3-12" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="as-metadata">
@@ -1627,9 +1662,11 @@ then consult the other.<a href="#section-5.2-2.1.1" class="pilcrow">¶</a></p>
           <li id="section-5.2-2.2">
             <p id="section-5.2-2.2.1">Validate <code>client_attesters</code> and select the entry whose <code>issuer</code>
 exactly matches the attestation's nonempty <code>iss</code>. Verify AS policy
-permits that client-to-attester association, evaluated on the
-entry's <code>issuer</code> and <code>jwks_uri</code> together rather than the issuer
-alone.<a href="#section-5.2-2.2.1" class="pilcrow">¶</a></p>
+permits that client-to-attester association. The entry's <code>issuer</code>
+and <code>jwks_uri</code> are matched together rather than the issuer alone,
+so that an endorsement naming a different key location behind a
+shared issuer string does not match; the matching identifies the
+entry and does not by itself authorize it.<a href="#section-5.2-2.2.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-5.2-2.3">
             <p id="section-5.2-2.3.1">Select the key source under <a href="#key-resolution" class="auto internal xref">Section 5.3</a>. Resolve <code>kid</code> to one
@@ -1645,7 +1682,10 @@ When the attestation is an additional security signal alongside
 another client authentication method (<span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-7.6" class="relref">Section 7.6</a></span>),
 validate that method under its own specification and verify that it
 authenticates that same client identifier. A mismatch is a failure of
-that method.<a href="#section-5.2-2.4.1" class="pilcrow">¶</a></p>
+that method. Where the companion method also establishes a
+confirmation key, for example mutual TLS <span>[<a href="#RFC8705" class="cite xref">RFC8705</a>]</span>, the
+configuration selects which key binds the issued token; the AS <span class="bcp14">MUST NOT</span> bind a token to the attested key on the strength of an
+attestation it did not accept.<a href="#section-5.2-2.4.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-5.2-2.5">
             <p id="section-5.2-2.5.1">Apply grant and authorization policy independently of the endorsement.<a href="#section-5.2-2.5.1" class="pilcrow">¶</a></p>
@@ -2071,6 +2111,10 @@ processing <code>client_attesters</code> under this profile<a href="#section-8-4
         <dd>
 <span class="refAuthor">Jones, M.</span>, <span class="refAuthor">Sakimura, N.</span>, and <span class="refAuthor">J. Bradley</span>, <span class="refTitle">"OAuth 2.0 Authorization Server Metadata"</span>, <span class="seriesInfo">RFC 8414</span>, <span class="seriesInfo">DOI 10.17487/RFC8414</span>, <time datetime="2018-06" class="refDate">June 2018</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8414">https://www.rfc-editor.org/rfc/rfc8414</a>&gt;</span>. </dd>
 <dd class="break"></dd>
+<dt id="RFC8705">[RFC8705]</dt>
+        <dd>
+<span class="refAuthor">Campbell, B.</span>, <span class="refAuthor">Bradley, J.</span>, <span class="refAuthor">Sakimura, N.</span>, and <span class="refAuthor">T. Lodderstedt</span>, <span class="refTitle">"OAuth 2.0 Mutual-TLS Client Authentication and Certificate-Bound Access Tokens"</span>, <span class="seriesInfo">RFC 8705</span>, <span class="seriesInfo">DOI 10.17487/RFC8705</span>, <time datetime="2020-02" class="refDate">February 2020</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8705">https://www.rfc-editor.org/rfc/rfc8705</a>&gt;</span>. </dd>
+<dd class="break"></dd>
 <dt id="RFC8725">[RFC8725]</dt>
         <dd>
 <span class="refAuthor">Sheffer, Y.</span>, <span class="refAuthor">Hardt, D.</span>, and <span class="refAuthor">M. Jones</span>, <span class="refTitle">"JSON Web Token Best Current Practices"</span>, <span class="seriesInfo">BCP 225</span>, <span class="seriesInfo">RFC 8725</span>, <span class="seriesInfo">DOI 10.17487/RFC8725</span>, <time datetime="2020-02" class="refDate">February 2020</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8725">https://www.rfc-editor.org/rfc/rfc8725</a>&gt;</span>. </dd>
@@ -2096,9 +2140,21 @@ processing <code>client_attesters</code> under this profile<a href="#section-8-4
 <a href="#section-9.2" class="section-number selfRef">9.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
         </h3>
 <dl class="references">
+<dt id="RFC7009">[RFC7009]</dt>
+        <dd>
+<span class="refAuthor">Lodderstedt, T., Ed.</span>, <span class="refAuthor">Dronia, S.</span>, and <span class="refAuthor">M. Scurtescu</span>, <span class="refTitle">"OAuth 2.0 Token Revocation"</span>, <span class="seriesInfo">RFC 7009</span>, <span class="seriesInfo">DOI 10.17487/RFC7009</span>, <time datetime="2013-08" class="refDate">August 2013</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7009">https://www.rfc-editor.org/rfc/rfc7009</a>&gt;</span>. </dd>
+<dd class="break"></dd>
 <dt id="RFC7592">[RFC7592]</dt>
         <dd>
 <span class="refAuthor">Richer, J., Ed.</span>, <span class="refAuthor">Jones, M.</span>, <span class="refAuthor">Bradley, J.</span>, and <span class="refAuthor">M. Machulak</span>, <span class="refTitle">"OAuth 2.0 Dynamic Client Registration Management Protocol"</span>, <span class="seriesInfo">RFC 7592</span>, <span class="seriesInfo">DOI 10.17487/RFC7592</span>, <time datetime="2015-07" class="refDate">July 2015</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7592">https://www.rfc-editor.org/rfc/rfc7592</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8628">[RFC8628]</dt>
+        <dd>
+<span class="refAuthor">Denniss, W.</span>, <span class="refAuthor">Bradley, J.</span>, <span class="refAuthor">Jones, M.</span>, and <span class="refAuthor">H. Tschofenig</span>, <span class="refTitle">"OAuth 2.0 Device Authorization Grant"</span>, <span class="seriesInfo">RFC 8628</span>, <span class="seriesInfo">DOI 10.17487/RFC8628</span>, <time datetime="2019-08" class="refDate">August 2019</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8628">https://www.rfc-editor.org/rfc/rfc8628</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9126">[RFC9126]</dt>
+        <dd>
+<span class="refAuthor">Lodderstedt, T.</span>, <span class="refAuthor">Campbell, B.</span>, <span class="refAuthor">Sakimura, N.</span>, <span class="refAuthor">Tonge, D.</span>, and <span class="refAuthor">F. Skokan</span>, <span class="refTitle">"OAuth 2.0 Pushed Authorization Requests"</span>, <span class="seriesInfo">RFC 9126</span>, <span class="seriesInfo">DOI 10.17487/RFC9126</span>, <time datetime="2021-09" class="refDate">September 2021</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9126">https://www.rfc-editor.org/rfc/rfc9126</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC9449">[RFC9449]</dt>
         <dd>
