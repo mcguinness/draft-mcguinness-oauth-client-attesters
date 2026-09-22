@@ -528,8 +528,8 @@ The considerations in {{ATTEST}}, {{CIMD}}, and {{RFC8725}} apply.
 
 * **Publisher compromise:** control of a CIMD host or a client's registration
   administration permits changing endorsements, within AS policy. The AS
-  SHOULD monitor and alert on endorsement changes and evaluate new attesters
-  as policy changes.
+  has no protocol signal for this, so operators generally monitor
+  endorsement changes and evaluate new attesters as policy changes.
   A separately specified signed-metadata mechanism could bind publisher
   intent independently of the HTTPS host, if its signing keys have an
   independent trust basis; this profile defines no such mechanism.
@@ -564,7 +564,8 @@ The considerations in {{ATTEST}}, {{CIMD}}, and {{RFC8725}} apply.
   publisher, so a compromised attester authenticates the client at all
   of them until the endorsement is withdrawn.
 * **Privacy:** public metadata exposes client-to-attester relationships.
-  It SHOULD NOT enumerate instances or their keys. Caching reduces the
+  Such metadata need not enumerate instances or their keys, and this
+  profile gives no reason to. Caching reduces the
   request-timing information observable at metadata and key endpoints.
   No stable instance identifier is required by this profile.
 
