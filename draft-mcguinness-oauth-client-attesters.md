@@ -326,7 +326,11 @@ For each presentation, the AS MUST:
    Obtain metadata from that source or a fresh cache, following CIMD
    resolution and validation or registered metadata policy, including
    {{trust}}. The AS MUST NOT combine endorsement lists from different
-   sources or switch sources because endorsement validation fails.
+   sources or switch sources because endorsement validation fails. A
+   client identifier that has both a registration and a reachable CIMD
+   is resolved from whichever single source this step selects; an
+   endorsement failure from that source is final, and the AS does not
+   then consult the other.
 2. Validate `client_attesters` and select the entry whose `issuer`
    exactly matches the attestation's nonempty `iss`. Verify AS policy
    permits that client-to-attester association, evaluated on the
@@ -723,12 +727,8 @@ The client sends `client_id=s6BhdRkqt3` with an attestation whose
 plus its DPoP proof. The AS loads the registered metadata and applies
 the same endorsement and proof checks; no CIMD is fetched.
 
-Had the administrator instead registered the URL `client_id` from
-{{example}}, the AS would process the request from the single source its
-policy selected in step 1, the registration or the CIMD, and never from a
-union of both. An endorsement failure from the selected source produces
-`invalid_client_attestation`. The AS does not then consult the other
-source.
+If this client identifier also had a reachable CIMD, step 1 of
+{{as-processing}} would still resolve it from one source only.
 
 # Document History
 {:numbered="false"}
