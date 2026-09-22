@@ -487,11 +487,17 @@ JOSE header parameters for key selection under this profile and MUST
 resolve only `kid` against the selected source. Origin comparison does
 not change identifier comparison.
 
-A key is eligible when it is the only key in the selected JWK Set
-whose `kid` equals the header `kid` by octet comparison, it is an
-asymmetric public key whose type is consistent with the header `alg`,
-its `use`, if present, is `sig`, its `key_ops`, if present, includes
-`verify`, and its `alg`, if present, equals the header `alg`. More
+A key is eligible when all of the following hold:
+
+* it is the only key in the selected JWK Set whose `kid` equals the
+  header `kid` by octet comparison;
+* it is an asymmetric public key whose type is consistent with the
+  header `alg`;
+* its `use`, if present, is `sig`;
+* its `key_ops`, if present, includes `verify`; and
+* its `alg`, if present, equals the header `alg`.
+
+More
 than one key matching the `kid` is a failure; the AS MUST NOT try
 candidate keys in turn.
 
