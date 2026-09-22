@@ -69,7 +69,14 @@ Attestation-Based Client Authentication
 {{ATTEST}} allows an attester to authenticate those instances. ATTEST
 requires an attestation to verify under the key of a known and trusted
 Client Attester ({{ATTEST, Section 7.1}}) and leaves how that trust is
-established to deployments ({{ATTEST, Section 10.8}}).
+established to deployments ({{ATTEST, Section 10.8}}). It does not
+define how a client
+identifies the attesters authorized to speak for it. Authorization
+server configuration alone can carry that association, but it does not
+let a client select or rotate its own attesters. This specification
+defines client metadata for expressing that endorsement while leaving
+the authorization server in control of whether an endorsement is
+accepted.
 
 This profile applies to both registered clients and clients identified by
 Client ID Metadata Documents (CIMDs) {{CIMD}}. Either can endorse one or
@@ -170,9 +177,13 @@ the authoritative metadata for a `client_id`.
 
 Client Attester Endorsement
 : A statement in the authoritative client metadata for a `client_id`
-  expressing the publisher's authorization for a specified Client
-  Attester to issue Client Attestations naming that `client_id`. An
-  endorsement delegates
+  identifying a Client Attester whose Client Attestations naming that
+  `client_id` are eligible for acceptance under this profile. It
+  expresses the publisher's authorization for that attester to speak
+  for the client. It does not make any attestation acceptable on its
+  own, which remains subject to AS policy ({{trust}}), and it says
+  nothing about which Client Instances the attester may attest, which
+  {{processing}} leaves to the attester. An endorsement delegates
   attestation authority for the named client only. It does not delegate
   OAuth authorization, user authority, or authority to further delegate
   attestation, and it does not extend to any other client.
