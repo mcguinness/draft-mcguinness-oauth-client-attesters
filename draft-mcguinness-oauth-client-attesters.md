@@ -326,7 +326,11 @@ For each presentation, the AS MUST:
    Obtain metadata from that source or a fresh cache, following CIMD
    resolution and validation or registered metadata policy, including
    {{trust}}. The AS MUST NOT combine endorsement lists from different
-   sources or switch sources because endorsement validation fails.
+   sources or switch sources because endorsement validation fails. A
+   client identifier that has both a registration and a reachable CIMD
+   is resolved from whichever single source this step selects; an
+   endorsement failure from that source is final, and the AS does not
+   then consult the other.
 2. Validate `client_attesters` and select the entry whose `issuer`
    exactly matches the attestation's nonempty `iss`. Verify AS policy
    permits that client-to-attester association, evaluated on the
@@ -597,7 +601,6 @@ Server Metadata registry established by {{RFC8414}}:
 --- back
 
 # CIMD Deployment Example {#example}
-{:numbered="false"}
 
 This example is informative. The AS has the following local configuration;
 these are policy settings, not new protocol metadata:
@@ -713,24 +716,76 @@ issuer's origin, and apply the same processing steps. An entry whose
 `jwks_uri` had a different origin from the issuer would then fail
 endorsement validation with the same error.
 
-# Registered Client Example
-{:numbered="false"}
+# Registered Client Example {#registered-example}
 
-An authenticated, authorized administrator registers `s6BhdRkqt3` with the
-same `client_attesters` and `token_endpoint_auth_method` as {{example}}. The AS
-applies the same AS-configured attester trust and key source.
+This example is informative. It runs {{example}} again with an opaque
+client identifier instead of a URL, to show that neither endorsement
+nor key selection depends on the identifier's shape under this
+policy: `client_attesters` travels with the client's metadata
+either way, and the endorsement names the attester's key location
+outright, so no origin has to be derived from the client identifier.
+How a publisher is authorized does differ between the two forms
+({{trust}}), but that question does not arise here because the AS
+trusts this attester independently. The AS configuration is the one in
+{{example}}.
 
-The client sends `client_id=s6BhdRkqt3` with an attestation whose
-`sub` is `s6BhdRkqt3` and `iss` is `https://attester.example/tenant/acme`,
-plus its DPoP proof. The AS loads the registered metadata and applies
-the same endorsement and proof checks; no CIMD is fetched.
+An authenticated, authorized administrator registers this metadata,
+for example through {{RFC7591}}:
 
-Had the administrator instead registered the URL `client_id` from
-{{example}}, the AS would process the request from the single source its
-policy selected in step 1, the registration or the CIMD, and never from a
-union of both. An endorsement failure from the selected source produces
-`invalid_client_attestation`. The AS does not then consult the other
-source.
+~~~ json
+{
+  "client_id": "s6BhdRkqt3",
+  "client_name": "Managed Agent Harness",
+  "redirect_uris": ["https://app.example/callback"],
+  "grant_types": ["authorization_code"],
+  "response_types": ["code"],
+  "token_endpoint_auth_method": "attest_jwt_client_auth_dpop",
+  "client_attesters": [
+    {
+      "issuer": "https://attester.example/tenant/acme",
+      "jwks_uri": "https://attester.example/tenant/acme/jwks"
+    }
+  ]
+}
+~~~
+
+The attester signs with the same key as in {{example}}, so the
+attestation header is the same:
+
+~~~ json
+{
+  "typ": "oauth-client-attestation+jwt",
+  "alg": "ES256",
+  "kid": "attester-1"
+}
+~~~
+
+In the payload only `sub` differs:
+
+~~~ json
+{
+  "iss": "https://attester.example/tenant/acme",
+  "sub": "s6BhdRkqt3",
+  "exp": 1789434000,
+  "cnf": {
+    "jwk": {
+      "kty": "EC",
+      "crv": "P-256",
+      "x": "JYcxlWx7A9YIcr3Bb94ZHqhUX6ea7leTAeGx_WWjs0A",
+      "y": "ppg4pVaOV7ANtw8fQoV8OWfe_6GhY13WPLpuWd_rHnc"
+    }
+  }
+}
+~~~
+
+The client redeems its code with `client_id=s6BhdRkqt3`, that
+attestation, and a combined DPoP proof. The AS reads the registered
+metadata rather than fetching a CIMD, then runs the same steps of
+{{as-processing}}: the endorsed issuer matches the attestation's `iss`,
+AS-configured attester trust selects the configured key source, `kid`
+resolves to `attester-1` there, and `sub` equals the requested
+`client_id`. The failure cases and their error response are those of
+{{example}}.
 
 # Document History
 {:numbered="false"}
