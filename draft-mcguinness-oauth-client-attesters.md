@@ -404,12 +404,14 @@ For each presentation, the AS MUST:
    endorsement failure from that source is final, and the AS does not
    then consult the other.
 2. Validate `client_attesters` and select the entry whose `issuer`
-   exactly matches the attestation's nonempty `iss`. Verify AS policy
-   permits that client-to-attester association. Match the entry's
-   `issuer` and `jwks_uri` together rather than the issuer alone, so
-   that an endorsement naming a different key location behind a shared
-   issuer string does not match. Matching identifies the entry; it does
-   not by itself authorize the entry.
+   exactly matches the attestation's nonempty `iss`. Because an issuer
+   occurs at most once in the array ({{metadata}}), that selection is
+   unique. Verify AS policy permits that client-to-attester
+   association, evaluated on the selected entry as a whole, including
+   its `jwks_uri`, rather than on the issuer alone. Selecting an entry
+   does not by itself authorize it, and no agreement between the
+   entry's `jwks_uri` and a configured source is required at this step;
+   {{key-resolution}} states where that agreement applies.
 3. Select the key source under {{key-resolution}}. Resolve `kid` to one
    eligible public key, refreshing on an unknown `kid` only as {{updates}}
    permits, and verify the signature using an acceptable asymmetric
@@ -553,8 +555,12 @@ Attestation is an additional security signal:
   client authentication method ({{ATTEST, Section 7.6}}), an
   endorsement validation failure means no attestation signal is
   available for that request. The AS MUST NOT treat the failed
-  attestation as a satisfied signal, and whether the request proceeds
-  on the companion method alone is AS policy.
+  attestation as a satisfied signal. Where the deployment requires an
+  attestation alongside that method, for example by advertising
+  `client_attestation_pop_methods_supported` ({{ATTEST, Section 7.6}}),
+  the request fails; where the attestation is optional under the
+  applicable policy, whether the request proceeds on the companion
+  method alone is AS policy.
 
 Obtaining a fresh attestation does not correct an endorsement failure
 caused by disagreement between the endorsement and AS configuration,
@@ -697,9 +703,14 @@ The considerations in {{ATTEST}}, {{CIMD}}, and {{RFC8725}} apply.
   revocation.
 * **Omitted attestation:** `client_attesters` does not itself require
   attestation. A client whose other credentials are stolen can be
-  authenticated without an attestation unless its registered
-  `token_endpoint_auth_method` requires one; deployments relying on
-  endorsement enforcement set that method accordingly.
+  authenticated without an attestation unless the deployment requires
+  one. ATTEST offers two ways to require it: registering a
+  `token_endpoint_auth_method` that is an attestation method, or
+  advertising `client_attestation_pop_methods_supported` to demand an
+  attestation alongside another client authentication method
+  ({{ATTEST, Section 7.6}}). Deployments relying on endorsement
+  enforcement use one of them; the second keeps mutual TLS or
+  `private_key_jwt` in place.
 * **Unscoped endorsement:** an endorsement carries no audience. Under
   publisher-authorized key selection, one public endorsement determines
   the attester and its keys at every AS whose policy covers that
@@ -805,8 +816,8 @@ The decoded payload names the endorsed issuer and the client:
     "jwk": {
       "kty": "EC",
       "crv": "P-256",
-      "x": "JYcxlWx7A9YIcr3Bb94ZHqhUX6ea7leTAeGx_WWjs0A",
-      "y": "ppg4pVaOV7ANtw8fQoV8OWfe_6GhY13WPLpuWd_rHnc"
+      "x": "9iHztmYIeKeyta94k1y5Dya5cab3-_H_yw_3v0p6K80",
+      "y": "NsrICJ4xFvOs5xaDM4sF1yDijCxN5LWailjw5EsERwI"
     }
   }
 }
@@ -833,10 +844,10 @@ from the configured source, and the endorsed `jwks_uri` is required to
 equal it, as it does here. An attestation from an unendorsed issuer, an
 endorsement naming the trusted issuer with a different key location, or
 a `kid` that resolves to no key in the configured source, produces the
-response below. {{RFC6749, Section 5.2}} reserves 401 for a client that
-authenticated through the `Authorization` header field; this client
-presents its attestation in the ATTEST header fields instead, so the
-status here is 400:
+response below. {{RFC6749, Section 5.2}} responds 400 by default and
+requires 401 only for a client that authenticated through the
+`Authorization` header field, which this client does not use; this
+example therefore shows the default:
 
 ~~~ http-message
 HTTP/1.1 400 Bad Request
@@ -910,8 +921,8 @@ In the payload only `sub` differs:
     "jwk": {
       "kty": "EC",
       "crv": "P-256",
-      "x": "JYcxlWx7A9YIcr3Bb94ZHqhUX6ea7leTAeGx_WWjs0A",
-      "y": "ppg4pVaOV7ANtw8fQoV8OWfe_6GhY13WPLpuWd_rHnc"
+      "x": "9iHztmYIeKeyta94k1y5Dya5cab3-_H_yw_3v0p6K80",
+      "y": "NsrICJ4xFvOs5xaDM4sF1yDijCxN5LWailjw5EsERwI"
     }
   }
 }
