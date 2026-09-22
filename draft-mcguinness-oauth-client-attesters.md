@@ -404,12 +404,14 @@ For each presentation, the AS MUST:
    endorsement failure from that source is final, and the AS does not
    then consult the other.
 2. Validate `client_attesters` and select the entry whose `issuer`
-   exactly matches the attestation's nonempty `iss`. Verify AS policy
-   permits that client-to-attester association. Match the entry's
-   `issuer` and `jwks_uri` together rather than the issuer alone, so
-   that an endorsement naming a different key location behind a shared
-   issuer string does not match. Matching identifies the entry; it does
-   not by itself authorize the entry.
+   exactly matches the attestation's nonempty `iss`. Because an issuer
+   occurs at most once in the array ({{metadata}}), that selection is
+   unique. Verify AS policy permits that client-to-attester
+   association, evaluated on the selected entry as a whole, including
+   its `jwks_uri`, rather than on the issuer alone. Selecting an entry
+   does not by itself authorize it, and no agreement between the
+   entry's `jwks_uri` and a configured source is required at this step;
+   {{key-resolution}} states where that agreement applies.
 3. Select the key source under {{key-resolution}}. Resolve `kid` to one
    eligible public key, refreshing on an unknown `kid` only as {{updates}}
    permits, and verify the signature using an acceptable asymmetric
