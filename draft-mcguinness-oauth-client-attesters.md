@@ -773,9 +773,6 @@ resolves to `attester-1` there, and `sub` equals the requested
 `client_id`. The failure cases and their error response are those of
 {{example}}.
 
-If this client identifier also had a reachable CIMD, step 1 of
-{{as-processing}} would still resolve it from one source only.
-
 # Document History
 {:numbered="false"}
 
