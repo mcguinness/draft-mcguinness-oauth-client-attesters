@@ -32,6 +32,7 @@ normative:
   RFC7517:
   RFC7519:
   RFC7591:
+  RFC7592:
   RFC8414:
   RFC8725:
   RFC9111:
