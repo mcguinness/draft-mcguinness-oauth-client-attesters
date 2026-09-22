@@ -538,15 +538,19 @@ Table of Contents
       [ATTEST], Section 7.4 defines that code for use in addition to the
       more general invalid_client; this profile narrows the choice to
       the specific code so an endorsement failure is distinguishable
-      from an ordinary credential failure.  The status is 400, because a
-      client presenting a Client Attestation does not authenticate
-      through the Authorization header field ([RFC6749], Section 5.2).
-      The response MUST NOT expose policy details.
+      from an ordinary credential failure.  The response MUST NOT expose
+      policy details.
+
+      This profile does not change the HTTP status any endpoint assigns
+      to a client authentication failure.  At the token endpoint
+      [RFC6749], Section 5.2 responds 400 by default and requires 401
+      only where the client authenticated through the Authorization
+      header field, which carrying a Client Attestation does not do.  At
+      the introspection endpoint [RFC7662], Section 2.3 requires 401.
+      Other endpoints follow their own specifications.
 
       A Client library that recognizes only invalid_client treats this
-      as an unrecognized failure rather than a credential failure.  An
-      AS concerned with that behavior can return invalid_client instead;
-      doing so loses the distinction and is not this profile's default.
+      as an unrecognized failure rather than a credential failure.
 
    Attestation is an additional security signal:  Where the deployment
       uses the Client Attestation alongside another client
@@ -787,6 +791,10 @@ Table of Contents
               RFC 7591, DOI 10.17487/RFC7591, July 2015,
               <https://www.rfc-editor.org/rfc/rfc7591>.
 
+   [RFC7662]  Richer, J., Ed., "OAuth 2.0 Token Introspection",
+              RFC 7662, DOI 10.17487/RFC7662, October 2015,
+              <https://www.rfc-editor.org/rfc/rfc7662>.
+
    [RFC8414]  Jones, M., Sakimura, N., and J. Bradley, "OAuth 2.0
               Authorization Server Metadata", RFC 8414,
               DOI 10.17487/RFC8414, June 2018,
@@ -817,10 +825,6 @@ Table of Contents
               "OAuth 2.0 Dynamic Client Registration Management
               Protocol", RFC 7592, DOI 10.17487/RFC7592, July 2015,
               <https://www.rfc-editor.org/rfc/rfc7592>.
-
-   [RFC7662]  Richer, J., Ed., "OAuth 2.0 Token Introspection",
-              RFC 7662, DOI 10.17487/RFC7662, October 2015,
-              <https://www.rfc-editor.org/rfc/rfc7662>.
 
    [RFC9449]  Fett, D., Campbell, B., Bradley, J., Lodderstedt, T.,
               Jones, M., and D. Waite, "OAuth 2.0 Demonstrating Proof of
