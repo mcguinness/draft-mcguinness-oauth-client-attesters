@@ -285,6 +285,7 @@ metadata (including {{RFC7591}}) or a CIMD. Its value is an array of objects:
 |---|---|---|
 | `issuer` | REQUIRED, nonempty StringOrURI {{RFC7519}} | Exact `iss` of the endorsed Client Attester |
 | `jwks_uri` | REQUIRED, HTTPS URL without userinfo or fragment | Location of the attester's public JSON Web Key (JWK) Set {{RFC7517}} |
+{: title="Members of a client_attesters entry"}
 
 An issuer MUST NOT occur more than once in the array. A missing or
 empty array authorizes no attester. An entry is malformed if it
@@ -744,6 +745,7 @@ these are policy settings, not new protocol metadata:
 | Key-trust policy for that attester | AS-configured attester trust |
 | Configured key source for that attester | `https://attester.example/tenant/acme/jwks` |
 | Maximum metadata and key cache ages | 3600 seconds each |
+{: title="AS configuration for this example"}
 
 At `https://platform.example/oauth-client`, the publisher serves:
 
