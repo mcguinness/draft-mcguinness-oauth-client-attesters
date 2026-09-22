@@ -34,10 +34,14 @@ normative:
   RFC7591:
   RFC7662:
   RFC8414:
+  RFC8705:
   RFC8725:
   RFC9111:
 informative:
+  RFC7009:
   RFC7592:
+  RFC8628:
+  RFC9126:
   RFC9449:
   SPIFFE-OAUTH: I-D.ietf-oauth-spiffe-client-auth
   INSTANCE-ID:
@@ -69,9 +73,16 @@ established to deployments ({{ATTEST, Section 10.8}}).
 
 This profile applies to both registered clients and clients identified by
 Client ID Metadata Documents {{CIMD}}. Either can endorse one or more
-attesters, for example across platforms or during migration. Deployments
-that manage attester trust entirely through authorization server (AS)
-configuration can continue to use {{ATTEST}} without this profile.
+attesters, for example across platforms or during migration.
+
+Publisher-authorized key selection exists for the case AS configuration
+does not reach: an AS serving many clients identified by metadata
+documents, each published by a different operator and attested by that
+operator's own platform attester, would otherwise need a configured
+entry for every attester of every client before any of them can
+authenticate. Deployments that can manage attester trust entirely
+through authorization server (AS) configuration do not need this
+profile and can continue to use {{ATTEST}}.
 
 This profile adds `client_attesters`: the client's endorsements of
 attesters and their verification-key locations. Under AS-configured
@@ -91,8 +102,16 @@ Client metadata --endorses--> Attester --attests--> Client Instance
 
 The profile applies at AS endpoints accepting Client Attestations for
 client authentication or as an additional security signal, using the
-profiling hook in {{ATTEST, Section 13}}. It retains ATTEST's wire
-format, proof methods, and token binding.
+profiling hook in {{ATTEST, Section 13}}. In a typical deployment those
+are the token endpoint, the pushed authorization request endpoint
+{{RFC9126}}, the device authorization endpoint {{RFC8628}}, and the
+introspection {{RFC7662}} and revocation {{RFC7009}} endpoints; the
+authorization endpoint does not authenticate clients and is out of
+scope. A party authenticating at any of these is acting as a client,
+including a resource server presenting a Client Attestation to the
+introspection endpoint. Where a flow authenticates more than once, each
+presentation is evaluated on its own under {{as-processing}}. The
+profile retains ATTEST's wire format, proof methods, and token binding.
 
 This profile, {{ATTEST}}, and {{INSTANCE-ID}} answer three separate
 questions in layers:
@@ -110,11 +129,31 @@ Client Instance ID (optional)  Which persistent instance is this?
 Endorsement carries no instance semantics, and instance identification
 does not establish attester trust. Neither establishes user delegation.
 
-Resource servers validating Client Attestations directly rely on
-configured attester trust; this profile does not define endorsement
-discovery or acceptance for those endpoints. This keeps client metadata
-resolution and endorsement-policy evaluation at the AS rather than
-distributing those functions to resource servers.
+A resource server that accepts a Client Attestation presented to it
+({{ATTEST, Section 7.6}}) relies on configured attester trust; this
+profile does not define endorsement discovery or acceptance there. That
+keeps client metadata resolution and endorsement-policy evaluation at
+the AS rather than distributing those functions to resource servers,
+and it has a consequence: withdrawing an endorsement ({{updates}})
+does not reach a resource server validating attestations directly.
+This is distinct from a resource server authenticating to an AS
+endpoint, which acts as a client and is in scope above.
+
+The AS conveys what it decided through the artifacts it issues rather
+than through endorsement data, and what those artifacts carry depends
+on the token-binding method the deployment selects. In ATTEST's
+combined mode ({{ATTEST, Section 5.2}}) the DPoP key and the attested
+Client Instance Key are one key, so the issued token's confirmation
+claim names the attested key. Where DPoP {{RFC9449}} is used alongside
+a separate Client Attestation proof, that same section does not require
+the DPoP key to match the attestation's `cnf`, and the token is bound
+to the DPoP key instead.
+
+A confirmation claim reports a binding, not an endorsement verdict.
+Introspection {{RFC7662}} likewise reports the token's state rather
+than how the AS evaluated the endorsement. Neither tells a resource
+server whether an endorsement was accepted, which is why endorsement
+policy stays at the AS.
 
 # Conventions and Trust Model {#trust}
 
@@ -258,6 +297,11 @@ An extension to this member is safe only if an implementation that
 ignores it reads the endorsement the same way. This profile defines no
 mechanism for marking an extension critical.
 
+Endorsed keys authenticate attesters, not clients. A key obtained from
+an endorsement MUST NOT be used to verify a client authentication
+assertion, and a key from the client's own `jwks` or `jwks_uri` MUST
+NOT be used to verify a Client Attestation.
+
 Every entry carries a complete issuer-to-key-location mapping, so an
 endorsement has the same meaning regardless of the AS policy that
 evaluates it, which the publisher cannot know. An endorsement
@@ -354,9 +398,11 @@ For each presentation, the AS MUST:
    then consult the other.
 2. Validate `client_attesters` and select the entry whose `issuer`
    exactly matches the attestation's nonempty `iss`. Verify AS policy
-   permits that client-to-attester association, evaluated on the
-   entry's `issuer` and `jwks_uri` together rather than the issuer
-   alone.
+   permits that client-to-attester association. The entry's `issuer`
+   and `jwks_uri` are matched together rather than the issuer alone,
+   so that an endorsement naming a different key location behind a
+   shared issuer string does not match; the matching identifies the
+   entry and does not by itself authorize it.
 3. Select the key source under {{key-resolution}}. Resolve `kid` to one
    eligible public key, refreshing on an unknown `kid` only as {{updates}}
    permits, and verify the signature using an acceptable asymmetric
@@ -368,7 +414,11 @@ For each presentation, the AS MUST:
    another client authentication method ({{ATTEST, Section 7.6}}),
    validate that method under its own specification and verify that it
    authenticates that same client identifier. A mismatch is a failure of
-   that method.
+   that method. Where the companion method also establishes a
+   confirmation key, for example mutual TLS {{RFC8705}}, the
+   configuration selects which key binds the issued token; the AS MUST
+   NOT bind a token to the attested key on the strength of an
+   attestation it did not accept.
 5. Apply grant and authorization policy independently of the endorsement.
 
 ## Key Source Selection {#key-resolution}
