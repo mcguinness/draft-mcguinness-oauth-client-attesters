@@ -787,11 +787,6 @@ Table of Contents
               RFC 7591, DOI 10.17487/RFC7591, July 2015,
               <https://www.rfc-editor.org/rfc/rfc7591>.
 
-   [RFC7592]  Richer, J., Ed., Jones, M., Bradley, J., and M. Machulak,
-              "OAuth 2.0 Dynamic Client Registration Management
-              Protocol", RFC 7592, DOI 10.17487/RFC7592, July 2015,
-              <https://www.rfc-editor.org/rfc/rfc7592>.
-
    [RFC8414]  Jones, M., Sakimura, N., and J. Bradley, "OAuth 2.0
               Authorization Server Metadata", RFC 8414,
               DOI 10.17487/RFC8414, June 2018,
@@ -817,6 +812,11 @@ Table of Contents
               May 2017, <https://www.rfc-editor.org/rfc/rfc8174>.
 
 9.2.  Informative References
+
+   [RFC7592]  Richer, J., Ed., Jones, M., Bradley, J., and M. Machulak,
+              "OAuth 2.0 Dynamic Client Registration Management
+              Protocol", RFC 7592, DOI 10.17487/RFC7592, July 2015,
+              <https://www.rfc-editor.org/rfc/rfc7592>.
 
    [RFC7662]  Richer, J., Ed., "OAuth 2.0 Token Introspection",
               RFC 7662, DOI 10.17487/RFC7662, October 2015,
