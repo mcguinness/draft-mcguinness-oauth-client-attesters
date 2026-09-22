@@ -1395,7 +1395,17 @@ authorized to set them for that client, or be covered by a validated
 software statement from an issuer approved for that purpose under
 <span>[<a href="#RFC7591" class="cite xref">RFC7591</a>]</span>. Open registration alone supplies neither assurance; issuing
 a client credential does not retroactively approve its endorsements.
-The same restriction applies to endorsement updates.<a href="#section-2.2-1" class="pilcrow">¶</a></p>
+The same restriction applies to endorsement updates, including updates
+made through the registration management protocol <span>[<a href="#RFC7592" class="cite xref">RFC7592</a>]</span>.
+Possession of a registration access token establishes control of the
+registration, not authority to endorse, and <span class="bcp14">MUST NOT</span> by itself
+authorize setting or replacing <code>client_attesters</code>.<a href="#section-2.2-1" class="pilcrow">¶</a></p>
+<p id="section-2.2-2">An AS that does not accept a submitted endorsement <span class="bcp14">MUST</span> either reject
+the request with <code>invalid_client_metadata</code>
+(<span>[<a href="#RFC7591" class="cite xref">RFC7591</a>], <a href="https://rfc-editor.org/rfc/rfc7591#section-3.2.2" class="relref">Section 3.2.2</a></span>) or omit <code>client_attesters</code> from the
+stored metadata and from the client information response
+(<span>[<a href="#RFC7591" class="cite xref">RFC7591</a>], <a href="https://rfc-editor.org/rfc/rfc7591#section-3.2.1" class="relref">Section 3.2.1</a></span>), so that the response never shows an
+endorsement the AS has not accepted.<a href="#section-2.2-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="profile-selection">
@@ -1752,10 +1762,20 @@ Attestation plays in the request.<a href="#section-5.4-3" class="pilcrow">¶</a>
           <dt id="section-5.4-4.1">Attestation is the client authentication method:</dt>
           <dd style="margin-left: 1.5em" id="section-5.4-4.2">
             <p id="section-5.4-4.2.1">An endorsement validation failure <span class="bcp14">MUST</span> produce
-<code>invalid_client_attestation</code>, the more specific code that
-<span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-7.4" class="relref">Section 7.4</a></span> permits in place of <code>invalid_client</code>, with
-the HTTP status that <span>[<a href="#RFC6749" class="cite xref">RFC6749</a>], <a href="https://rfc-editor.org/rfc/rfc6749#section-5.2" class="relref">Section 5.2</a></span> assigns to client
-authentication failures, and without exposing policy details.<a href="#section-5.4-4.2.1" class="pilcrow">¶</a></p>
+<code>invalid_client_attestation</code>. <span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-7.4" class="relref">Section 7.4</a></span> defines that
+code for use in addition to the more general <code>invalid_client</code>; this
+profile narrows the choice to the specific code so an endorsement
+failure is distinguishable from an ordinary credential failure. The
+response <span class="bcp14">MUST NOT</span> expose policy details.<a href="#section-5.4-4.2.1" class="pilcrow">¶</a></p>
+<p id="section-5.4-4.2.2">This profile does not change the HTTP status any endpoint assigns to
+a client authentication failure. At the token endpoint
+<span>[<a href="#RFC6749" class="cite xref">RFC6749</a>], <a href="https://rfc-editor.org/rfc/rfc6749#section-5.2" class="relref">Section 5.2</a></span> responds 400 by default and requires 401
+only where the client authenticated through the <code>Authorization</code>
+header field, which carrying a Client Attestation does not do. At the
+introspection endpoint <span>[<a href="#RFC7662" class="cite xref">RFC7662</a>], <a href="https://rfc-editor.org/rfc/rfc7662#section-2.3" class="relref">Section 2.3</a></span> requires 401. Other
+endpoints follow their own specifications.<a href="#section-5.4-4.2.2" class="pilcrow">¶</a></p>
+<p id="section-5.4-4.2.3">A Client library that recognizes only <code>invalid_client</code> treats this as
+an unrecognized failure rather than a credential failure.<a href="#section-5.4-4.2.3" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
 <dt id="section-5.4-4.3">Attestation is an additional security signal:</dt>
@@ -1769,14 +1789,21 @@ on the companion method alone is AS policy.<a href="#section-5.4-4.4.1" class="p
 </dd>
         <dd class="break"></dd>
 </dl>
-<p id="section-5.4-5">Everything else keeps its own error. Signature verification with a
+<p id="section-5.4-5">An endorsement failure caused by disagreement between the endorsement
+and AS configuration, such as an endorsed <code>jwks_uri</code> matching neither
+the configured source nor a configured alias (<a href="#key-resolution" class="auto internal xref">Section 5.3</a>), is
+not corrected by obtaining a fresh attestation. Because the response
+deliberately carries no policy detail, a Client cannot tell that case
+apart from one a fresh attestation would fix; it is resolved through
+the operational channels in <a href="#security" class="auto internal xref">Section 7</a> rather than by client retry.<a href="#section-5.4-5" class="pilcrow">¶</a></p>
+<p id="section-5.4-6">Everything else keeps its own error. Signature verification with a
 resolved key and the remaining attestation and proof checks follow
 <span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-7.4" class="relref">Section 7.4</a></span>, including challenge and freshness responses. A
 companion client authentication method that fails, or that
 authenticates a different client identifier, produces the error defined
 by its own specification. Other metadata-discovery, registration,
 authentication, and grant errors follow their base specifications. The
-no-fallback rule in <a href="#trust" class="auto internal xref">Section 2</a> applies.<a href="#section-5.4-5" class="pilcrow">¶</a></p>
+no-fallback rule in <a href="#trust" class="auto internal xref">Section 2</a> applies.<a href="#section-5.4-6" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -2036,6 +2063,10 @@ processing <code>client_attesters</code> under this profile<a href="#section-8-4
         <dd>
 <span class="refAuthor">Richer, J., Ed.</span>, <span class="refAuthor">Jones, M.</span>, <span class="refAuthor">Bradley, J.</span>, <span class="refAuthor">Machulak, M.</span>, and <span class="refAuthor">P. Hunt</span>, <span class="refTitle">"OAuth 2.0 Dynamic Client Registration Protocol"</span>, <span class="seriesInfo">RFC 7591</span>, <span class="seriesInfo">DOI 10.17487/RFC7591</span>, <time datetime="2015-07" class="refDate">July 2015</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7591">https://www.rfc-editor.org/rfc/rfc7591</a>&gt;</span>. </dd>
 <dd class="break"></dd>
+<dt id="RFC7662">[RFC7662]</dt>
+        <dd>
+<span class="refAuthor">Richer, J., Ed.</span>, <span class="refTitle">"OAuth 2.0 Token Introspection"</span>, <span class="seriesInfo">RFC 7662</span>, <span class="seriesInfo">DOI 10.17487/RFC7662</span>, <time datetime="2015-10" class="refDate">October 2015</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7662">https://www.rfc-editor.org/rfc/rfc7662</a>&gt;</span>. </dd>
+<dd class="break"></dd>
 <dt id="RFC8414">[RFC8414]</dt>
         <dd>
 <span class="refAuthor">Jones, M.</span>, <span class="refAuthor">Sakimura, N.</span>, and <span class="refAuthor">J. Bradley</span>, <span class="refTitle">"OAuth 2.0 Authorization Server Metadata"</span>, <span class="seriesInfo">RFC 8414</span>, <span class="seriesInfo">DOI 10.17487/RFC8414</span>, <time datetime="2018-06" class="refDate">June 2018</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8414">https://www.rfc-editor.org/rfc/rfc8414</a>&gt;</span>. </dd>
@@ -2065,9 +2096,9 @@ processing <code>client_attesters</code> under this profile<a href="#section-8-4
 <a href="#section-9.2" class="section-number selfRef">9.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
         </h3>
 <dl class="references">
-<dt id="RFC7662">[RFC7662]</dt>
+<dt id="RFC7592">[RFC7592]</dt>
         <dd>
-<span class="refAuthor">Richer, J., Ed.</span>, <span class="refTitle">"OAuth 2.0 Token Introspection"</span>, <span class="seriesInfo">RFC 7662</span>, <span class="seriesInfo">DOI 10.17487/RFC7662</span>, <time datetime="2015-10" class="refDate">October 2015</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7662">https://www.rfc-editor.org/rfc/rfc7662</a>&gt;</span>. </dd>
+<span class="refAuthor">Richer, J., Ed.</span>, <span class="refAuthor">Jones, M.</span>, <span class="refAuthor">Bradley, J.</span>, and <span class="refAuthor">M. Machulak</span>, <span class="refTitle">"OAuth 2.0 Dynamic Client Registration Management Protocol"</span>, <span class="seriesInfo">RFC 7592</span>, <span class="seriesInfo">DOI 10.17487/RFC7592</span>, <time datetime="2015-07" class="refDate">July 2015</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7592">https://www.rfc-editor.org/rfc/rfc7592</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC9449">[RFC9449]</dt>
         <dd>
