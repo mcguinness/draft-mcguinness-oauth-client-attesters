@@ -376,7 +376,8 @@ trust would instead hand key selection to the publisher.
   including tenant scope; a shared issuer or origin alone does not
   establish equivalence. Because an alias applies to every client
   endorsing the issuer, this bounds what an alias may map to, and it is
-  the rule the tenant-isolation argument in {{security}} rests on. This check
+  the rule the tenant-isolation argument in {{security}} rests on.
+  This check
   surfaces disagreement between the endorsement and AS configuration,
   including endorsement
   of a different key set behind a shared issuer string, instead of
