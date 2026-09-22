@@ -429,7 +429,13 @@ including an endorsed `jwks_uri` that matches neither the configured
 source nor a configured alias, and the case where no eligible key is
 available after any refresh permitted by {{updates}}. Signature verification with a resolved key and
 the remaining attestation and proof checks follow {{ATTEST, Section 7.4}},
-including challenge and freshness responses. A companion client
+including challenge and freshness responses. Where the deployment uses
+the Client Attestation as an additional security signal rather than as
+the client authentication method ({{ATTEST, Section 7.6}}), an
+endorsement validation failure means no attestation signal is available
+for that request; the AS MUST NOT treat the failed attestation as a
+satisfied signal, and whether the request proceeds on the companion
+method alone is AS policy. A companion client
 authentication method that fails, or that authenticates a different
 client identifier, produces the error defined by its own specification.
 Other metadata-discovery, registration, authentication, and grant errors
