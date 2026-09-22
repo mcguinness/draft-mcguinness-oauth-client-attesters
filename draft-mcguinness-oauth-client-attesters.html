@@ -1203,7 +1203,7 @@ or authentication method.<a href="#section-abstract-1" class="pilcrow">¶</a></p
             <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-updates-and-withdrawal" class="internal xref">Updates and Withdrawal</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.1">
-                <p id="section-toc.1-1.6.2.1.1"><a href="#section-6.1" class="auto internal xref">6.1</a>.  <a href="#name-cache-freshness" class="internal xref">Cache Freshness</a></p>
+                <p id="section-toc.1-1.6.2.1.1"><a href="#section-6.1" class="auto internal xref">6.1</a>.  <a href="#name-cache-freshness-and-removal" class="internal xref">Cache Freshness and Removal</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.2">
                 <p id="section-toc.1-1.6.2.2.1"><a href="#section-6.2" class="auto internal xref">6.2</a>.  <a href="#name-endorsement-and-key-changes" class="internal xref">Endorsement and Key Changes</a></p>
@@ -1550,6 +1550,9 @@ policy applies to an attester, remain AS policy (<a href="#profile-selection" cl
       <h2 id="name-attestation-and-as-processi">
 <a href="#section-5" class="section-number selfRef">5. </a><a href="#name-attestation-and-as-processi" class="section-name selfRef">Attestation and AS Processing</a>
       </h2>
+<p id="section-5-1">This section covers what an attester must establish and put in a Client
+Attestation, the order in which an AS validates one, how the AS selects
+the key that verifies it, and how failures are reported.<a href="#section-5-1" class="pilcrow">¶</a></p>
 <div id="issuance-and-presentation">
 <section id="section-5.1">
         <h3 id="name-issuance-and-presentation">
@@ -1674,9 +1677,11 @@ surfaces disagreement between the endorsement and AS configuration,
 including endorsement
 of a different key set behind a shared issuer string, instead of
 resolving it silently. An endorsed <code>jwks_uri</code> <span class="bcp14">MUST NOT</span> select,
-override, or provide a fallback for the configured source. No origin
-relationship is required between the configured key source and the
-issuer.<a href="#section-5.3-3.1.1" class="pilcrow">¶</a></p>
+override, or provide a fallback for the configured source. The AS
+<span class="bcp14">MUST NOT</span> retrieve the endorsed <code>jwks_uri</code> under this policy; the
+endorsed value is compared, never fetched. No origin relationship is
+required between
+the configured key source and the issuer.<a href="#section-5.3-3.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-5.3-3.2">
             <p id="section-5.3-3.2.1"><strong>Publisher-authorized key selection:</strong> use the endorsed <code>jwks_uri</code>.
@@ -1721,29 +1726,52 @@ algorithm restrictions in step 3 of <a href="#as-processing" class="auto interna
         <h3 id="name-errors">
 <a href="#section-5.4" class="section-number selfRef">5.4. </a><a href="#name-errors" class="section-name selfRef">Errors</a>
         </h3>
-<p id="section-5.4-1">Where the Client Attestation is the client authentication method, an
-endorsement validation failure <span class="bcp14">MUST</span> produce <code>invalid_client_attestation</code>,
-the more specific code that <span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-7.4" class="relref">Section 7.4</a></span> permits in place of
-<code>invalid_client</code>, with the HTTP status that <span>[<a href="#RFC6749" class="cite xref">RFC6749</a>], <a href="https://rfc-editor.org/rfc/rfc6749#section-5.2" class="relref">Section 5.2</a></span>
-assigns to client authentication failures, and without exposing policy
-details. Endorsement validation covers selecting
-a permitted endorsement in step 2 of <a href="#as-processing" class="auto internal xref">Section 5.2</a> and selecting the
-key source and resolving <code>kid</code> in step 3 under <a href="#key-resolution" class="auto internal xref">Section 5.3</a>,
-including an endorsed <code>jwks_uri</code> that matches neither the configured
-source nor a configured alias, and the case where no eligible key is
-available after any refresh permitted by <a href="#updates" class="auto internal xref">Section 6</a>. Signature verification with a resolved key and
-the remaining attestation and proof checks follow <span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-7.4" class="relref">Section 7.4</a></span>,
-including challenge and freshness responses. Where the deployment uses
-the Client Attestation as an additional security signal rather than as
-the client authentication method (<span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-7.6" class="relref">Section 7.6</a></span>), an
-endorsement validation failure means no attestation signal is available
-for that request; the AS <span class="bcp14">MUST NOT</span> treat the failed attestation as a
-satisfied signal, and whether the request proceeds on the companion
-method alone is AS policy. A companion client
-authentication method that fails, or that authenticates a different
-client identifier, produces the error defined by its own specification.
-Other metadata-discovery, registration, authentication, and grant errors
-follow their base specifications. The no-fallback rule in <a href="#trust" class="auto internal xref">Section 2</a> applies.<a href="#section-5.4-1" class="pilcrow">¶</a></p>
+<p id="section-5.4-1">Endorsement validation covers these parts of <a href="#as-processing" class="auto internal xref">Section 5.2</a>:<a href="#section-5.4-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.4-2.1">
+            <p id="section-5.4-2.1.1">selecting a permitted endorsement in step 2;<a href="#section-5.4-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.4-2.2">
+            <p id="section-5.4-2.2.1">selecting the key source and resolving <code>kid</code> in step 3 under
+<a href="#key-resolution" class="auto internal xref">Section 5.3</a>, including an endorsed <code>jwks_uri</code> that matches
+neither the configured source nor a configured alias; and<a href="#section-5.4-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.4-2.3">
+            <p id="section-5.4-2.3.1">the case where no eligible key is available after any refresh
+permitted by <a href="#updates" class="auto internal xref">Section 6</a>.<a href="#section-5.4-2.3.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-5.4-3">Its outcome is reported differently depending on the role the Client
+Attestation plays in the request.<a href="#section-5.4-3" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-5.4-4">
+          <dt id="section-5.4-4.1">Attestation is the client authentication method:</dt>
+          <dd style="margin-left: 1.5em" id="section-5.4-4.2">
+            <p id="section-5.4-4.2.1">An endorsement validation failure <span class="bcp14">MUST</span> produce
+<code>invalid_client_attestation</code>, the more specific code that
+<span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-7.4" class="relref">Section 7.4</a></span> permits in place of <code>invalid_client</code>, with
+the HTTP status that <span>[<a href="#RFC6749" class="cite xref">RFC6749</a>], <a href="https://rfc-editor.org/rfc/rfc6749#section-5.2" class="relref">Section 5.2</a></span> assigns to client
+authentication failures, and without exposing policy details.<a href="#section-5.4-4.2.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-5.4-4.3">Attestation is an additional security signal:</dt>
+          <dd style="margin-left: 1.5em" id="section-5.4-4.4">
+            <p id="section-5.4-4.4.1">Where the deployment uses the Client Attestation alongside another
+client authentication method (<span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-7.6" class="relref">Section 7.6</a></span>), an
+endorsement validation failure means no attestation signal is
+available for that request. The AS <span class="bcp14">MUST NOT</span> treat the failed
+attestation as a satisfied signal, and whether the request proceeds
+on the companion method alone is AS policy.<a href="#section-5.4-4.4.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+</dl>
+<p id="section-5.4-5">Everything else keeps its own error. Signature verification with a
+resolved key and the remaining attestation and proof checks follow
+<span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-7.4" class="relref">Section 7.4</a></span>, including challenge and freshness responses. A
+companion client authentication method that fails, or that
+authenticates a different client identifier, produces the error defined
+by its own specification. Other metadata-discovery, registration,
+authentication, and grant errors follow their base specifications. The
+no-fallback rule in <a href="#trust" class="auto internal xref">Section 2</a> applies.<a href="#section-5.4-5" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -1753,10 +1781,19 @@ follow their base specifications. The no-fallback rule in <a href="#trust" class
       <h2 id="name-updates-and-withdrawal">
 <a href="#section-6" class="section-number selfRef">6. </a><a href="#name-updates-and-withdrawal" class="section-name selfRef">Updates and Withdrawal</a>
       </h2>
-<div id="cache-freshness">
+<p id="section-6-1">A publisher withdraws an endorsement by removing it from the
+authoritative client metadata (<a href="#metadata" class="auto internal xref">Section 3</a>). Three things then govern
+when that takes effect and what it reaches: cached copies expire under
+the maximum ages below, an accepted update binds from the next
+presentation (<a href="#endorsement-changes" class="auto internal xref">Section 6.2</a>), and an issued grant keeps its
+access tokens unless the deployment separately revokes them, though a
+refresh that presents an attestation is checked again
+(<a href="#existing-grants" class="auto internal xref">Section 6.3</a>). This profile sets no ceiling on the withdrawal
+latency that the maximum ages bound.<a href="#section-6-1" class="pilcrow">¶</a></p>
+<div id="cache-freshness-and-removal">
 <section id="section-6.1">
-        <h3 id="name-cache-freshness">
-<a href="#section-6.1" class="section-number selfRef">6.1. </a><a href="#name-cache-freshness" class="section-name selfRef">Cache Freshness</a>
+        <h3 id="name-cache-freshness-and-removal">
+<a href="#section-6.1" class="section-number selfRef">6.1. </a><a href="#name-cache-freshness-and-removal" class="section-name selfRef">Cache Freshness and Removal</a>
         </h3>
 <p id="section-6.1-1">The AS <span class="bcp14">MUST</span>:<a href="#section-6.1-1" class="pilcrow">¶</a></p>
 <ul class="normal">
@@ -1796,10 +1833,12 @@ endorsement takes effect, as it bounds withdrawal.<a href="#section-6.1-4" class
 stop using previously cached endorsements from that document, and <span class="bcp14">MUST NOT</span> use them again unless a later retrieval of that document succeeds.
 A retrieval failure that is not a removal, such as a timeout or a 5xx
 status, does not by itself invalidate an unexpired cached copy. Removal
-cannot be detected while the AS continues to use an unexpired cache.<a href="#section-6.1-5" class="pilcrow">¶</a></p>
+cannot be detected while the AS continues to use an unexpired cache.
+Deleting a registered client's registration removes its endorsements
+with it.<a href="#section-6.1-5" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="endorsement-and-key-changes">
+<div id="endorsement-changes">
 <section id="section-6.2">
         <h3 id="name-endorsement-and-key-changes">
 <a href="#section-6.2" class="section-number selfRef">6.2. </a><a href="#name-endorsement-and-key-changes" class="section-name selfRef">Endorsement and Key Changes</a>
@@ -2179,7 +2218,11 @@ The flow does not require <code>client_instance_id</code> or an <code>act</code>
 from the configured source, and the endorsed <code>jwks_uri</code> is required to
 equal it, as it does here. An attestation from an unendorsed issuer, an
 endorsement naming the trusted issuer with a different key location, or
-a <code>kid</code> that resolves to no key in the configured source, produces:<a href="#appendix-A-13" class="pilcrow">¶</a></p>
+a <code>kid</code> that resolves to no key in the configured source, produces the
+response below. <span>[<a href="#RFC6749" class="cite xref">RFC6749</a>], <a href="https://rfc-editor.org/rfc/rfc6749#section-5.2" class="relref">Section 5.2</a></span> reserves 401 for a client that
+authenticated through the <code>Authorization</code> header field; this client
+presents its attestation in the ATTEST header fields instead, so the
+status here is 400:<a href="#appendix-A-13" class="pilcrow">¶</a></p>
 <div class="lang-http-message sourcecode" id="appendix-A-14">
 <pre>
 HTTP/1.1 400 Bad Request
