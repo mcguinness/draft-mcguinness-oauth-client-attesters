@@ -522,7 +522,7 @@ Introspection {{RFC7662}}
 reports revoked tokens inactive. Offline validation requires a separate
 revocation mechanism or token expiration.
 
-# Security Considerations
+# Security Considerations {#security}
 
 The considerations in {{ATTEST}}, {{CIMD}}, and {{RFC8725}} apply.
 
