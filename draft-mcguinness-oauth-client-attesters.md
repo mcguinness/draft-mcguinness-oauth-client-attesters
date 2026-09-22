@@ -185,7 +185,18 @@ authorized to set them for that client, or be covered by a validated
 software statement from an issuer approved for that purpose under
 {{RFC7591}}. Open registration alone supplies neither assurance; issuing
 a client credential does not retroactively approve its endorsements.
-The same restriction applies to endorsement updates.
+The same restriction applies to endorsement updates, including updates
+made through the registration management protocol {{RFC7592}}.
+Possession of a registration access token establishes control of the
+registration, not authority to endorse, and MUST NOT by itself
+authorize setting or replacing `client_attesters`.
+
+An AS that does not accept a submitted endorsement MUST either reject
+the request with `invalid_client_metadata`
+({{RFC7591, Section 3.2.2}}) or omit `client_attesters` from the
+stored metadata and from the client information response
+({{RFC7591, Section 3.2.1}}), so that the response never shows an
+endorsement the AS has not accepted.
 
 ## Profile Selection {#profile-selection}
 
