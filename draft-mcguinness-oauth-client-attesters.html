@@ -1263,9 +1263,14 @@ attesters, for example across platforms or during migration. Deployments
 that manage attester trust entirely through authorization server (AS)
 configuration can continue to use ATTEST without this profile.<a href="#section-1-2" class="pilcrow">¶</a></p>
 <p id="section-1-3">This profile adds <code>client_attesters</code>: the client's endorsements of
-attesters and their verification-key locations, generalizing SPIFFE client
-authentication's bundle endpoint <span>[<a href="#SPIFFE-OAUTH" class="cite xref">SPIFFE-OAUTH</a>]</span>. An AS accepts an
-endorsement only under its own trust policy. The resulting chain is:<a href="#section-1-3" class="pilcrow">¶</a></p>
+attesters and their verification-key locations. Under AS-configured
+attester trust this plays the role that the bundle endpoint of SPIFFE
+client authentication plays <span>[<a href="#SPIFFE-OAUTH" class="cite xref">SPIFFE-OAUTH</a>]</span>, with the key source
+established out of band and the endorsed location only compared against
+it. Publisher-authorized key selection deliberately does the opposite,
+letting the publisher name the location, so it is not a substitute for
+SPIFFE bundle configuration. An AS accepts an endorsement only under
+its own trust policy. The resulting chain is:<a href="#section-1-3" class="pilcrow">¶</a></p>
 <div class="alignLeft art-ascii-art art-text artwork" id="section-1-4">
 <pre>
 Client metadata --endorses--&gt; Attester --attests--&gt; Client Instance
