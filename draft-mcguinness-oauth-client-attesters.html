@@ -1256,7 +1256,14 @@ Attestation-Based Client Authentication
 <span>[<a href="#ATTEST" class="cite xref">ATTEST</a>]</span> allows an attester to authenticate those instances. ATTEST
 requires an attestation to verify under the key of a known and trusted
 Client Attester (<span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-7.1" class="relref">Section 7.1</a></span>) and leaves how that trust is
-established to deployments (<span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-10.8" class="relref">Section 10.8</a></span>).<a href="#section-1-1" class="pilcrow">¶</a></p>
+established to deployments (<span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-10.8" class="relref">Section 10.8</a></span>). It does not
+define how a client
+identifies the attesters authorized to speak for it. Authorization
+server configuration alone can carry that association, but it does not
+let a client select or rotate its own attesters. This specification
+defines client metadata for expressing that endorsement while leaving
+the authorization server in control of whether an endorsement is
+accepted.<a href="#section-1-1" class="pilcrow">¶</a></p>
 <p id="section-1-2">This profile applies to both registered clients and clients identified by
 Client ID Metadata Documents (CIMDs) <span>[<a href="#CIMD" class="cite xref">CIMD</a>]</span>. Either can endorse one or
 more
@@ -1356,9 +1363,13 @@ the authoritative metadata for a <code>client_id</code>.<a href="#section-2-2" c
         <dt id="section-2-3.1">Client Attester Endorsement</dt>
         <dd style="margin-left: 1.5em" id="section-2-3.2">
           <p id="section-2-3.2.1">A statement in the authoritative client metadata for a <code>client_id</code>
-expressing the publisher's authorization for a specified Client
-Attester to issue Client Attestations naming that <code>client_id</code>. An
-endorsement delegates
+identifying a Client Attester whose Client Attestations naming that
+<code>client_id</code> are eligible for acceptance under this profile. It
+expresses the publisher's authorization for that attester to speak
+for the client. It does not make any attestation acceptable on its
+own, which remains subject to AS policy (<a href="#trust" class="auto internal xref">Section 2</a>), and it says
+nothing about which Client Instances the attester may attest, which
+<a href="#processing" class="auto internal xref">Section 5</a> leaves to the attester. An endorsement delegates
 attestation authority for the named client only. It does not delegate
 OAuth authorization, user authority, or authority to further delegate
 attestation, and it does not extend to any other client.<a href="#section-2-3.2.1" class="pilcrow">¶</a></p>
