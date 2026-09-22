@@ -456,8 +456,8 @@ trust would instead hand key selection to the publisher.
   A configured alias MUST preserve the endorsed attestation authority,
   including tenant scope; a shared issuer or origin alone does not
   establish equivalence. Because an alias applies to every client
-  endorsing the issuer, this bounds what an alias may map to, and it is
-  the rule the tenant-isolation argument in {{security}} rests on.
+  endorsing the issuer, this requirement bounds what an alias may map
+  to; the tenant-isolation considerations in {{security}} depend on it.
   This check
   surfaces disagreement between the endorsement and AS configuration,
   including endorsement
