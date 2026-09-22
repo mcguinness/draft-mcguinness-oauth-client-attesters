@@ -460,9 +460,9 @@ The AS MUST:
 
 Configured maximum ages bound withdrawal latency: a withdrawn
 endorsement or key can remain acceptable until the applicable age
-expires. The AS MUST be configured with maximum ages that keep this
-latency within the deployment's security requirements; short ages, for
-example one hour, keep it small. This profile specifies no ceiling, so
+expires. Configure maximum ages so that this latency stays within the
+deployment's security requirements; short ages, for example one hour,
+keep it small. This profile specifies no ceiling, so
 a publisher cannot predict from the protocol alone how long a
 withdrawal takes to bite; deployments that need a predictable bound
 state one in their trust agreement. Fresh entries do not require
