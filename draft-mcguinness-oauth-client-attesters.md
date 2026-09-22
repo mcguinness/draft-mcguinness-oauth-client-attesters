@@ -314,8 +314,7 @@ location. How each key-trust policy uses that location is specified in
 
 Each entry is a Client Attester Endorsement ({{trust}}) for the
 `client_id` whose metadata contains it. An `issuer` identifies a
-namespace, not a discovery endpoint. Key-source constraints are
-specified in {{key-resolution}}.
+namespace, not a discovery endpoint.
 
 {{ATTEST, Section 10.8}} recommends, among other options, resolving `kid`
 through client metadata `jwks_uri`. This profile extends that option
