@@ -309,8 +309,9 @@ assertion, and a key from the client's own `jwks` or `jwks_uri` MUST
 NOT be used to verify a Client Attestation.
 
 Every entry carries a complete issuer-to-key-location mapping, so an
-endorsement has the same meaning regardless of the AS policy that
-evaluates it, which the publisher cannot know. An endorsement
+endorsement has the same meaning regardless of which AS policy
+evaluates it, and the publisher cannot know which policy that is. An
+endorsement
 therefore identifies a Client Attester by both its issuer and its key
 location. How each key-trust policy uses that location is specified in
 {{key-resolution}}.
