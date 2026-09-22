@@ -142,7 +142,7 @@ Attestation only when both of the following hold:
 Endorsement alone does not make an attester trusted, and AS trust in an
 attester alone does not authorize it for a client. AS policy can narrow
 the endorsed set; it MUST NOT add an unendorsed attester or fall back to
-another trust mechanism. An endorsement MUST NOT by itself establish
+another trust mechanism. An endorsement does not by itself establish
 that the client is trusted or authorized to access a resource.
 
 Two key-trust policies exist, and the AS determines from its configured
@@ -184,7 +184,7 @@ The same restriction applies to endorsement updates.
 ## Profile Selection {#profile-selection}
 
 The AS determines that this profile applies to a request by local
-policy, which MAY be scoped per client; this out-of-band determination
+policy, which can be scoped per client; this out-of-band determination
 satisfies {{ATTEST, Section 13}}. Applicability is not selected by the
 presence or absence of `client_attesters`. An AS advertises the
 capability with `client_attester_endorsement_supported`
@@ -237,8 +237,9 @@ Rejection under this profile does not affect the client's other
 authentication methods and does not by itself make a CIMD invalid or
 uncacheable under {{CIMD}}.
 
-Extensions MUST NOT weaken an endorsement's meaning for implementations
-that ignore them.
+An extension to this member is safe only if an implementation that
+ignores it reads the endorsement the same way. This profile defines no
+mechanism for marking an extension critical.
 
 Every entry carries a complete issuer-to-key-location mapping, so an
 endorsement has the same meaning regardless of the AS policy that
@@ -371,15 +372,18 @@ trust would instead hand key selection to the publisher.
   where keys are retrieved. An alias belongs to the issuer's configured
   key source, so it applies to every client that endorses that issuer
   and is not scoped to the client whose endorsement prompted it.
-  Configured aliases MUST preserve the endorsed attestation authority,
-  including tenant scope; a shared
-  issuer or origin alone does not establish equivalence. This check
+  A configured alias MUST preserve the endorsed attestation authority,
+  including tenant scope; a shared issuer or origin alone does not
+  establish equivalence. Because an alias applies to every client
+  endorsing the issuer, this bounds what an alias may map to, and it is
+  the rule the tenant-isolation argument in {{security}} rests on.
+  This check
   surfaces disagreement between the endorsement and AS configuration,
   including endorsement
   of a different key set behind a shared issuer string, instead of
   resolving it silently. An endorsed `jwks_uri` MUST NOT select,
-  override, or provide a fallback for the configured source. The
-  configured key source MAY use a different HTTPS origin from the
+  override, or provide a fallback for the configured source. No origin
+  relationship is required between the configured key source and the
   issuer.
 * **Publisher-authorized key selection:** use the endorsed `jwks_uri`.
   The `issuer` MUST be an HTTPS URL and `jwks_uri` MUST have the same
@@ -412,9 +416,9 @@ than one key matching the `kid` is a failure; the AS MUST NOT try
 candidate keys in turn.
 
 When retrieving a JWK Set or client metadata, the AS MUST authenticate
-the HTTPS server, limit response size and request time, prevent
-retrieval from prohibited network destinations, and MUST NOT follow
-redirects. The AS SHOULD advertise
+the HTTPS server and MUST NOT follow redirects. Bounding response size
+and request time, and blocking prohibited network destinations, are
+local defenses; see Security Considerations. The AS SHOULD advertise
 `client_attestation_signing_alg_values_supported` consistent with the
 algorithm restrictions in step 3 of {{as-processing}}
 ({{ATTEST, Section 8}}).
@@ -459,9 +463,9 @@ The AS MUST:
 
 Configured maximum ages bound withdrawal latency: a withdrawn
 endorsement or key can remain acceptable until the applicable age
-expires. The AS MUST be configured with maximum ages that keep this
-latency within the deployment's security requirements; short ages, for
-example one hour, keep it small. This profile specifies no ceiling, so
+expires. Configure maximum ages so that this latency stays within the
+deployment's security requirements; short ages, for example one hour,
+keep it small. This profile specifies no ceiling, so
 a publisher cannot predict from the protocol alone how long a
 withdrawal takes to bite; deployments that need a predictable bound
 state one in their trust agreement. Fresh entries do not require
@@ -514,20 +518,22 @@ unless the deployment separately couples withdrawal to revocation.
 Refresh requests requiring a Client Attestation are checked again under
 {{processing}}.
 
-Deployments using withdrawal to terminate existing access MUST configure
-the AS to revoke affected grants, invalidate their access and refresh
-tokens, and prevent further refresh issuance. Introspection {{RFC7662}}
+Withdrawal alone does not terminate existing access. A deployment that
+requires termination separately revokes the affected grants,
+invalidates their access and refresh tokens, and prevents further
+refresh issuance.
+Introspection {{RFC7662}}
 reports revoked tokens inactive. Offline validation requires a separate
 revocation mechanism or token expiration.
 
-# Security Considerations
+# Security Considerations {#security}
 
 The considerations in {{ATTEST}}, {{CIMD}}, and {{RFC8725}} apply.
 
 * **Publisher compromise:** control of a CIMD host or a client's registration
   administration permits changing endorsements, within AS policy. The AS
-  SHOULD monitor and alert on endorsement changes and evaluate new attesters
-  as policy changes.
+  has no protocol signal for this, so operators generally monitor
+  endorsement changes and evaluate new attesters as policy changes.
   A separately specified signed-metadata mechanism could bind publisher
   intent independently of the HTTPS host, if its signing keys have an
   independent trust basis; this profile defines no such mechanism.
@@ -542,9 +548,12 @@ The considerations in {{ATTEST}}, {{CIMD}}, and {{RFC8725}} apply.
   retrieval. Under publisher-authorized key selection the publisher
   chooses both the issuer and the key location, so an authorized
   publisher can cause the AS to issue an outbound request to an origin
-  of the publisher's choosing; {{key-resolution}} bounds that request
-  but does not remove it. Endorsed URLs remain subject to SSRF
-  defenses; endorsement does not make a network location safe.
+  of the publisher's choosing. {{key-resolution}} constrains where that
+  request may go but does not remove it, and an AS defends itself
+  further by bounding response
+  size and request time and by blocking prohibited network
+  destinations. Endorsed URLs remain subject to SSRF defenses;
+  endorsement does not make a network location safe.
 * **Withdrawal latency:** cached acceptance persists as described in
   {{updates}}. Urgent incidents require local denial or another
   revocation channel; removing a key at its origin is not instantaneous
@@ -560,7 +569,8 @@ The considerations in {{ATTEST}}, {{CIMD}}, and {{RFC8725}} apply.
   publisher, so a compromised attester authenticates the client at all
   of them until the endorsement is withdrawn.
 * **Privacy:** public metadata exposes client-to-attester relationships.
-  It SHOULD NOT enumerate instances or their keys. Caching reduces the
+  Such metadata need not enumerate instances or their keys, and this
+  profile gives no reason to. Caching reduces the
   request-timing information observable at metadata and key endpoints.
   No stable instance identifier is required by this profile.
 
