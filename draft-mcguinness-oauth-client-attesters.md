@@ -353,6 +353,13 @@ is also authorized to select keys. Otherwise, publisher-authorized key
 selection applies if the publisher is so authorized. If neither
 applies, no key source is available and the endorsement fails.
 
+Removing a configured entry MUST NOT by itself make its issuer eligible
+for publisher-authorized key selection. An issuer the AS has configured
+remains governed by AS-configured attester trust until an operator
+records a policy decision for that issuer; until then no key source is
+available and the endorsement fails. Otherwise an edit made to reduce
+trust would instead hand key selection to the publisher.
+
 * **AS-configured attester trust:** use only the independently
   configured key source for the exact issuer. The endorsed `jwks_uri`
   MUST equal that source's URI or one of its configured aliases. An
