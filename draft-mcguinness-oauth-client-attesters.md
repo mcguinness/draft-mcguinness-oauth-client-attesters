@@ -34,10 +34,14 @@ normative:
   RFC7591:
   RFC7662:
   RFC8414:
+  RFC8705:
   RFC8725:
   RFC9111:
 informative:
+  RFC7009:
   RFC7592:
+  RFC8628:
+  RFC9126:
   RFC9449:
   SPIFFE-OAUTH: I-D.ietf-oauth-spiffe-client-auth
   INSTANCE-ID:
