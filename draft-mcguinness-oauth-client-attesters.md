@@ -287,6 +287,10 @@ policy applies to an attester, remain AS policy ({{profile-selection}}).
 
 # Attestation and AS Processing {#processing}
 
+This section covers what an attester puts in a Client Attestation, the
+order in which an AS validates one, how the AS selects the key that
+verifies it, and how failures are reported.
+
 ## Issuance and Presentation
 
 Requests under this profile MUST include `client_id` to select the
@@ -468,6 +472,14 @@ authentication, and grant errors follow their base specifications. The
 no-fallback rule in {{trust}} applies.
 
 # Updates and Withdrawal {#updates}
+
+A publisher withdraws an endorsement by removing it from the
+authoritative client metadata ({{metadata}}). Three things then govern
+when that takes effect and what it reaches: cached copies expire under
+the maximum ages below, an accepted update binds from the next
+presentation ({{endorsement-changes}}), and already-issued grants are
+unaffected unless the deployment separately revokes them
+({{existing-grants}}). This profile sets no ceiling on that delay.
 
 ## Cache Freshness and Removal
 
