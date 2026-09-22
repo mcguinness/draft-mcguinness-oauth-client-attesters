@@ -76,12 +76,14 @@ Client ID Metadata Documents (CIMDs) {{CIMD}}. Either can endorse one or
 more
 attesters, for example across platforms or during migration.
 
-Publisher-authorized key selection exists for the case AS configuration
-does not reach: an AS serving many clients identified by metadata
-documents, each published by a different operator and attested by that
-operator's own platform attester, would otherwise need a configured
-entry for every attester of every client before any of them can
-authenticate. Deployments that can manage attester trust entirely
+Publisher-authorized key selection exists for the case that AS
+configuration does not reach. Consider an AS serving many clients
+identified by metadata documents, each published by a different
+operator and attested by that operator's own platform attester. That AS
+would otherwise need a configured entry for every attester of every
+client before any of them could authenticate.
+
+Deployments that can manage attester trust entirely
 through AS configuration do not need this
 profile and can continue to use {{ATTEST}}.
 
