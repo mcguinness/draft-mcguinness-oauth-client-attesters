@@ -287,6 +287,10 @@ policy applies to an attester, remain AS policy ({{profile-selection}}).
 
 # Attestation and AS Processing {#processing}
 
+This section covers what an attester must establish and put in a Client
+Attestation, the order in which an AS validates one, how the AS selects
+the key that verifies it, and how failures are reported.
+
 ## Issuance and Presentation
 
 Requests under this profile MUST include `client_id` to select the
@@ -386,9 +390,11 @@ trust would instead hand key selection to the publisher.
   including endorsement
   of a different key set behind a shared issuer string, instead of
   resolving it silently. An endorsed `jwks_uri` MUST NOT select,
-  override, or provide a fallback for the configured source. No origin
-  relationship is required between the configured key source and the
-  issuer.
+  override, or provide a fallback for the configured source. The AS
+  MUST NOT retrieve the endorsed `jwks_uri` under this policy; the
+  endorsed value is compared, never fetched. No origin relationship is
+  required between
+  the configured key source and the issuer.
 * **Publisher-authorized key selection:** use the endorsed `jwks_uri`.
   The `issuer` MUST be an HTTPS URL and `jwks_uri` MUST have the same
   origin {{RFC6454}}. This origin check neither isolates tenants sharing
@@ -429,33 +435,55 @@ algorithm restrictions in step 3 of {{as-processing}}
 
 ## Errors
 
-Where the Client Attestation is the client authentication method, an
-endorsement validation failure MUST produce `invalid_client_attestation`,
-the more specific code that {{ATTEST, Section 7.4}} permits in place of
-`invalid_client`, with the HTTP status that {{RFC6749, Section 5.2}}
-assigns to client authentication failures, and without exposing policy
-details. Endorsement validation covers selecting
-a permitted endorsement in step 2 of {{as-processing}} and selecting the
-key source and resolving `kid` in step 3 under {{key-resolution}},
-including an endorsed `jwks_uri` that matches neither the configured
-source nor a configured alias, and the case where no eligible key is
-available after any refresh permitted by {{updates}}. Signature verification with a resolved key and
-the remaining attestation and proof checks follow {{ATTEST, Section 7.4}},
-including challenge and freshness responses. Where the deployment uses
-the Client Attestation as an additional security signal rather than as
-the client authentication method ({{ATTEST, Section 7.6}}), an
-endorsement validation failure means no attestation signal is available
-for that request; the AS MUST NOT treat the failed attestation as a
-satisfied signal, and whether the request proceeds on the companion
-method alone is AS policy. A companion client
-authentication method that fails, or that authenticates a different
-client identifier, produces the error defined by its own specification.
-Other metadata-discovery, registration, authentication, and grant errors
-follow their base specifications. The no-fallback rule in {{trust}} applies.
+Endorsement validation covers these parts of {{as-processing}}:
+
+* selecting a permitted endorsement in step 2;
+* selecting the key source and resolving `kid` in step 3 under
+  {{key-resolution}}, including an endorsed `jwks_uri` that matches
+  neither the configured source nor a configured alias; and
+* the case where no eligible key is available after any refresh
+  permitted by {{updates}}.
+
+Its outcome is reported differently depending on the role the Client
+Attestation plays in the request.
+
+Attestation is the client authentication method:
+: An endorsement validation failure MUST produce
+  `invalid_client_attestation`, the more specific code that
+  {{ATTEST, Section 7.4}} permits in place of `invalid_client`, with
+  the HTTP status that {{RFC6749, Section 5.2}} assigns to client
+  authentication failures, and without exposing policy details.
+
+Attestation is an additional security signal:
+: Where the deployment uses the Client Attestation alongside another
+  client authentication method ({{ATTEST, Section 7.6}}), an
+  endorsement validation failure means no attestation signal is
+  available for that request. The AS MUST NOT treat the failed
+  attestation as a satisfied signal, and whether the request proceeds
+  on the companion method alone is AS policy.
+
+Everything else keeps its own error. Signature verification with a
+resolved key and the remaining attestation and proof checks follow
+{{ATTEST, Section 7.4}}, including challenge and freshness responses. A
+companion client authentication method that fails, or that
+authenticates a different client identifier, produces the error defined
+by its own specification. Other metadata-discovery, registration,
+authentication, and grant errors follow their base specifications. The
+no-fallback rule in {{trust}} applies.
 
 # Updates and Withdrawal {#updates}
 
-## Cache Freshness
+A publisher withdraws an endorsement by removing it from the
+authoritative client metadata ({{metadata}}). Three things then govern
+when that takes effect and what it reaches: cached copies expire under
+the maximum ages below, an accepted update binds from the next
+presentation ({{endorsement-changes}}), and an issued grant keeps its
+access tokens unless the deployment separately revokes them, though a
+refresh that presents an attestation is checked again
+({{existing-grants}}). This profile sets no ceiling on the withdrawal
+latency that the maximum ages bound.
+
+## Cache Freshness and Removal
 
 The AS MUST:
 
@@ -495,8 +523,10 @@ NOT use them again unless a later retrieval of that document succeeds.
 A retrieval failure that is not a removal, such as a timeout or a 5xx
 status, does not by itself invalidate an unexpired cached copy. Removal
 cannot be detected while the AS continues to use an unexpired cache.
+Deleting a registered client's registration removes its endorsements
+with it.
 
-## Endorsement and Key Changes
+## Endorsement and Key Changes {#endorsement-changes}
 
 Once a metadata or key update is accepted, the AS MUST use it on the
 next presentation. Removing an endorsement, removing a verification
@@ -513,7 +543,7 @@ under AS-configured attester trust, cause endorsement failures until
 the AS configures a matching alias or updates its configured source.
 The AS's configured maximum ages bound stale acceptance.
 
-## Existing Grants
+## Existing Grants {#existing-grants}
 
 Endorsement withdrawal is prospective with respect to client
 authentication: it prevents future authentication under the removed
@@ -698,7 +728,11 @@ Because the AS applies AS-configured attester trust, keys come only
 from the configured source, and the endorsed `jwks_uri` is required to
 equal it, as it does here. An attestation from an unendorsed issuer, an
 endorsement naming the trusted issuer with a different key location, or
-a `kid` that resolves to no key in the configured source, produces:
+a `kid` that resolves to no key in the configured source, produces the
+response below. {{RFC6749, Section 5.2}} reserves 401 for a client that
+authenticated through the `Authorization` header field; this client
+presents its attestation in the ATTEST header fields instead, so the
+status here is 400:
 
 ~~~ http-message
 HTTP/1.1 400 Bad Request
