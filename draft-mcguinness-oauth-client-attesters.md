@@ -476,10 +476,11 @@ trust would instead hand key selection to the publisher.
 A non-HTTPS issuer requires AS-configured attester trust because it has
 no HTTPS origin binding.
 
-Issuer and client identifiers, and endorsed `jwks_uri` values compared
-with configured source URIs and aliases, MUST use exact, case-sensitive
-string comparison without URI normalization; an alternative spelling of
-a location requires an explicit alias. Key selection and caches MUST bind keys to
+The AS MUST use exact, case-sensitive string comparison, without URI
+normalization, for issuer identifiers, for client identifiers, and when
+comparing endorsed `jwks_uri` values with configured source URIs and
+aliases. An alternative spelling of a location requires an explicit
+alias. Key selection and caches MUST bind keys to
 the client identifier, issuer, selected key source, and applicable trust
 policy; `kid` alone or a union of keys from different entries is
 insufficient. The AS MUST ignore the `jku`, `x5u`, `x5c`, and `jwk`
