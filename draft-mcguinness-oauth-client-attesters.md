@@ -600,8 +600,8 @@ expires. Configure maximum ages so that this latency stays within the
 deployment's security requirements; short ages, for example one hour,
 keep it small. This profile specifies no ceiling, so
 a publisher cannot predict from the protocol alone how long a
-withdrawal takes to bite; deployments that need a predictable bound
-state one in their trust agreement. Fresh entries do not require
+withdrawal takes to take effect. A deployment that needs a predictable
+bound states one in its trust agreement. Fresh entries do not require
 retrieval on each request. These limits expire cached copies, not authoritative client
 registrations.
 
