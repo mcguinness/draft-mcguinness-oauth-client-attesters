@@ -746,7 +746,17 @@ for example through {{RFC7591}}:
 ~~~
 
 The attester signs with the same key as in {{example}}, so the
-attestation header is unchanged. Only `sub` differs:
+attestation header is the same:
+
+~~~ json
+{
+  "typ": "oauth-client-attestation+jwt",
+  "alg": "ES256",
+  "kid": "attester-1"
+}
+~~~
+
+In the payload only `sub` differs:
 
 ~~~ json
 {
