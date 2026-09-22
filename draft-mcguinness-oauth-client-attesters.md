@@ -279,6 +279,11 @@ An extension to this member is safe only if an implementation that
 ignores it reads the endorsement the same way. This profile defines no
 mechanism for marking an extension critical.
 
+Endorsed keys authenticate attesters, not clients. A key obtained from
+an endorsement MUST NOT be used to verify a client authentication
+assertion, and a key from the client's own `jwks` or `jwks_uri` MUST
+NOT be used to verify a Client Attestation.
+
 Every entry carries a complete issuer-to-key-location mapping, so an
 endorsement has the same meaning regardless of the AS policy that
 evaluates it, which the publisher cannot know. An endorsement
