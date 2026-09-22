@@ -92,9 +92,9 @@ attesters and their verification-key locations. Under AS-configured
 attester trust this plays the role that the bundle endpoint of SPIFFE
 client authentication plays {{SPIFFE-OAUTH}}, with the key source
 established out of band and the endorsed location only compared against
-it. Publisher-authorized key selection deliberately does the opposite,
-letting the publisher name the location, so it is not a substitute for
-SPIFFE bundle configuration. An AS accepts an endorsement only under
+it. Publisher-authorized key selection instead lets the publisher name
+the location, so it is not a substitute for SPIFFE bundle
+configuration. An AS accepts an endorsement only under
 its own trust policy. The resulting chain is:
 
 ~~~ ascii-art
