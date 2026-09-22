@@ -73,9 +73,16 @@ established to deployments ({{ATTEST, Section 10.8}}).
 
 This profile applies to both registered clients and clients identified by
 Client ID Metadata Documents {{CIMD}}. Either can endorse one or more
-attesters, for example across platforms or during migration. Deployments
-that manage attester trust entirely through authorization server (AS)
-configuration can continue to use {{ATTEST}} without this profile.
+attesters, for example across platforms or during migration.
+
+Publisher-authorized key selection exists for the case AS configuration
+does not reach: an AS serving many clients identified by metadata
+documents, each published by a different operator and attested by that
+operator's own platform attester, would otherwise need a configured
+entry for every attester of every client before any of them can
+authenticate. Deployments that can manage attester trust entirely
+through authorization server (AS) configuration do not need this
+profile and can continue to use {{ATTEST}}.
 
 This profile adds `client_attesters`: the client's endorsements of
 attesters and their verification-key locations. Under AS-configured
