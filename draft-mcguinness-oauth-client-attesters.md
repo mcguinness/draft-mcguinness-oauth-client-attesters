@@ -170,9 +170,13 @@ the authoritative metadata for a `client_id`.
 
 Client Attester Endorsement
 : A statement in the authoritative client metadata for a `client_id`
-  expressing the publisher's authorization for a specified Client
-  Attester to issue Client Attestations naming that `client_id`. An
-  endorsement delegates
+  identifying a Client Attester whose Client Attestations naming that
+  `client_id` are eligible for acceptance under this profile. It
+  expresses the publisher's authorization for that attester to speak
+  for the client. It does not make any attestation acceptable on its
+  own, which remains subject to AS policy ({{trust}}), and it says
+  nothing about which Client Instances the attester may attest, which
+  {{processing}} leaves to the attester. An endorsement delegates
   attestation authority for the named client only. It does not delegate
   OAuth authorization, user authority, or authority to further delegate
   attestation, and it does not extend to any other client.
