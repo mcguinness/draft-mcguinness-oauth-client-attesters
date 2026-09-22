@@ -82,7 +82,7 @@ documents, each published by a different operator and attested by that
 operator's own platform attester, would otherwise need a configured
 entry for every attester of every client before any of them can
 authenticate. Deployments that can manage attester trust entirely
-through authorization server (AS) configuration do not need this
+through AS configuration do not need this
 profile and can continue to use {{ATTEST}}.
 
 This profile adds `client_attesters`: the client's endorsements of
@@ -101,7 +101,8 @@ Client metadata --endorses--> Attester --attests--> Client Instance
        +----- AS accepts endorsement and validates proof-+
 ~~~
 
-The profile applies at AS endpoints accepting Client Attestations for
+The profile applies at authorization server (AS) endpoints accepting
+Client Attestations for
 client authentication or as an additional security signal, using the
 profiling hook in {{ATTEST, Section 13}}. In a typical deployment those
 are the token endpoint, the pushed authorization request endpoint
