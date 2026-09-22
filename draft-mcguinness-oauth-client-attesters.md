@@ -394,7 +394,11 @@ For each presentation, the AS MUST:
    another client authentication method ({{ATTEST, Section 7.6}}),
    validate that method under its own specification and verify that it
    authenticates that same client identifier. A mismatch is a failure of
-   that method.
+   that method. Where the companion method also establishes a
+   confirmation key, for example mutual TLS {{RFC8705}}, the
+   configuration selects which key binds the issued token; the AS MUST
+   NOT bind a token to the attested key on the strength of an
+   attestation it did not accept.
 5. Apply grant and authorization policy independently of the endorsement.
 
 ## Key Source Selection {#key-resolution}
