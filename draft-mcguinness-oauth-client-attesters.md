@@ -471,7 +471,10 @@ metadata maximum age bounds the delay before a newly published
 endorsement takes effect, as it bounds withdrawal.
 
 On observing that a CIMD has been removed (HTTP 404 or 410), the AS MUST
-stop using previously cached endorsements from that document. Removal
+stop using previously cached endorsements from that document, and MUST
+NOT use them again unless a later retrieval of that document succeeds.
+A retrieval failure that is not a removal, such as a timeout or a 5xx
+status, does not by itself invalidate an unexpired cached copy. Removal
 cannot be detected while the AS continues to use an unexpired cache.
 
 ## Endorsement and Key Changes
