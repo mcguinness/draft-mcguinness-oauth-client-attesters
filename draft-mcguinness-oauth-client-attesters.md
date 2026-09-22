@@ -546,8 +546,9 @@ The considerations in {{ATTEST}}, {{CIMD}}, and {{RFC8725}} apply.
   retrieval. Under publisher-authorized key selection the publisher
   chooses both the issuer and the key location, so an authorized
   publisher can cause the AS to issue an outbound request to an origin
-  of the publisher's choosing; {{key-resolution}} bounds that request
-  but does not remove it. An AS defends itself by bounding response
+  of the publisher's choosing. {{key-resolution}} constrains where that
+  request may go but does not remove it, and an AS defends itself
+  further by bounding response
   size and request time and by blocking prohibited network
   destinations. Endorsed URLs remain subject to SSRF defenses;
   endorsement does not make a network location safe.
