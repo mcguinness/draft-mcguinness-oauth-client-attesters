@@ -209,8 +209,7 @@ would otherwise need a configured entry for every attester of every
 client before any of them could authenticate.
 
 When combined with {{INSTANCE-ID}}, the same two requirements establish
-attester authority; instance continuity remains independent. Other ATTEST
-deployments can use configured trust without this profile.
+attester authority; instance continuity remains independent.
 
 ## Registered Endorsements {#registered}
 
