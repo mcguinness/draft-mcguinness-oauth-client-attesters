@@ -178,13 +178,6 @@ the endorsed set; it MUST NOT add an unendorsed attester or fall back to
 another trust mechanism. An endorsement does not by itself establish
 that the client is trusted or authorized to access a resource.
 
-Publisher-authorized key selection exists for the case that AS
-configuration does not reach. Consider an AS serving many clients
-identified by metadata documents, each published by a different
-operator and attested by that operator's own platform attester. That AS
-would otherwise need a configured entry for every attester of every
-client before any of them could authenticate.
-
 Two key-trust policies exist, and the AS determines from its configured
 policy which one applies. The choice is not free per association:
 AS-configured attester trust is keyed by exact issuer string and, once
@@ -207,6 +200,13 @@ them:
   particular attester and configures its key source. The endorsement
   authorizes that attester to act for the client; it cannot supply the
   trust anchor ({{key-resolution}}).
+
+Publisher-authorized key selection exists for the case that AS
+configuration does not reach. Consider an AS serving many clients
+identified by metadata documents, each published by a different
+operator and attested by that operator's own platform attester. That AS
+would otherwise need a configured entry for every attester of every
+client before any of them could authenticate.
 
 When combined with {{INSTANCE-ID}}, the same two requirements establish
 attester authority; instance continuity remains independent. Other ATTEST
