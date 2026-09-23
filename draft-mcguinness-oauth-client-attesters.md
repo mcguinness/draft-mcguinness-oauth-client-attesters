@@ -231,7 +231,7 @@ stored metadata and from the client information response
 ({{RFC7591, Section 3.2.1}}), so that the response never shows an
 endorsement the AS has not accepted.
 
-## Profile Selection {#profile-selection}
+## Applicability and Scope {#profile-selection}
 
 The AS determines that this profile applies to a request by local
 policy, which can be scoped per client; this out-of-band determination
