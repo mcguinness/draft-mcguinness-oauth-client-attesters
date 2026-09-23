@@ -70,8 +70,8 @@ Attestation-Based Client Authentication {{ATTEST}} allows a Client
 Attester to make security-relevant statements about a client instance
 and the key it holds. For an authorization server (AS) to rely on such
 an attestation, two distinct questions need answers: is the attester
-trusted, and is that attester authorized to speak for this particular
-client?
+trusted ({{ATTEST, Section 7.1}}), and is that attester authorized to
+speak for this particular client?
 
 ATTEST defines the Client Attestation format, its presentation, and its
 validation, and intentionally leaves establishment of Client Attester
