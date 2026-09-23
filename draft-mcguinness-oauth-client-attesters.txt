@@ -4,8 +4,8 @@
 
 Web Authorization Protocol                                 K. McGuinness
 Internet-Draft                                               Independent
-Intended status: Standards Track                       22 September 2026
-Expires: 26 March 2027
+Intended status: Standards Track                       23 September 2026
+Expires: 27 March 2027
 
 
                  OAuth 2.0 Client Attester Endorsement
@@ -13,13 +13,16 @@ Expires: 26 March 2027
 
 Abstract
 
-   This specification profiles OAuth 2.0 Attestation-Based Client
-   Authentication with client metadata identifying endorsed attesters
-   and their verification-key locations.  It defines authorization-
-   server validation and withdrawal rules for endorsements in registered
-   client metadata or Client ID Metadata Documents, and an
-   authorization-server metadata parameter advertising support.  It
-   introduces no new credential or authentication method.
+   OAuth 2.0 Attestation-Based Client Authentication requires an
+   authorization server to trust the attester that vouches for a client
+   instance, but does not define how a client identifies the attesters
+   authorized to speak for it.  This specification closes that gap with
+   client metadata, for registered clients or Client ID Metadata
+   Documents, naming endorsed attesters and their verification-key
+   locations, and defines how an authorization server validates
+   endorsements and processes their withdrawal while keeping control of
+   whether an endorsement is trusted.  It introduces no new credential
+   or client authentication method.
 
 About This Document
 
@@ -55,7 +58,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 26 March 2027.
+   This Internet-Draft will expire on 27 March 2027.
 
 Copyright Notice
 
@@ -77,7 +80,7 @@ Table of Contents
    2.  Conventions and Trust Model
      2.1.  Acceptance Policy
      2.2.  Registered Endorsements
-     2.3.  Profile Selection
+     2.3.  Applicability and Scope
      2.4.  Conformance
    3.  Client Metadata
    4.  Authorization Server Metadata
@@ -102,65 +105,60 @@ Table of Contents
 
 1.  Introduction
 
-   A client can have many installations, each holding a different key.
-   Attestation-Based Client Authentication [ATTEST] allows an attester
-   to authenticate those instances.  ATTEST requires an attestation to
-   verify under the key of a known and trusted Client Attester
-   ([ATTEST], Section 7.1) and leaves how that trust is established to
-   deployments ([ATTEST], Section 10.8).  It does not define how a
-   client identifies the attesters authorized to speak for it.
-   Authorization server configuration alone can carry that association,
-   but it does not let a client select or rotate its own attesters.
-   This specification defines client metadata for expressing that
-   endorsement while leaving the authorization server in control of
-   whether an endorsement is accepted.
+   Attestation-Based Client Authentication [ATTEST] allows a Client
+   Attester to make security-relevant statements about a client instance
+   and the key it holds.  For an authorization server (AS) to rely on
+   such an attestation, two distinct questions need answers: is the
+   attester trusted ([ATTEST], Section 7.1), and is that attester
+   authorized to speak for this particular client?
 
-   This profile applies to both registered clients and clients
-   identified by Client ID Metadata Documents (CIMDs) [CIMD].  Either
-   can endorse one or more attesters, for example across platforms or
-   during migration.
+   ATTEST defines the Client Attestation format, its presentation, and
+   its validation, and intentionally leaves establishment of Client
+   Attester trust to deployments ([ATTEST], Section 10.8).  It does not
+   define a relationship by which a client identifies the attesters
+   authorized to attest its instances.
 
-   Publisher-authorized key selection exists for the case that AS
-   configuration does not reach.  Consider an AS serving many clients
-   identified by metadata documents, each published by a different
-   operator and attested by that operator's own platform attester.  That
-   AS would otherwise need a configured entry for every attester of
-   every client before any of them could authenticate.
+   That relationship matters when a client has many independently
+   provisioned instances, uses a platform or workload attester, migrates
+   between attesters, or is identified by a Client ID Metadata Document
+   (CIMD) [CIMD] rather than by pre-established bilateral configuration.
+   Requiring the AS to configure every client-to-attester association
+   makes that relationship an AS deployment concern and limits the
+   client's ability to select, rotate, or withdraw its attesters.
 
-   Deployments that can manage attester trust entirely through AS
-   configuration do not need this profile and can continue to use
-   [ATTEST].
-
-   This profile adds client_attesters: the client's endorsements of
-   attesters and their verification-key locations.  Under AS-configured
-   attester trust this plays the role that the bundle endpoint of SPIFFE
-   client authentication plays [SPIFFE-OAUTH], with the key source
-   established out of band and the endorsed location only compared
-   against it.  Publisher-authorized key selection instead lets the
-   publisher name the location, so it is not a substitute for SPIFFE
-   bundle configuration.  An AS accepts an endorsement only under its
-   own trust policy.  The resulting chain is:
+   This specification makes the relationship explicit by defining a
+   Client Attester Endorsement in client metadata:
 
    Client metadata --endorses--> Attester --attests--> Client Instance
-          |                         |                       |
-          +----- AS accepts endorsement and validates proof-+
+          \__________________ AS validates __________________/
 
-   The profile applies at authorization server (AS) endpoints accepting
-   Client Attestations for client authentication or as an additional
-   security signal, using the profiling hook in [ATTEST], Section 13.
-   In a typical deployment those are the token endpoint, the pushed
-   authorization request endpoint [RFC9126], the device authorization
-   endpoint [RFC8628], and the introspection [RFC7662] and revocation
-   [RFC7009] endpoints; the authorization endpoint does not authenticate
-   clients and is out of scope.  A party authenticating at any of these
-   is acting as a client, including a resource server presenting a
-   Client Attestation to the introspection endpoint.  Where a flow
-   authenticates more than once, each presentation is evaluated on its
-   own under Section 5.2.  The profile retains ATTEST's wire format,
-   proof methods, and token binding.
+   An endorsement says that the client publisher authorizes the named
+   Client Attester to speak for that client.  It does not make that
+   attester trusted by the AS.  The AS remains responsible for deciding
+   whether to accept the endorsed attester and how its verification keys
+   are trusted (Section 2).
 
-   This profile, [ATTEST], and [INSTANCE-ID] answer three separate
-   questions in layers:
+   This separates two authorities that otherwise tend to be conflated:
+
+   *  the client publisher determines which attesters are authorized to
+      speak for the client; and
+
+   *  the AS determines which of those endorsements it is willing to
+      trust.
+
+   The profile therefore enables client-managed attester association
+   without transferring trust-policy control to the client publisher.
+
+   This specification adds the client_attesters client metadata member,
+   containing endorsed attesters and their verification-key locations
+   (Section 3).  It applies to both registered clients and clients
+   identified by CIMDs, and supports several simultaneous endorsements
+   for cases such as heterogeneous platforms and attester migration.
+
+   The profile builds directly on ATTEST and introduces no new
+   credential or client authentication method.  ATTEST, this profile,
+   and the optional Client Instance ID profile [INSTANCE-ID] address
+   separate layers:
 
    Client Attester Endorsement    Who may attest for this client?
                 |
@@ -174,33 +172,11 @@ Table of Contents
    identification does not establish attester trust.  Neither
    establishes user delegation.
 
-   A resource server that accepts a Client Attestation presented to it
-   ([ATTEST], Section 7.6) relies on configured attester trust; this
-   profile does not define endorsement discovery or acceptance there.
-   That keeps client metadata resolution and endorsement-policy
-   evaluation at the AS rather than distributing those functions to
-   resource servers, and it has a consequence: withdrawing an
-   endorsement (Section 6) does not reach a resource server validating
-   attestations directly.  This is distinct from a resource server
-   authenticating to an AS endpoint, which acts as a client and is in
-   scope above.
-
-   The AS conveys what it decided through the artifacts it issues rather
-   than through endorsement data, and what those artifacts carry depends
-   on the token-binding method the deployment selects.  In ATTEST's
-   combined mode ([ATTEST], Section 5.2) the Demonstrating Proof of
-   Possession (DPoP) key [RFC9449] and the attested Client Instance Key
-   are one key, so the issued token's confirmation claim names the
-   attested key.  Where DPoP is used alongside a separate Client
-   Attestation proof, that same section does not require the DPoP key to
-   match the attestation's cnf, and the token is bound to the DPoP key
-   instead.
-
-   A confirmation claim reports a binding, not an endorsement verdict.
-   Introspection [RFC7662] likewise reports the token's state rather
-   than how the AS evaluated the endorsement.  Neither tells a resource
-   server whether an endorsement was accepted, which is why endorsement
-   policy stays at the AS.
+   Deployments that can manage client-to-attester relationships entirely
+   through AS configuration can continue to use [ATTEST] without this
+   profile.  This profile is intended for deployments where that
+   association needs to be expressed and maintained by the client
+   publisher while remaining subject to AS acceptance policy.
 
 2.  Conventions and Trust Model
 
@@ -272,9 +248,15 @@ Table of Contents
       endorsement authorizes that attester to act for the client; it
       cannot supply the trust anchor (Section 5.3).
 
+   Publisher-authorized key selection exists for the case that AS
+   configuration does not reach.  Consider an AS serving many clients
+   identified by metadata documents, each published by a different
+   operator and attested by that operator's own platform attester.  That
+   AS would otherwise need a configured entry for every attester of
+   every client before any of them could authenticate.
+
    When combined with [INSTANCE-ID], the same two requirements establish
-   attester authority; instance continuity remains independent.  Other
-   ATTEST deployments can use configured trust without this profile.
+   attester authority; instance continuity remains independent.
 
 2.2.  Registered Endorsements
 
@@ -295,7 +277,7 @@ Table of Contents
    information response ([RFC7591], Section 3.2.1), so that the response
    never shows an endorsement the AS has not accepted.
 
-2.3.  Profile Selection
+2.3.  Applicability and Scope
 
    The AS determines that this profile applies to a request by local
    policy, which can be scoped per client; this out-of-band
@@ -311,6 +293,47 @@ Table of Contents
    CIMD leaves handling of unrecognized metadata unspecified; this
    profile is independent of that choice.  Publishing client_attesters
    does not require an AS to apply this profile.
+
+   The profile applies at AS endpoints accepting Client Attestations for
+   client authentication or as an additional security signal.  In a
+   typical deployment those are the token endpoint, the pushed
+   authorization request endpoint [RFC9126], the device authorization
+   endpoint [RFC8628], and the introspection [RFC7662] and revocation
+   [RFC7009] endpoints; the authorization endpoint does not authenticate
+   clients and is out of scope.  A party authenticating at any of these
+   is acting as a client, including a resource server presenting a
+   Client Attestation to the introspection endpoint.  Where a flow
+   authenticates more than once, each presentation is evaluated on its
+   own under Section 5.2.  The profile retains ATTEST's wire format,
+   proof methods, and token binding.
+
+   A resource server that accepts a Client Attestation presented to it
+   ([ATTEST], Section 7.6) relies on configured attester trust; this
+   profile does not define endorsement discovery or acceptance there.
+   That keeps client metadata resolution and endorsement-policy
+   evaluation at the AS rather than distributing those functions to
+   resource servers, and it has a consequence: withdrawing an
+   endorsement (Section 6) does not reach a resource server validating
+   attestations directly.  This is distinct from a resource server
+   authenticating to an AS endpoint, which acts as a client and is in
+   scope above.
+
+   The AS conveys what it decided through the artifacts it issues rather
+   than through endorsement data, and what those artifacts carry depends
+   on the token-binding method the deployment selects.  In ATTEST's
+   combined mode ([ATTEST], Section 5.2) the Demonstrating Proof of
+   Possession (DPoP) key [RFC9449] and the attested Client Instance Key
+   are one key, so the issued token's confirmation claim names the
+   attested key.  Where DPoP is used alongside a separate Client
+   Attestation proof, that same section does not require the DPoP key to
+   match the attestation's cnf, and the token is bound to the DPoP key
+   instead.
+
+   A confirmation claim reports a binding, not an endorsement verdict.
+   Introspection [RFC7662] likewise reports the token's state rather
+   than how the AS evaluated the endorsement.  Neither tells a resource
+   server whether an endorsement was accepted, which is why endorsement
+   policy stays at the AS.
 
 2.4.  Conformance
 
@@ -378,6 +401,13 @@ Table of Contents
    endorsement therefore identifies a Client Attester by both its issuer
    and its key location.  How each key-trust policy uses that location
    is specified in Section 5.3.
+
+   Under AS-configured attester trust the endorsed jwks_uri plays the
+   role that the bundle endpoint of SPIFFE client authentication plays
+   [SPIFFE-OAUTH], with the key source established out of band and the
+   endorsed location only compared against it.  Publisher-authorized key
+   selection instead lets the publisher name the location, so it is not
+   a substitute for SPIFFE bundle configuration.
 
    Each entry is a Client Attester Endorsement (Section 2) for the
    client_id whose metadata contains it.  An issuer identifies a
