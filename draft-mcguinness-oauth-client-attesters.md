@@ -91,8 +91,8 @@ This specification makes the relationship explicit by defining a Client
 Attester Endorsement in client metadata:
 
 ~~~ ascii-art
-Client --endorses--> Attester --attests--> Client Instance
-      \_______________ AS validates _______________/
+Client metadata --endorses--> Attester --attests--> Client Instance
+       \__________________ AS validates __________________/
 ~~~
 
 An endorsement says that the client publisher authorizes the named
@@ -108,7 +108,7 @@ This separates two authorities that otherwise tend to be conflated:
 * the AS determines which of those endorsements it is willing to trust.
 
 The profile therefore enables client-managed attester association
-without transferring trust-policy control to the client.
+without transferring trust-policy control to the client publisher.
 
 This specification adds the `client_attesters` client metadata member,
 containing endorsed attesters and their verification-key locations
