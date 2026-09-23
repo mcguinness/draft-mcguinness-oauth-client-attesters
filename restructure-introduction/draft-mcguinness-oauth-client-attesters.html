@@ -11,11 +11,12 @@
 authorization server to trust the attester that vouches for a client
 instance, but does not define how a client identifies the attesters
 authorized to speak for it. This specification closes that gap with
-client metadata naming endorsed attesters and their verification-key
-locations, and defines how an authorization server validates and
-withdraws those endorsements while keeping control of whether an
-endorsement is trusted. It introduces no new credential or client
-authentication method. 
+client metadata, for registered clients or Client ID Metadata
+Documents, naming endorsed attesters and their verification-key
+locations, and defines how an authorization server validates
+endorsements and processes their withdrawal while keeping control of
+whether an endorsement is trusted. It introduces no new credential or
+client authentication method. 
     " name="description">
 <meta content="xml2rfc 3.34.1" name="generator">
 <meta content="OAuth" name="keyword">
@@ -1055,7 +1056,7 @@ svg {
 </tr></thead>
 <tfoot><tr>
 <td class="left">McGuinness</td>
-<td class="center">Expires 26 March 2027</td>
+<td class="center">Expires 27 March 2027</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1068,12 +1069,12 @@ svg {
 <dd class="internet-draft">draft-mcguinness-oauth-client-attesters-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-09-22" class="published">22 September 2026</time>
+<time datetime="2026-09-23" class="published">23 September 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2027-03-26">26 March 2027</time></dd>
+<dd class="expires"><time datetime="2027-03-27">27 March 2027</time></dd>
 <dt class="label-authors">Author:</dt>
 <dd class="authors">
 <div class="author">
@@ -1090,11 +1091,12 @@ svg {
 authorization server to trust the attester that vouches for a client
 instance, but does not define how a client identifies the attesters
 authorized to speak for it. This specification closes that gap with
-client metadata naming endorsed attesters and their verification-key
-locations, and defines how an authorization server validates and
-withdraws those endorsements while keeping control of whether an
-endorsement is trusted. It introduces no new credential or client
-authentication method.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+client metadata, for registered clients or Client ID Metadata
+Documents, naming endorsed attesters and their verification-key
+locations, and defines how an authorization server validates
+endorsements and processes their withdrawal while keeping control of
+whether an endorsement is trusted. It introduces no new credential or
+client authentication method.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
 </section>
 <section class="note rfcEditorRemove" id="section-note.1">
       <h2 id="name-about-this-document">
@@ -1131,7 +1133,7 @@ authentication method.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 26 March 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 27 March 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1173,7 +1175,7 @@ authentication method.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
                 <p id="section-toc.1-1.2.2.2.1" class="keepWithNext"><a href="#section-2.2" class="auto internal xref">2.2</a>.  <a href="#name-registered-endorsements" class="internal xref">Registered Endorsements</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.3">
-                <p id="section-toc.1-1.2.2.3.1"><a href="#section-2.3" class="auto internal xref">2.3</a>.  <a href="#name-profile-selection" class="internal xref">Profile Selection</a></p>
+                <p id="section-toc.1-1.2.2.3.1"><a href="#section-2.3" class="auto internal xref">2.3</a>.  <a href="#name-applicability-and-scope" class="internal xref">Applicability and Scope</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.4">
                 <p id="section-toc.1-1.2.2.4.1"><a href="#section-2.4" class="auto internal xref">2.4</a>.  <a href="#name-conformance" class="internal xref">Conformance</a></p>
@@ -1259,8 +1261,8 @@ authentication method.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
 Attester to make security-relevant statements about a client instance
 and the key it holds. For an authorization server (AS) to rely on such
 an attestation, two distinct questions need answers: is the attester
-trusted, and is that attester authorized to speak for this particular
-client?<a href="#section-1-1" class="pilcrow">¶</a></p>
+trusted (<span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-7.1" class="relref">Section 7.1</a></span>), and is that attester authorized to
+speak for this particular client?<a href="#section-1-1" class="pilcrow">¶</a></p>
 <p id="section-1-2">ATTEST defines the Client Attestation format, its presentation, and its
 validation, and intentionally leaves establishment of Client Attester
 trust to deployments (<span>[<a href="#ATTEST" class="cite xref">ATTEST</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-10.8" class="relref">Section 10.8</a></span>). It does not define a
@@ -1277,8 +1279,8 @@ client's ability to select, rotate, or withdraw its attesters.<a href="#section-
 Attester Endorsement in client metadata:<a href="#section-1-4" class="pilcrow">¶</a></p>
 <div class="alignLeft art-ascii-art art-text artwork" id="section-1-5">
 <pre>
-Client --endorses--&gt; Attester --attests--&gt; Client Instance
-      \_______________ AS validates _______________/
+Client metadata --endorses--&gt; Attester --attests--&gt; Client Instance
+       \__________________ AS validates __________________/
 </pre><a href="#section-1-5" class="pilcrow">¶</a>
 </div>
 <p id="section-1-6">An endorsement says that the client publisher authorizes the named
@@ -1297,7 +1299,7 @@ speak for the client; and<a href="#section-1-8.1.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
 <p id="section-1-9">The profile therefore enables client-managed attester association
-without transferring trust-policy control to the client.<a href="#section-1-9" class="pilcrow">¶</a></p>
+without transferring trust-policy control to the client publisher.<a href="#section-1-9" class="pilcrow">¶</a></p>
 <p id="section-1-10">This specification adds the <code>client_attesters</code> client metadata member,
 containing endorsed attesters and their verification-key locations
 (<a href="#metadata" class="auto internal xref">Section 3</a>). It applies to both registered clients and clients
@@ -1379,23 +1381,17 @@ attester alone does not authorize it for a client. AS policy can narrow
 the endorsed set; it <span class="bcp14">MUST NOT</span> add an unendorsed attester or fall back to
 another trust mechanism. An endorsement does not by itself establish
 that the client is trusted or authorized to access a resource.<a href="#section-2.1-3" class="pilcrow">¶</a></p>
-<p id="section-2.1-4">Publisher-authorized key selection exists for the case that AS
-configuration does not reach. Consider an AS serving many clients
-identified by metadata documents, each published by a different
-operator and attested by that operator's own platform attester. That AS
-would otherwise need a configured entry for every attester of every
-client before any of them could authenticate.<a href="#section-2.1-4" class="pilcrow">¶</a></p>
-<p id="section-2.1-5">Two key-trust policies exist, and the AS determines from its configured
+<p id="section-2.1-4">Two key-trust policies exist, and the AS determines from its configured
 policy which one applies. The choice is not free per association:
 AS-configured attester trust is keyed by exact issuer string and, once
 configured for any client, governs that issuer string for every client.
 Publisher-authorized key selection is keyed by the client publisher and
 needs no per-attester configuration. The two policies are defined
 below; <a href="#key-resolution" class="auto internal xref">Section 5.3</a> gives the procedure that selects between
-them:<a href="#section-2.1-5" class="pilcrow">¶</a></p>
+them:<a href="#section-2.1-4" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-2.1-6.1">
-            <p id="section-2.1-6.1.1"><strong>Publisher-authorized key selection:</strong> the AS authorizes the
+<li class="normal" id="section-2.1-5.1">
+            <p id="section-2.1-5.1.1"><strong>Publisher-authorized key selection:</strong> the AS authorizes the
 publisher of specified clients to select both the attester and its
 key source, so the endorsed <code>jwks_uri</code> supplies the keys. For CIMD,
 configure exact client URLs or HTTPS origins, optionally restricted
@@ -1403,18 +1399,23 @@ to path segments. Successful metadata retrieval does not establish
 this authorization. Shared hosting requires a boundary that excludes
 other publishers. For a registered client, the publisher is the party
 authorized to set endorsements under <a href="#registered" class="auto internal xref">Section 2.2</a>, and the AS
-configures whether that party's endorsements select keys.<a href="#section-2.1-6.1.1" class="pilcrow">¶</a></p>
+configures whether that party's endorsements select keys.<a href="#section-2.1-5.1.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-2.1-6.2">
-            <p id="section-2.1-6.2.1"><strong>AS-configured attester trust:</strong> the AS independently trusts a
+          <li class="normal" id="section-2.1-5.2">
+            <p id="section-2.1-5.2.1"><strong>AS-configured attester trust:</strong> the AS independently trusts a
 particular attester and configures its key source. The endorsement
 authorizes that attester to act for the client; it cannot supply the
-trust anchor (<a href="#key-resolution" class="auto internal xref">Section 5.3</a>).<a href="#section-2.1-6.2.1" class="pilcrow">¶</a></p>
+trust anchor (<a href="#key-resolution" class="auto internal xref">Section 5.3</a>).<a href="#section-2.1-5.2.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
+<p id="section-2.1-6">Publisher-authorized key selection exists for the case that AS
+configuration does not reach. Consider an AS serving many clients
+identified by metadata documents, each published by a different
+operator and attested by that operator's own platform attester. That AS
+would otherwise need a configured entry for every attester of every
+client before any of them could authenticate.<a href="#section-2.1-6" class="pilcrow">¶</a></p>
 <p id="section-2.1-7">When combined with <span>[<a href="#INSTANCE-ID" class="cite xref">INSTANCE-ID</a>]</span>, the same two requirements establish
-attester authority; instance continuity remains independent. Other ATTEST
-deployments can use configured trust without this profile.<a href="#section-2.1-7" class="pilcrow">¶</a></p>
+attester authority; instance continuity remains independent.<a href="#section-2.1-7" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="registered">
@@ -1442,8 +1443,8 @@ endorsement the AS has not accepted.<a href="#section-2.2-2" class="pilcrow">¶<
 </div>
 <div id="profile-selection">
 <section id="section-2.3">
-        <h3 id="name-profile-selection">
-<a href="#section-2.3" class="section-number selfRef">2.3. </a><a href="#name-profile-selection" class="section-name selfRef">Profile Selection</a>
+        <h3 id="name-applicability-and-scope">
+<a href="#section-2.3" class="section-number selfRef">2.3. </a><a href="#name-applicability-and-scope" class="section-name selfRef">Applicability and Scope</a>
         </h3>
 <p id="section-2.3-1">The AS determines that this profile applies to a request by local
 policy, which can be scoped per client; this out-of-band determination
@@ -1581,25 +1582,25 @@ list; and<a href="#section-3-4.1.1" class="pilcrow">¶</a></p>
 <p id="section-3-5">Rejection under this profile does not affect the client's other
 authentication methods and does not by itself make a CIMD invalid or
 uncacheable under <span>[<a href="#CIMD" class="cite xref">CIMD</a>]</span>.<a href="#section-3-5" class="pilcrow">¶</a></p>
-<p id="section-3-6">Under AS-configured attester trust the endorsed <code>jwks_uri</code> plays the
-role that the bundle endpoint of SPIFFE client authentication plays
-<span>[<a href="#SPIFFE-OAUTH" class="cite xref">SPIFFE-OAUTH</a>]</span>, with the key source established out of band and the
-endorsed location only compared against it. Publisher-authorized key
-selection instead lets the publisher name the location, so it is not a
-substitute for SPIFFE bundle configuration.<a href="#section-3-6" class="pilcrow">¶</a></p>
-<p id="section-3-7">An extension to this member is safe only if an implementation that
+<p id="section-3-6">An extension to this member is safe only if an implementation that
 ignores it reads the endorsement the same way. This profile defines no
-mechanism for marking an extension critical.<a href="#section-3-7" class="pilcrow">¶</a></p>
-<p id="section-3-8">Endorsed keys authenticate attesters, not clients. A key obtained from
+mechanism for marking an extension critical.<a href="#section-3-6" class="pilcrow">¶</a></p>
+<p id="section-3-7">Endorsed keys authenticate attesters, not clients. A key obtained from
 an endorsement <span class="bcp14">MUST NOT</span> be used to verify a client authentication
-assertion, and a key from the client's own <code>jwks</code> or <code>jwks_uri</code> <span class="bcp14">MUST NOT</span> be used to verify a Client Attestation.<a href="#section-3-8" class="pilcrow">¶</a></p>
-<p id="section-3-9">Every entry carries a complete issuer-to-key-location mapping, so an
+assertion, and a key from the client's own <code>jwks</code> or <code>jwks_uri</code> <span class="bcp14">MUST NOT</span> be used to verify a Client Attestation.<a href="#section-3-7" class="pilcrow">¶</a></p>
+<p id="section-3-8">Every entry carries a complete issuer-to-key-location mapping, so an
 endorsement has the same meaning regardless of which AS policy
 evaluates it, and the publisher cannot know which policy that is. An
 endorsement
 therefore identifies a Client Attester by both its issuer and its key
 location. How each key-trust policy uses that location is specified in
-<a href="#key-resolution" class="auto internal xref">Section 5.3</a>.<a href="#section-3-9" class="pilcrow">¶</a></p>
+<a href="#key-resolution" class="auto internal xref">Section 5.3</a>.<a href="#section-3-8" class="pilcrow">¶</a></p>
+<p id="section-3-9">Under AS-configured attester trust the endorsed <code>jwks_uri</code> plays the
+role that the bundle endpoint of SPIFFE client authentication plays
+<span>[<a href="#SPIFFE-OAUTH" class="cite xref">SPIFFE-OAUTH</a>]</span>, with the key source established out of band and the
+endorsed location only compared against it. Publisher-authorized key
+selection instead lets the publisher name the location, so it is not a
+substitute for SPIFFE bundle configuration.<a href="#section-3-9" class="pilcrow">¶</a></p>
 <p id="section-3-10">Each entry is a Client Attester Endorsement (<a href="#trust" class="auto internal xref">Section 2</a>) for the
 <code>client_id</code> whose metadata contains it. An <code>issuer</code> identifies a
 namespace, not a discovery endpoint.<a href="#section-3-10" class="pilcrow">¶</a></p>
