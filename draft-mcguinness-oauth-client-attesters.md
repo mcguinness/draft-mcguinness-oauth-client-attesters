@@ -329,13 +329,6 @@ Rejection under this profile does not affect the client's other
 authentication methods and does not by itself make a CIMD invalid or
 uncacheable under {{CIMD}}.
 
-Under AS-configured attester trust the endorsed `jwks_uri` plays the
-role that the bundle endpoint of SPIFFE client authentication plays
-{{SPIFFE-OAUTH}}, with the key source established out of band and the
-endorsed location only compared against it. Publisher-authorized key
-selection instead lets the publisher name the location, so it is not a
-substitute for SPIFFE bundle configuration.
-
 An extension to this member is safe only if an implementation that
 ignores it reads the endorsement the same way. This profile defines no
 mechanism for marking an extension critical.
@@ -352,6 +345,13 @@ endorsement
 therefore identifies a Client Attester by both its issuer and its key
 location. How each key-trust policy uses that location is specified in
 {{key-resolution}}.
+
+Under AS-configured attester trust the endorsed `jwks_uri` plays the
+role that the bundle endpoint of SPIFFE client authentication plays
+{{SPIFFE-OAUTH}}, with the key source established out of band and the
+endorsed location only compared against it. Publisher-authorized key
+selection instead lets the publisher name the location, so it is not a
+substitute for SPIFFE bundle configuration.
 
 Each entry is a Client Attester Endorsement ({{trust}}) for the
 `client_id` whose metadata contains it. An `issuer` identifies a
