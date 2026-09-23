@@ -56,7 +56,8 @@ OAuth 2.0 Attestation-Based Client Authentication requires an
 authorization server to trust the attester that vouches for a client
 instance, but does not define how a client identifies the attesters
 authorized to speak for it. This specification closes that gap with
-client metadata naming endorsed attesters and their verification-key
+client metadata, for registered clients or Client ID Metadata
+Documents, naming endorsed attesters and their verification-key
 locations, and defines how an authorization server validates
 endorsements and processes their withdrawal while keeping control of
 whether an endorsement is trusted. It introduces no new credential or
