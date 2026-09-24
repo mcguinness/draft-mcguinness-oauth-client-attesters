@@ -68,7 +68,7 @@ client authentication method.
 # Introduction
 
 Attestation-Based Client Authentication {{ATTEST}} lets a Client
-Attester make security-relevant statements about a client instance and
+Attester make security-relevant statements about a Client Instance and
 the key it holds. Before an authorization server (AS) relies on such an
 attestation, it needs answers to two distinct questions: is the
 attester trusted ({{ATTEST, Section 7.1}}), and is that attester
@@ -152,11 +152,11 @@ Client Attester Endorsement
 : A statement in the authoritative client metadata for a `client_id`
   identifying a Client Attester whose Client Attestations naming that
   `client_id` are eligible for acceptance under this profile, subject to
-  AS policy ({{trust}}). It expresses the publisher's authorization for that
-  attester to speak for the client; it does not say which Client
-  Instances the attester may attest, which {{processing}} leaves to the
-  attester. An endorsement delegates
-  attestation authority for the named client only. It does not delegate
+  AS policy ({{acceptance}}). It expresses the publisher's authorization
+  for that attester to speak for the client; it does not say which
+  Client Instances the attester may attest, which {{processing}} leaves
+  to the attester. An endorsement delegates attestation authority for
+  the named client only. It does not delegate
   OAuth authorization, user authority, or authority to further delegate
   attestation.
 
@@ -174,8 +174,8 @@ Attestation only when both of the following hold:
 
 Endorsement alone does not make an attester trusted, and AS trust in an
 attester alone does not authorize it for a client. AS policy can narrow
-the endorsed set, and authorizing a publisher to select keys
-({{key-resolution}}) permits each attester that publisher endorses.
+the endorsed set, and authorizing a publisher to select keys permits
+each attester that publisher endorses, subject to {{key-resolution}}.
 AS policy MUST NOT add an unendorsed attester or accept an
 attestation through another attester-trust mechanism. Where the
 attestation is optional, proceeding on a companion client
@@ -188,8 +188,8 @@ applies. The choice is not free per association: AS-configured
 attester trust is keyed by exact issuer string and, once configured for
 any client, governs that issuer string for every client.
 Publisher-authorized key selection is keyed by the client publisher and
-needs no per-attester configuration. {{key-resolution}} gives the
-procedure that selects between them:
+needs no per-attester configuration. The two policies are below;
+{{key-resolution}} gives the procedure that selects between them:
 
 * **Publisher-authorized key selection:** the AS authorizes the
   publisher of specified clients to select both the attester and its
@@ -342,7 +342,7 @@ Endorsed keys authenticate attesters, not clients. A key obtained from
 an endorsement MUST NOT be used to verify a client authentication
 assertion, and a key from the client's own `jwks` or `jwks_uri` MUST
 NOT be used to verify a Client Attestation. An entry whose `jwks_uri`
-is identical to the client's own `jwks_uri` is therefore malformed.
+is identical to the client's own `jwks_uri` is also malformed.
 
 An endorsement identifies a Client Attester by both issuer and key
 location. The publisher cannot know which key-trust policy the AS
@@ -367,8 +367,9 @@ location, so it is no substitute for SPIFFE bundle configuration.
 
 Clients using attestation as client authentication select
 `attest_jwt_client_auth` or `attest_jwt_client_auth_dpop` under
-{{ATTEST, Section 9}}. When attestation supplements another method,
-that method remains required under {{ATTEST, Section 7.6}}. The member
+{{ATTEST, Section 9}}. When attestation supplements another method
+({{ATTEST, Section 7.6}}), that method still authenticates the client.
+The member
 does not select a grant, proof method, or the optional
 instance-identification profile.
 
@@ -383,7 +384,8 @@ defines one OPTIONAL authorization server metadata parameter
   `client_attesters` under this profile. The default is `false`.
 
 Whether the profile governs a particular client, and which key-trust
-policy applies to an attester, remain AS policy ({{profile-selection}}).
+policy applies to an attester, remain AS policy ({{profile-selection}},
+{{acceptance}}).
 
 # Attestation and AS Processing {#processing}
 
@@ -548,8 +550,8 @@ Endorsement validation covers these parts of {{as-processing}}:
 * selecting the key source and resolving `kid` in step 3 under
   {{key-resolution}}, including an endorsed `jwks_uri` that matches
   neither the configured key source nor a configured alias; and
-* the case where no eligible key is available after any refresh
-  permitted by {{updates}}.
+* finding no eligible key after any refresh permitted by
+  {{updates}}.
 
 How a failure is reported depends on the role the Client Attestation
 plays in the request.
@@ -566,9 +568,9 @@ Attestation is the client authentication method:
   This profile does not change the HTTP status code an endpoint assigns
   to a client authentication failure. The token endpoint responds 400
   by default and requires 401 only when the client authenticated
-  through the `Authorization` header field {{RFC6749, Section 5.2}},
+  through the `Authorization` header field ({{RFC6749, Section 5.2}}),
   which a Client Attestation does not use. The introspection endpoint
-  requires 401 {{RFC7662, Section 2.3}}. Other endpoints follow their
+  requires 401 ({{RFC7662, Section 2.3}}). Other endpoints follow their
   own specifications.
 
   A client library that recognizes only `invalid_client` treats this
@@ -609,7 +611,8 @@ companion client authentication method that fails, or that
 authenticates a different client identifier, produces the error defined
 by its own specification. Other metadata-discovery, registration,
 authentication, and grant errors follow their base specifications. The
-no-fallback rule in {{acceptance}} applies.
+prohibition on other attester-trust mechanisms in {{acceptance}}
+applies.
 
 # Updates and Withdrawal {#updates}
 
@@ -675,7 +678,7 @@ the AS reads (the configured key source or the endorsed `jwks_uri`,
 before signing with it. It keeps the old key published until
 attestations signed with it expire, since removing the key rejects them.
 A new key location takes effect only after the publisher updates the
-endorsement and metadata caches refresh. Under AS-configured attester
+endorsement and the AS's cached metadata refreshes. Under AS-configured attester
 trust, it also fails endorsement validation until the AS configures a
 matching alias or updates its configured key source, so the attester
 and publisher coordinate the move with the AS operator.
@@ -854,7 +857,7 @@ The decoded payload names the endorsed issuer and the client:
 
 There is one client metadata document, not one per installation. An
 endorsement for this client does not let the attester authenticate
-another client, even if both use the same attestation service. The
+another client, even if both use the same Client Attester. The
 flow does not require `client_instance_id` or an `act` claim.
 
 Under AS-configured attester trust, keys come only from the configured
