@@ -693,10 +693,11 @@ with it.
 
 ## Endorsement and Key Changes {#endorsement-changes}
 
-Once a metadata or key update is accepted, the AS MUST use it on the
-next presentation. Removing an endorsement, removing a verification
-key, or publishing an empty list prevents acceptance under that entry
-or key, including for attestations issued before the update. Local
+Once the AS has retrieved or stored a metadata or key update, it MUST
+use it on the next presentation. Removing an endorsement, removing a
+verification key, or publishing an empty list prevents acceptance
+under that entry or key, including for attestations issued before the
+update. Local
 policy denial MUST take effect immediately on subsequent requests,
 without waiting for cache expiration.
 
