@@ -573,9 +573,11 @@ Attestation is the client authentication method:
 : An endorsement validation failure MUST produce
   `invalid_client_attestation`. {{ATTEST, Section 7.4}} defines that
   code for use in addition to the more general `invalid_client`; this
-  profile narrows the choice to the specific code so an endorsement
-  failure is distinguishable from an ordinary credential failure. The
-  response MUST NOT expose policy details.
+  profile narrows the choice to the specific code so the response
+  identifies the Client Attestation, rather than another client
+  credential, as the cause. The code does not separate an endorsement
+  failure from other attestation failures, which ATTEST also reports
+  with it. The response MUST NOT expose policy details.
 
   This profile does not change the HTTP status code any endpoint
   assigns to
