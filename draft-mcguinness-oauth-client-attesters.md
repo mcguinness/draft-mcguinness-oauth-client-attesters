@@ -506,26 +506,19 @@ selection to the publisher.
   and is not scoped to the client whose endorsement prompted it.
   A configured alias MUST preserve the endorsed attestation authority,
   including tenant scope; a shared issuer or origin alone does not
-  establish equivalence. Because an alias applies to every client
-  endorsing the issuer, this requirement bounds what an alias may map
-  to; the tenant-isolation considerations in {{security}} depend on it.
-  This check
-  surfaces disagreement between the endorsement and AS configuration,
-  including endorsement
-  of a different key set behind a shared issuer string, instead of
-  resolving it silently. An endorsed `jwks_uri` MUST NOT select,
-  override, or provide a fallback for the configured source. The AS
-  MUST NOT retrieve the endorsed `jwks_uri` under this policy; the
-  endorsed value is compared, never fetched. No origin relationship is
-  required between
-  the configured key source and the issuer.
+  establish equivalence, and tenant isolation ({{security}}) depends on
+  this. This check surfaces disagreement between the endorsement and AS
+  configuration, including endorsement of a different key set behind a
+  shared issuer string, instead of resolving it silently. An endorsed
+  `jwks_uri` MUST NOT select, override, or provide a fallback for the
+  configured source. The AS MUST NOT retrieve the endorsed `jwks_uri`
+  under this policy; the endorsed value is compared, never fetched. No
+  origin relationship is required between the configured key source
+  and the issuer.
 * **Publisher-authorized key selection:** use the endorsed `jwks_uri`.
   The `issuer` MUST be an HTTPS URL and `jwks_uri` MUST have the same
   origin {{RFC6454}}. This origin check neither isolates tenants sharing
-  an origin nor establishes trust in an issuer name. Because
-  AS-configured trust governs any issuer string it is configured for,
-  publisher-selected keys are never accepted under an issuer string the
-  AS trusts or has configured.
+  an origin nor establishes trust in an issuer name.
 
 A non-HTTPS issuer requires AS-configured attester trust because it has
 no HTTPS origin binding.
