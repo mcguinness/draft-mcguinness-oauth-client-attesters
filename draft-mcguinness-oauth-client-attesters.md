@@ -648,12 +648,11 @@ no-fallback rule in {{acceptance}} applies.
 A publisher withdraws an endorsement by removing it from the
 authoritative client metadata ({{metadata}}). Three things then govern
 when that takes effect and what it reaches: cached copies expire under
-the maximum ages below, an accepted update binds from the next
+the maximum ages below, a retrieved update binds from the next
 presentation ({{endorsement-changes}}), and an issued grant keeps its
 access tokens unless the deployment separately revokes them, though a
 refresh that presents an attestation is checked again
-({{existing-grants}}). This profile sets no ceiling on the withdrawal
-latency that the maximum ages bound.
+({{existing-grants}}).
 
 ## Cache Freshness and Removal
 
