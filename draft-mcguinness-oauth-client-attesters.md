@@ -446,7 +446,7 @@ For each presentation, the AS MUST:
    using AS registration or discovery policy, before evaluating endorsements.
    Obtain metadata from that source or a fresh cache, following CIMD
    resolution and validation or registered metadata policy, including
-   {{trust}}. The AS MUST NOT combine endorsement lists from different
+   {{registered}}. The AS MUST NOT combine endorsement lists from different
    sources or switch sources because endorsement validation fails. A
    client identifier that has both a registration and a reachable CIMD
    is resolved from whichever single source this step selects; an
@@ -593,7 +593,7 @@ Attestation is the client authentication method:
   introspection endpoint {{RFC7662, Section 2.3}} requires 401. Other
   endpoints follow their own specifications.
 
-  A Client library that recognizes only `invalid_client` treats this as
+  A client library that recognizes only `invalid_client` treats this as
   an unrecognized failure rather than a credential failure.
 
 Attestation is an additional security signal:
@@ -831,7 +831,7 @@ At `https://platform.example/oauth-client`, the publisher serves:
 }
 ~~~
 
-The attester's configured key endpoint publishes this illustrative JWK
+The attester's configured key source publishes this illustrative JWK
 Set. This signing key is distinct from the Client Instance Key in
 `cnf.jwk`:
 
@@ -912,7 +912,7 @@ Cache-Control: no-store
 ~~~
 
 Had the AS instead authorized `https://platform.example` for
-publisher-authorized key selection and configured no trust for the
+publisher-authorized key selection and never configured trust for the
 issuer, the same document would succeed under the other policy: the AS
 would retrieve keys from the endorsed `jwks_uri`, which shares the
 issuer's origin, and apply the same processing steps. An entry whose
@@ -933,8 +933,8 @@ How a publisher is authorized does differ between the two forms
 trusts this attester independently. The AS configuration is the one in
 {{example}}.
 
-An authenticated, authorized administrator registers this metadata,
-for example through {{RFC7591}}:
+An authenticated, authorized administrator registers the client, for
+example through {{RFC7591}}, and the AS returns this client information:
 
 ~~~ json
 {
