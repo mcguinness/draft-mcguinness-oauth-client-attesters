@@ -352,12 +352,14 @@ therefore identifies a Client Attester by both its issuer and its key
 location. How each key-trust policy uses that location is specified in
 {{key-resolution}}.
 
-Under AS-configured attester trust the endorsed `jwks_uri` plays the
-role that the bundle endpoint of SPIFFE client authentication plays
-{{SPIFFE-OAUTH}}, with the key source established out of band and the
-endorsed location only compared against it. Publisher-authorized key
-selection instead lets the publisher name the location, so it is not a
-substitute for SPIFFE bundle configuration.
+SPIFFE client authentication {{SPIFFE-OAUTH}} publishes one
+verification-key location per trust domain, its
+`spiffe_bundle_endpoint`. Under AS-configured attester trust the
+endorsed `jwks_uri` plays that role for each named attester, with the
+key source established out of band and the endorsed location only
+compared against it. Publisher-authorized key selection instead lets
+the publisher name the location, so it is not a substitute for SPIFFE
+bundle configuration.
 
 Each entry is a Client Attester Endorsement ({{trust}}) for the
 `client_id` whose metadata contains it. An `issuer` identifies a
@@ -369,11 +371,6 @@ with a separate key location for each endorsed issuer. A top-level
 `jwks_uri` can contain several issuers' keys, but does not associate
 them with named attesters or separate them from client authentication
 keys. It does not replace `client_attesters` under this profile.
-
-SPIFFE's `spiffe_bundle_endpoint` publishes a verification-key location
-for one trust domain. `client_attesters` extends this pattern to multiple
-named attesters, with AS key-trust policy selecting the published or
-AS-configured key source ({{key-resolution}}).
 
 Clients using attestation as client authentication select
 `attest_jwt_client_auth` or `attest_jwt_client_auth_dpop` under
