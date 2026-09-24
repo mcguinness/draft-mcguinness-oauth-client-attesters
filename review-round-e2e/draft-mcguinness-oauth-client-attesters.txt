@@ -245,13 +245,18 @@ Table of Contents
       publisher of specified clients to select both the attester and its
       key source, so the endorsed jwks_uri supplies the keys.  For CIMD,
       configure exact client URLs or HTTPS origins, optionally
-      restricted to a path prefix that matches only at a / segment
-      boundary and is compared without normalization or percent-
-      decoding.  Successful metadata retrieval does not establish this
-      authorization.  Shared hosting requires a boundary that excludes
-      other publishers.  For a registered client, the publisher is the
-      party authorized to set endorsements under Section 2.2, and the AS
-      configures whether that party's endorsements select keys.
+      restricted to a path prefix.  A prefix matches only at a / segment
+      boundary, and a client URL whose path contains \, ;, or a percent-
+      encoded /, \, or . matches no prefix, because a server can decode
+      or route such a path to a different document than the one
+      compared.  Client identifier comparison itself stays exact.  A
+      path prefix is a publisher boundary only where the host serves
+      each path under it from the publisher it names; shared hosting
+      requires such a boundary.  Successful metadata retrieval does not
+      establish this authorization.  For a registered client, the
+      publisher is the party authorized to set endorsements under
+      Section 2.2, and the AS configures whether that party's
+      endorsements select keys.
 
    *  *AS-configured attester trust:* the AS independently trusts a
       particular attester and configures its key source.  The
@@ -555,9 +560,11 @@ Table of Contents
    After a configured entry is removed, the AS MUST NOT verify an
    attestation under that issuer with publisher-selected keys unless an
    operator has since decided that publishers may select keys for that
-   issuer; until then no key source is available and the endorsement
-   fails.  Without this rule, removing a configured entry would hand key
-   selection to the publisher.
+   issuer.  Restoring a configured key source for the issuer returns it
+   to AS-configured attester trust.  Until one of these happens, no key
+   source is available and the endorsement fails.  Without this rule,
+   removing a configured entry would hand key selection to the
+   publisher.
 
    *  *AS-configured attester trust:* use only the independently
       configured key source for the exact issuer.  The endorsed jwks_uri

@@ -1405,11 +1405,15 @@ them:<a href="#section-2.1-4" class="pilcrow">¶</a></p>
 publisher of specified clients to select both the attester and its
 key source, so the endorsed <code>jwks_uri</code> supplies the keys. For CIMD,
 configure exact client URLs or HTTPS origins, optionally restricted
-to a path prefix that matches only at a <code>/</code> segment boundary and is
-compared without normalization or percent-decoding. Successful
-metadata retrieval does not establish
-this authorization. Shared hosting requires a boundary that excludes
-other publishers. For a registered client, the publisher is the party
+to a path prefix. A prefix matches only at a <code>/</code> segment boundary,
+and a client URL whose path contains <code>\</code>, <code>;</code>, or a percent-encoded
+<code>/</code>, <code>\</code>, or <code>.</code> matches no prefix, because a server can decode or
+route such a path to a different document than the one compared.
+Client identifier comparison itself stays exact. A path prefix is a
+publisher boundary only where the host serves each path under it from
+the publisher it names; shared hosting requires such a boundary.
+Successful metadata retrieval does not establish this authorization.
+For a registered client, the publisher is the party
 authorized to set endorsements under <a href="#registered" class="auto internal xref">Section 2.2</a>, and the AS
 configures whether that party's endorsements select keys.<a href="#section-2.1-5.1.1" class="pilcrow">¶</a></p>
 </li>
@@ -1770,9 +1774,10 @@ applies, no key source is available and the endorsement fails.<a href="#section-
 <p id="section-5.3-2">After a configured entry is removed, the AS <span class="bcp14">MUST NOT</span> verify an
 attestation under that issuer with publisher-selected keys unless an
 operator has since decided that publishers may select keys for that
-issuer; until then no key source is available and the endorsement
-fails. Without this rule, removing a configured entry would hand key
-selection to the publisher.<a href="#section-5.3-2" class="pilcrow">¶</a></p>
+issuer. Restoring a configured key source for the issuer returns it to
+AS-configured attester trust. Until one of these happens, no key
+source is available and the endorsement fails. Without this rule,
+removing a configured entry would hand key selection to the publisher.<a href="#section-5.3-2" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-5.3-3.1">
             <p id="section-5.3-3.1.1"><strong>AS-configured attester trust:</strong> use only the independently
