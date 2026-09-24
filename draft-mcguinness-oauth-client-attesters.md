@@ -496,9 +496,10 @@ applies, no key source is available and the endorsement fails.
 After a configured entry is removed, the AS MUST NOT verify an
 attestation under that issuer with publisher-selected keys unless an
 operator has since decided that publishers may select keys for that
-issuer; until then no key source is available and the endorsement
-fails. Without this rule, removing a configured entry would hand key
-selection to the publisher.
+issuer. Restoring a configured key source for the issuer returns it to
+AS-configured attester trust. Until one of these happens, no key
+source is available and the endorsement fails. Without this rule,
+removing a configured entry would hand key selection to the publisher.
 
 * **AS-configured attester trust:** use only the independently
   configured key source for the exact issuer. The endorsed `jwks_uri`
