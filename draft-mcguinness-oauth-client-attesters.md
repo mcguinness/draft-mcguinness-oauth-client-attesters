@@ -166,7 +166,7 @@ Client Attester Endorsement
   OAuth authorization, user authority, or authority to further delegate
   attestation, and it does not extend to any other client.
 
-## Acceptance Policy
+## Acceptance Policy {#acceptance}
 
 For requests governed by this profile, the AS MUST accept a Client
 Attestation only when both of the following hold:
@@ -180,9 +180,14 @@ Attestation only when both of the following hold:
 
 Endorsement alone does not make an attester trusted, and AS trust in an
 attester alone does not authorize it for a client. AS policy can narrow
-the endorsed set; it MUST NOT add an unendorsed attester or fall back to
-another trust mechanism. An endorsement does not by itself establish
-that the client is trusted or authorized to access a resource.
+the endorsed set when evaluating it, and authorizing a publisher to
+select keys ({{key-resolution}}) permits each attester that publisher
+endorses. AS policy MUST NOT add an unendorsed attester or accept an
+attestation through another attester-trust mechanism. Where the
+attestation is optional, proceeding on a companion client
+authentication method without it ({{errors}}) is not such a fallback.
+An endorsement does not by itself establish that the client is trusted
+or authorized to access a resource.
 
 Two key-trust policies exist, and the AS determines from its configured
 policy which one applies. The choice is not free per association:
@@ -555,7 +560,7 @@ local defenses; see {{security}}. The AS SHOULD advertise
 algorithm restrictions in step 3 of {{as-processing}}
 ({{ATTEST, Section 8}}).
 
-## Errors
+## Errors {#errors}
 
 Endorsement validation covers these parts of {{as-processing}}:
 
@@ -631,7 +636,7 @@ companion client authentication method that fails, or that
 authenticates a different client identifier, produces the error defined
 by its own specification. Other metadata-discovery, registration,
 authentication, and grant errors follow their base specifications. The
-no-fallback rule in {{trust}} applies.
+no-fallback rule in {{acceptance}} applies.
 
 # Updates and Withdrawal {#updates}
 
