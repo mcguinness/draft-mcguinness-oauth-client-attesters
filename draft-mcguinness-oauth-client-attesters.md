@@ -347,7 +347,8 @@ mechanism for marking an extension critical.
 Endorsed keys authenticate attesters, not clients. A key obtained from
 an endorsement MUST NOT be used to verify a client authentication
 assertion, and a key from the client's own `jwks` or `jwks_uri` MUST
-NOT be used to verify a Client Attestation.
+NOT be used to verify a Client Attestation. An entry whose `jwks_uri`
+is identical to the client's own `jwks_uri` is therefore malformed.
 
 Every entry carries a complete issuer-to-key-location mapping, so an
 endorsement has the same meaning regardless of which AS policy
