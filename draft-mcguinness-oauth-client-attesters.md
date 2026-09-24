@@ -616,9 +616,13 @@ Obtaining a fresh attestation does not correct an endorsement failure
 caused by disagreement between the endorsement and AS configuration,
 such as an endorsed `jwks_uri` matching neither the configured source
 nor a configured alias ({{key-resolution}}). Because the response
-deliberately carries no policy detail, a Client cannot tell that case
-apart from one a fresh attestation would fix; it is resolved through
-the operational channels in {{security}} rather than by client retry.
+deliberately carries no policy detail, a client cannot tell that case
+apart from one a fresh attestation would fix, or from a transient
+failure to retrieve metadata or a JWK Set ({{updates}}), which a later
+presentation can clear. A configuration disagreement is resolved by
+the client publisher and the AS operator outside the protocol, for
+example under the trust agreement ({{profile-selection}}), not by
+client retry.
 
 Everything else keeps its own error. Signature verification with a
 resolved key and the remaining attestation and proof checks follow
