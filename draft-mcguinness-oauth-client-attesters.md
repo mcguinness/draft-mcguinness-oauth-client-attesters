@@ -202,7 +202,9 @@ them:
   publisher of specified clients to select both the attester and its
   key source, so the endorsed `jwks_uri` supplies the keys. For CIMD,
   configure exact client URLs or HTTPS origins, optionally restricted
-  to path segments. Successful metadata retrieval does not establish
+  to a path prefix that matches only at a `/` segment boundary and is
+  compared without normalization or percent-decoding. Successful
+  metadata retrieval does not establish
   this authorization. Shared hosting requires a boundary that excludes
   other publishers. For a registered client, the publisher is the party
   authorized to set endorsements under {{registered}}, and the AS
