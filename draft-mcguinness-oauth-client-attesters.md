@@ -454,11 +454,10 @@ For each presentation, the AS MUST:
    exactly matches the attestation's nonempty `iss`. Because an issuer
    occurs at most once in the array ({{metadata}}), that selection is
    unique. Verify AS policy permits that client-to-attester
-   association, evaluated on the selected entry as a whole, including
-   its `jwks_uri`, rather than on the issuer alone. Selecting an entry
-   does not by itself authorize it, and no agreement between the
-   entry's `jwks_uri` and a configured source is required at this step;
-   {{key-resolution}} states where that agreement applies.
+   association. Selecting an entry does not by itself authorize it.
+   Policy evaluates the selected entry, including its `jwks_uri`, not
+   the issuer alone; agreement between that `jwks_uri` and a configured
+   source is checked in step 3 under {{key-resolution}}, not here.
 3. Select the key source under {{key-resolution}}. Resolve `kid` to one
    eligible public key, refreshing on an unknown `kid` only as {{updates}}
    permits, and verify the signature using an acceptable asymmetric
