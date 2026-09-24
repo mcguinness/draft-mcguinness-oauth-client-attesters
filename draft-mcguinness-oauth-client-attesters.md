@@ -85,8 +85,8 @@ provisioned instances, uses a platform or workload attester, migrates
 between attesters, or is identified by a Client ID Metadata Document
 (CIMD) {{CIMD}} rather than by pre-established bilateral configuration.
 Requiring the AS to configure every client-to-attester association
-makes that relationship an AS deployment concern and limits the
-client's ability to select, rotate, or withdraw its attesters.
+makes that relationship an AS deployment concern, so the client cannot
+withdraw or narrow its attesters without the AS.
 
 This specification makes the relationship explicit by defining a Client
 Attester Endorsement in client metadata:
@@ -109,7 +109,12 @@ This separates two authorities that otherwise tend to be conflated:
 * the AS determines which of those endorsements it is willing to trust.
 
 The profile therefore enables client-managed attester association
-without transferring trust-policy control to the client publisher.
+without transferring trust-policy control to the client publisher. The
+publisher can always withdraw or narrow its endorsements. Adding an
+attester or moving its key location takes effect without AS action
+only where the AS authorizes the publisher to select keys; where the
+AS configures attester trust itself, it also has to accept the change
+({{trust}}).
 
 This specification adds the `client_attesters` client metadata member,
 containing endorsed attesters and their verification-key locations
