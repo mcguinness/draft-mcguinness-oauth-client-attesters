@@ -489,12 +489,12 @@ is also authorized to select keys. Otherwise, publisher-authorized key
 selection applies if the publisher is so authorized. If neither
 applies, no key source is available and the endorsement fails.
 
-Removing a configured entry MUST NOT by itself make its issuer eligible
-for publisher-authorized key selection. An issuer the AS has configured
-remains governed by AS-configured attester trust until an operator
-records a policy decision for that issuer; until then no key source is
-available and the endorsement fails. Without this rule, removing a
-configured entry would hand key selection to the publisher.
+After a configured entry is removed, the AS MUST NOT verify an
+attestation under that issuer with publisher-selected keys unless an
+operator has since decided that publishers may select keys for that
+issuer; until then no key source is available and the endorsement
+fails. Without this rule, removing a configured entry would hand key
+selection to the publisher.
 
 * **AS-configured attester trust:** use only the independently
   configured key source for the exact issuer. The endorsed `jwks_uri`
