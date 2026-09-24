@@ -235,7 +235,9 @@ The same restriction applies to endorsement updates, including updates
 made through the registration management protocol {{RFC7592}}.
 Possession of a registration access token establishes control of the
 registration, not authority to endorse, and MUST NOT by itself
-authorize setting or replacing `client_attesters`.
+authorize setting or replacing `client_attesters`. Removing the member,
+including by omitting it from an update that {{RFC7592}} treats as a
+request to delete it, replaces it.
 
 An AS that does not accept a submitted endorsement MUST either reject
 the request with `invalid_client_metadata`
@@ -769,14 +771,14 @@ The considerations in {{ATTEST}}, {{CIMD}}, and {{RFC8725}} apply.
 * **Omitted attestation:** `client_attesters` does not itself require
   attestation. A client whose other credentials are stolen can be
   authenticated without an attestation unless the deployment requires
-  one. ATTEST offers two ways to require it: registering a
-  `token_endpoint_auth_method` that is an attestation method, or
-  advertising `client_attestation_pop_methods_supported` without the
-  value `none`, which demands an attestation alongside another client
-  authentication method ({{ATTEST, Section 7.6}}). Deployments relying
-  on endorsement enforcement use one of them; the second keeps mutual
-  TLS or `private_key_jwt` in place. A list that includes `none` leaves
-  the attestation optional and does not prevent omission.
+  one, either through an attestation `token_endpoint_auth_method` or
+  by advertising `client_attestation_pop_methods_supported` without
+  `none` ({{errors}}); the second keeps mutual TLS or `private_key_jwt`
+  in place. A holder of a registration access token can change
+  `token_endpoint_auth_method` or `jwks` through {{RFC7592}} even where
+  it cannot change `client_attesters` ({{registered}}); a deployment
+  relying on endorsement enforcement restricts those changes in the
+  same way or requires attestation by AS policy.
 * **Unscoped endorsement:** an endorsement carries no audience. Under
   publisher-authorized key selection, one public endorsement determines
   the attester and its keys at every AS whose policy covers that
