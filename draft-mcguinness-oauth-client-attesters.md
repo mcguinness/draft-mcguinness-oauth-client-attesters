@@ -722,18 +722,13 @@ The AS's configured maximum ages bound stale acceptance.
 
 Endorsement withdrawal is prospective with respect to client
 authentication: it prevents future authentication under the removed
-endorsement but does not itself revoke existing grants or access tokens
-unless the deployment separately couples withdrawal to revocation.
+endorsement but does not revoke existing grants or access tokens.
 Refresh requests requiring a Client Attestation are checked again under
-{{processing}}.
-
-Withdrawal alone does not terminate existing access. A deployment that
-requires termination separately revokes the affected grants,
-invalidates their access and refresh tokens, and prevents further
-refresh issuance.
-Introspection {{RFC7662}}
-reports revoked tokens inactive. Offline validation requires a separate
-revocation mechanism or token expiration.
+{{processing}}. A deployment that requires termination separately
+revokes the affected grants, invalidates their access and refresh
+tokens, and prevents further refresh issuance. Introspection
+{{RFC7662}} reports revoked tokens inactive. Offline validation
+requires a separate revocation mechanism or token expiration.
 
 # Security Considerations {#security}
 
