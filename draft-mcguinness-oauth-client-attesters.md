@@ -620,9 +620,7 @@ Attestation is an additional security signal:
 Whenever an endorsement validation failure causes the AS to reject the
 request, the AS MUST return `invalid_client_attestation`, whether the
 Client Attestation served as the client authentication method or as an
-additional security signal. Signature verification with a resolved key
-and the remaining attestation and proof checks keep their own errors,
-as below.
+additional security signal.
 
 Obtaining a fresh attestation does not correct an endorsement failure
 caused by disagreement between the endorsement and AS configuration,
