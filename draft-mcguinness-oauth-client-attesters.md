@@ -55,10 +55,13 @@ informative:
 OAuth 2.0 Attestation-Based Client Authentication requires an
 authorization server to trust the attester that vouches for a client
 instance, but does not define how a client identifies the attesters
-authorized to speak for it. This specification defines a client metadata member, usable by registered clients and in Client ID Metadata Documents, that names the endorsed attesters and the locations of their verification keys. It defines how an authorization server
-validates endorsements and processes their withdrawal while retaining
-control over whether to trust them. It introduces no new credential or
-client authentication method.
+authorized to attest for it. This specification defines a client
+metadata member, usable by registered clients and in Client ID Metadata
+Documents, that names the endorsed attesters and the locations of their
+verification keys. It defines how an authorization server validates
+endorsements and processes their withdrawal while retaining control over
+whether to trust them. It introduces no new credential or client
+authentication method.
 
 --- middle
 
@@ -69,7 +72,7 @@ Client Attester to make security-relevant statements about a Client
 Instance and the key it holds. Before an authorization server (AS)
 relies on such an attestation, it needs answers to two distinct
 questions: is the attester trusted ({{Section 7.1 of ATTEST}}), and is
-that attester authorized to speak for this particular client?
+that attester authorized to attest for this particular client?
 
 ATTEST defines the Client Attestation format, presentation, and
 validation, and places the establishment of trust in Client Attesters
@@ -94,7 +97,7 @@ Client metadata --endorses--> Attester --attests--> Client Instance
 ~~~
 
 An endorsement states that the client publisher authorizes the named
-Client Attester to speak for the client. It does not make that attester
+Client Attester to attest for the client. It does not make that attester
 trusted by the authorization server, which still decides whether to
 accept the endorsed attester and how to trust its verification keys
 ({{trust}}). The `client_attesters` client metadata member
@@ -106,7 +109,7 @@ across heterogeneous platforms or during attester migration.
 This separates two distinct authorities:
 
 * the client publisher determines which attesters are authorized to
-  speak for the client; and
+  attest for the client; and
 * the authorization server determines which of those endorsements it is
   willing to trust.
 
@@ -158,7 +161,7 @@ Client Attester Endorsement
   identifying a Client Attester whose Client Attestations naming that
   `client_id` are eligible for acceptance under this profile, subject to
   authorization server policy ({{acceptance}}). It expresses the
-  publisher's authorization for that attester to speak for the client;
+  publisher's authorization for that attester to attest for the client;
   it does not specify which Client Instances the attester may attest,
   which {{processing}} leaves to the attester. An endorsement delegates
   attestation authority for the named client only. It does not delegate
@@ -215,7 +218,7 @@ configuration. The two policies are defined as follows;
   party's endorsements select keys.
 * **AS-configured attester trust:** the authorization server
   independently trusts a particular attester and configures its key
-  source. The endorsement authorizes that attester to act for the
+  source. The endorsement authorizes that attester to attest for the
   client; it cannot supply the trust anchor ({{key-resolution}}).
 
 Publisher-authorized key selection serves deployments in which
