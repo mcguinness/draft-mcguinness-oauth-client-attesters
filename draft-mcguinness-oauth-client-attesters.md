@@ -53,27 +53,28 @@ informative:
 --- abstract
 
 OAuth 2.0 Attestation-Based Client Authentication requires an
-authorization server to trust the attester that makes statements about a client instance, but does not define how a client identifies the attesters
-authorized to attest for it. This specification defines a client
-metadata member, usable by registered clients and in Client ID Metadata
-Documents, that names the endorsed attesters and the locations of their
-verification keys. It defines how an authorization server validates
-endorsements and processes their withdrawal while retaining control over
-whether to trust them. It introduces no new credential or client
-authentication method.
+authorization server to trust the attester that makes statements about a
+client instance, but does not define how a client identifies the
+attesters authorized to attest for it. This specification defines a
+client metadata parameter, usable by registered clients and in Client ID
+Metadata Documents, that names the endorsed attesters and the locations
+of their verification keys. It defines how an authorization server
+validates endorsements and processes their withdrawal while retaining
+control over whether to trust them. It introduces no new credential or
+client authentication method.
 
 --- middle
 
 # Introduction
 
-OAuth 2.0 Attestation-Based Client Authentication {{ATTEST}} enables a
-Client Attester to make security-relevant statements about a Client
-Instance and the key it holds. Before an authorization server (AS)
-relies on such an attestation, it determines two things: whether
+OAuth 2.0 Attestation-Based Client Authentication (ATTEST) {{ATTEST}}
+enables a Client Attester to make security-relevant statements about a
+Client Instance and the key it holds. Before an authorization server
+(AS) relies on such an attestation, it determines two things: whether
 the attester is trusted ({{Section 7.1 of ATTEST}}) and whether that
 attester is authorized to attest for this particular client.
 
-{{ATTEST}} defines the Client Attestation format, presentation, and
+ATTEST defines the Client Attestation format, presentation, and
 validation, and places the establishment of trust in Client Attesters
 outside its scope ({{Section 10.8 of ATTEST}}). It defines no
 relationship by which a client identifies the attesters authorized to
@@ -120,9 +121,9 @@ the authorization server authorizes the publisher to select keys; where
 the authorization server configures attester trust itself, the change
 also requires acceptance by the authorization server ({{trust}}).
 
-This profile builds on {{ATTEST}} and introduces no new credential or
-client authentication method. {{ATTEST}}, this profile, and the optional
-Client Instance ID profile {{INSTANCE-ID}} address separate layers:
+This profile builds on ATTEST and introduces no new credential or client
+authentication method. ATTEST, this profile, and the optional Client
+Instance ID profile {{INSTANCE-ID}} address separate layers:
 
 ~~~ ascii-art
 Client Attester Endorsement    Who may attest for this client?
@@ -175,8 +176,8 @@ accept a Client Attestation only when both of the following hold:
 1. **Client endorsement:** the authoritative metadata for the requested
    `client_id` currently endorses the attestation's issuer
    ({{metadata}}).
-2. **Authorization server acceptance:** authorization server policy
-   permits that attester for that client and determines how the
+2. **Authorization server attester acceptance:** authorization server
+   policy permits that attester for that client and determines how the
    attester's verification keys are trusted ({{key-resolution}}).
 
 Endorsement alone does not make an attester trusted, and authorization
@@ -236,14 +237,14 @@ Registered endorsements MUST originate from a party authenticated and
 authorized to set them for that client, or be covered by a validated
 software statement from an issuer approved for that purpose under
 {{RFC7591}}. Open registration alone provides neither assurance; issuing
-a client credential does not retroactively approve its endorsements.
-The same restriction applies to endorsement updates, including updates
-made through the registration management protocol {{RFC7592}}.
-Possession of a registration access token establishes control of the
-registration, not authority to endorse, and MUST NOT by itself
-authorize setting or replacing `client_attesters`. Removing the member,
-including by omitting it from an update that {{RFC7592}} treats as a
-deletion request, is treated as replacing it.
+a client credential does not retroactively approve its endorsements. The
+same restriction applies to endorsement updates, including updates made
+through the registration management protocol {{RFC7592}}. Possession of
+a registration access token establishes control of the registration, not
+authority to endorse, and MUST NOT by itself authorize setting or
+replacing `client_attesters`. Removing the parameter, including by
+omitting it from an update that {{RFC7592}} treats as a deletion
+request, is treated as replacing it.
 
 An authorization server that does not accept a submitted endorsement
 MUST either reject the request with the `invalid_client_metadata` error
@@ -259,9 +260,9 @@ whether this profile applies to a request; this out-of-band
 determination satisfies {{Section 13 of ATTEST}}. The presence or
 absence of `client_attesters` does not determine whether this profile
 applies, and publishing it does not require an authorization server to
-apply this profile. This profile is independent of how {{CIMD}} handles
-unrecognized metadata, which it leaves unspecified. An authorization
-server advertises the capability with the
+apply this profile. This profile is independent of how an authorization
+server processes unrecognized metadata in a CIMD, which {{CIMD}} leaves
+unspecified. An authorization server advertises the capability with the
 `client_attester_endorsement_supported` metadata parameter
 ({{as-metadata}}). Because that parameter applies to the authorization
 server as a whole, deployments relying on endorsement enforcement
@@ -282,7 +283,7 @@ authenticating at any of these endpoints acts as a client, including a
 resource server presenting a Client Attestation to the introspection
 endpoint. Where a flow authenticates more than once, each presentation
 is evaluated on its own under {{as-processing}}. This profile retains
-the wire format, proof methods, and token binding of {{ATTEST}}.
+the wire format, proof methods, and token binding of ATTEST.
 
 A resource server that accepts a Client Attestation presented to it
 ({{Section 7.6 of ATTEST}}) relies on configured attester trust; this
@@ -471,9 +472,9 @@ For each presentation, the authorization server MUST:
    keys, and an `alg` header parameter value of `none` MUST NOT be
    accepted under this profile.
 4. Verify that the `sub` claim exactly equals the requested `client_id`,
-   then validate the remaining attestation and proof under the method
-   selected from {{ATTEST}}. When the attestation is an additional
-   security signal alongside another client authentication method
+   then validate the remaining attestation and proof under the selected
+   ATTEST method. When the attestation is an additional security signal
+   alongside another client authentication method
    ({{Section 7.6 of ATTEST}}), validate that method under its own
    specification and verify that it authenticates the same client
    identifier; a mismatch is a failure of that method. Where the
