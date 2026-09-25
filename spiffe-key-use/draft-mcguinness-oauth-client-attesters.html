@@ -1817,10 +1817,10 @@ header <code>kid</code> by octet comparison;<a href="#section-5.3-7.1.1" class="
 header <code>alg</code>;<a href="#section-5.3-7.2.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-5.3-7.3">
-            <p id="section-5.3-7.3.1">its <code>use</code>, if present, is <code>sig</code>, or, under AS-configured attester
-trust, a value the configured key source's specification defines for
-JWT signing keys (for example <code>jwt-svid</code> in a SPIFFE trust bundle
-<span>[<a href="#SPIFFE-OAUTH" class="cite xref">SPIFFE-OAUTH</a>]</span>);<a href="#section-5.3-7.3.1" class="pilcrow">¶</a></p>
+            <p id="section-5.3-7.3.1">its <code>use</code>, if present, is <code>sig</code> or, under AS-configured attester
+trust, a value the AS has configured for that key source as
+identifying signature keys (for example <code>jwt-svid</code> for a SPIFFE trust
+bundle <span>[<a href="#SPIFFE-OAUTH" class="cite xref">SPIFFE-OAUTH</a>]</span>);<a href="#section-5.3-7.3.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-5.3-7.4">
             <p id="section-5.3-7.4.1">its <code>key_ops</code>, if present, includes <code>verify</code>; and<a href="#section-5.3-7.4.1" class="pilcrow">¶</a></p>

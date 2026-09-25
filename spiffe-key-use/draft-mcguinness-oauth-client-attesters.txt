@@ -595,10 +595,10 @@ Table of Contents
    *  it is an asymmetric public key whose type is consistent with the
       header alg;
 
-   *  its use, if present, is sig, or, under AS-configured attester
-      trust, a value the configured key source's specification defines
-      for JWT signing keys (for example jwt-svid in a SPIFFE trust
-      bundle [SPIFFE-OAUTH]);
+   *  its use, if present, is sig or, under AS-configured attester
+      trust, a value the AS has configured for that key source as
+      identifying signature keys (for example jwt-svid for a SPIFFE
+      trust bundle [SPIFFE-OAUTH]);
 
    *  its key_ops, if present, includes verify; and
 
