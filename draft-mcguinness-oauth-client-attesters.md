@@ -816,27 +816,34 @@ sources.
 
 # IANA Considerations
 
-This document requests registration in the OAuth Dynamic Client
-Registration Metadata registry established by {{RFC7591}}:
+## OAuth Dynamic Client Registration Metadata Registration
+
+This specification requests registration of the following value in the
+"OAuth Dynamic Client Registration Metadata" registry established by
+{{RFC7591}}:
 
 * Client Metadata Name: `client_attesters`
 * Client Metadata Description: Attesters endorsed to issue Client
   Attestations for this client, with their verification-key locations
 * Change Controller: IETF
-* Specification Document(s): {{metadata}} of this document
+* Specification Document(s): {{metadata}} of this specification
 
-This document also requests registration in the OAuth Authorization
-Server Metadata registry established by {{RFC8414}}:
+## OAuth Authorization Server Metadata Registration
+
+This specification requests registration of the following value in the
+"OAuth Authorization Server Metadata" registry established by
+{{RFC8414}}:
 
 * Metadata Name: `client_attester_endorsement_supported`
-* Metadata Description: Boolean indicating that the authorization server
-  is capable of processing `client_attesters` under this profile
+* Metadata Description: Boolean value indicating whether the
+  authorization server supports processing the `client_attesters`
+  client metadata member
 * Change Controller: IETF
-* Specification Document(s): {{as-metadata}} of this document
+* Specification Document(s): {{as-metadata}} of this specification
 
 --- back
 
-# CIMD Deployment Example {#example}
+# Client ID Metadata Document Example {#example}
 
 This example is informative. The authorization server has the following
 configuration, which is authorization server policy, not protocol
@@ -851,7 +858,8 @@ metadata:
 | Maximum metadata and key cache ages | 3600 seconds each |
 {: title="Authorization server configuration for this example"}
 
-At `https://platform.example/oauth-client`, the publisher serves:
+The following example shows the Client ID Metadata Document that the
+publisher serves at `https://platform.example/oauth-client`:
 
 ~~~ json
 {
@@ -870,8 +878,9 @@ At `https://platform.example/oauth-client`, the publisher serves:
 }
 ~~~
 
-The configured key source publishes this illustrative JWK Set, whose
-signing key is distinct from the Client Instance Key in `cnf.jwk`:
+The following example shows the JWK Set published at the configured
+key source. Its signing key is distinct from the Client Instance Key in
+the `jwk` member of the `cnf` claim:
 
 ~~~ json
 {
@@ -887,7 +896,8 @@ signing key is distinct from the Client Instance Key in `cnf.jwk`:
 }
 ~~~
 
-The decoded Client Attestation header selects that key:
+The following example shows the decoded JOSE header of the Client
+Attestation, whose `kid` header parameter selects that key:
 
 ~~~ json
 {
@@ -897,7 +907,9 @@ The decoded Client Attestation header selects that key:
 }
 ~~~
 
-The decoded payload names the endorsed issuer and the client:
+The following example shows the decoded payload of the Client
+Attestation. The `iss` claim names the endorsed issuer, and the `sub`
+claim names the client:
 
 ~~~ json
 {
@@ -918,25 +930,27 @@ The decoded payload names the endorsed issuer and the client:
 1. The Client Instance proves to the attester that it is authorized
    to use this client identifier and holds its instance key.
 2. The attester issues the Client Attestation shown above.
-3. After user authorization, the Client Instance redeems its code with
-   that `client_id`, the Client Attestation, and a combined
-   Demonstrating Proof of Possession (DPoP) proof {{RFC9449}}.
+3. After user authorization, the Client Instance redeems its
+   authorization code with that `client_id`, the Client Attestation, and
+   a combined Demonstrating Proof of Possession (DPoP) proof
+   {{RFC9449}}.
 4. The authorization server validates the CIMD, endorsement,
    attestation, proof, and grant before issuing the access token.
 
-There is one client metadata document, not one per installation. An
+There is one Client ID Metadata Document, not one per installation. An
 endorsement for this client does not let the attester authenticate
-another client, even if both use the same Client Attester. The
-flow does not require `client_instance_id` or an `act` claim.
+another client, even if both use the same Client Attester. The flow does
+not require a `client_instance_id` claim or an `act` claim.
 
 Under AS-configured attester trust, keys come only from the configured
-key source, and the endorsed `jwks_uri` has to equal it, as it does
-here. An attestation from an unendorsed issuer, an endorsement naming
-the trusted issuer with a different key location, or a `kid` that
-resolves to no key in the configured key source produces the response
-below. {{Section 5.2 of RFC6749}} requires 401 only for a client that
-authenticated through the `Authorization` header field, which this
-client does not use, so the example shows the default 400:
+key source, and the endorsed `jwks_uri` is required to equal it, as it
+does here. An attestation from an unendorsed issuer, an endorsement
+naming the trusted issuer with a different key location, or a `kid`
+value that resolves to no key in the configured key source results in
+the following error response. {{Section 5.2 of RFC6749}} requires a 401
+(Unauthorized) status code only for a client that authenticated through
+the `Authorization` request header field, which this client does not
+use, so the example shows the default 400 (Bad Request) status code:
 
 ~~~ http-message
 HTTP/1.1 400 Bad Request
@@ -946,10 +960,10 @@ Cache-Control: no-store
 {"error": "invalid_client_attestation"}
 ~~~
 
-Had the authorization server instead authorized
+If the authorization server had instead authorized
 `https://platform.example` for publisher-authorized key selection and
-never configured trust for the issuer, the same document would also
-succeed, with keys retrieved from the endorsed `jwks_uri`, which shares
+had not configured trust for the issuer, the same document would also be
+accepted, with keys retrieved from the endorsed `jwks_uri`, which shares
 the issuer's origin. An entry whose `jwks_uri` had a different origin
 from the issuer would then fail endorsement validation with the same
 error.
@@ -959,16 +973,16 @@ error.
 This example is informative. It repeats {{example}}, with the same
 authorization server configuration, for an opaque client identifier.
 Under AS-configured attester trust, neither endorsement nor key
-selection depends on the identifier's shape: `client_attesters` travels
-with the client's metadata, and the endorsement names the key location
-outright, so no origin is derived from the client identifier. Publisher
-authorization does differ between the two forms ({{trust}}), but not
-here, because the authorization server trusts this attester
-independently.
+selection depends on the form of the identifier: the `client_attesters`
+member is part of the client's metadata, and the endorsement names the
+key location directly, so no origin is derived from the client
+identifier. Publisher authorization differs between the two forms
+({{trust}}), but that difference does not arise here, because the
+authorization server trusts this attester independently.
 
 An authenticated, authorized administrator registers the client, for
-example through {{RFC7591}}, and the authorization server returns this
-client information:
+example through {{RFC7591}}, and the authorization server returns the
+following client information response:
 
 ~~~ json
 {
@@ -987,8 +1001,8 @@ client information:
 }
 ~~~
 
-The attester signs with the same key as in {{example}}, so the
-attestation header is the same:
+The attester signs with the same key as in {{example}}, so the JOSE
+header of the attestation is unchanged:
 
 ~~~ json
 {
@@ -998,7 +1012,7 @@ attestation header is the same:
 }
 ~~~
 
-In the payload only `sub` differs:
+In the payload, only the `sub` claim differs:
 
 ~~~ json
 {
@@ -1016,14 +1030,14 @@ In the payload only `sub` differs:
 }
 ~~~
 
-The client redeems its code with `client_id=s6BhdRkqt3`, that
-attestation, and a combined DPoP proof. The authorization server reads
-the registered metadata rather than fetching a CIMD, then runs the same
-steps of {{as-processing}}: the endorsed issuer matches the
-attestation's `iss`, AS-configured attester trust selects the configured
-key source, `kid` resolves to `attester-1` there, and `sub` equals the
-requested `client_id`. The failure cases and their error response are
-those of {{example}}.
+The client redeems its authorization code with `client_id=s6BhdRkqt3`,
+that attestation, and a combined DPoP proof. The authorization server
+reads the registered metadata rather than fetching a CIMD, then runs the
+same steps of {{as-processing}}: the endorsed issuer matches the `iss`
+claim of the attestation, AS-configured attester trust selects the
+configured key source, the `kid` value resolves to the `attester-1` key
+there, and the `sub` claim equals the requested `client_id`. The failure
+cases and their error response are those of {{example}}.
 
 # Document History
 {:numbered="false"}
