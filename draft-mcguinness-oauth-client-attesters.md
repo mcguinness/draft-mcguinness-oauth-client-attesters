@@ -584,42 +584,46 @@ Endorsement validation covers these parts of {{as-processing}}:
 How a failure is reported depends on the role the Client Attestation
 plays in the request.
 
-Attestation is the client authentication method:
-: An endorsement validation failure MUST produce
-  `invalid_client_attestation`. {{Section 7.4 of ATTEST}} defines that
-  code alongside the more general `invalid_client`; this profile
-  requires the specific code so the response identifies the Client
-  Attestation, not another client credential, as the cause. The code
-  does not distinguish endorsement failures from other attestation
-  failures. The response MUST NOT expose policy details.
+When the Client Attestation is the client authentication method, the
+authorization server MUST respond to an endorsement validation failure
+with the `invalid_client_attestation` error code.
+{{Section 7.4 of ATTEST}} defines that error code alongside the more
+general `invalid_client` error code; this profile requires the specific
+code so that the response identifies the Client Attestation, not another
+client credential, as the cause. The code does not distinguish
+endorsement failures from other attestation failures. The response MUST
+NOT expose policy details.
 
-  This profile does not change the HTTP status code an endpoint assigns
-  to a client authentication failure. The token endpoint responds 400
-  by default and requires 401 only when the client authenticated
-  through the `Authorization` header field ({{Section 5.2 of RFC6749}}),
-  which a Client Attestation does not use. The introspection endpoint
-  requires 401 ({{Section 2.3 of RFC7662}}). Other endpoints follow their
-  own specifications.
+This profile does not change the HTTP status code that an endpoint
+returns for a client authentication failure. The token endpoint responds
+with HTTP status code 400 (Bad Request) by default and requires 401
+(Unauthorized) only when the client authenticated through the
+`Authorization` request header field ({{Section 5.2 of RFC6749}}), which
+a Client Attestation does not use. The introspection endpoint responds
+with 401 (Unauthorized) ({{Section 2.3 of RFC7662}}). Other endpoints
+follow their own specifications.
 
-  A client library that recognizes only `invalid_client` treats this
-  code as an unrecognized failure rather than a credential failure.
+A client library that recognizes only the `invalid_client` error code
+treats `invalid_client_attestation` as an unrecognized failure rather
+than a credential failure.
 
-Attestation is an additional security signal:
-: Where the Client Attestation accompanies another client authentication
-  method ({{Section 7.6 of ATTEST}}), an endorsement validation failure
-  leaves no attestation signal for that request. The authorization
-  server MUST NOT treat the failed attestation as a satisfied signal. If
-  the deployment requires an attestation alongside that method, the
-  request fails. A server signals that requirement by advertising the
-  `client_attestation_pop_methods_supported` metadata parameter without
-  the value `none`; a list containing `none` leaves the attestation
-  optional. Where the attestation is optional, whether the request
-  proceeds on the companion method alone is authorization server policy.
+When the Client Attestation accompanies another client authentication
+method as an additional security signal ({{Section 7.6 of ATTEST}}), an
+endorsement validation failure leaves no attestation signal for that
+request. The authorization server MUST NOT treat the failed attestation
+as a satisfied signal. If the deployment requires an attestation
+alongside that method, the request fails. A server signals that
+requirement by advertising the
+`client_attestation_pop_methods_supported` metadata parameter without
+the value `none`; a list containing `none` leaves the attestation
+optional. Where the attestation is optional, whether the request
+proceeds on the companion method alone is authorization server policy.
 
 Whenever an endorsement validation failure causes the authorization
-server to reject the request, the authorization server MUST return
-`invalid_client_attestation`, whether the Client Attestation served as
-the client authentication method or as an additional security signal.
+server to reject the request, the authorization server MUST respond with
+the `invalid_client_attestation` error code, whether the Client
+Attestation served as the client authentication method or as an
+additional security signal.
 
 A fresh attestation does not correct an endorsement validation failure
 caused by disagreement between the endorsement and authorization server
@@ -686,14 +690,15 @@ endorsement MUST NOT cause a client metadata refresh; the metadata
 maximum age bounds the delay before a newly published endorsement takes
 effect, as it bounds withdrawal.
 
-On observing that a CIMD or a selected JWK Set has been removed (HTTP
-404 or 410), the authorization server MUST stop using previously cached
-endorsements or keys from that document, and MUST NOT use them again
-unless a later retrieval of that document succeeds. A retrieval failure
-that is not a removal, such as a timeout or a 5xx status, does not by
-itself invalidate an unexpired cached copy. While the authorization
-server serves an unexpired cache, it cannot observe a removal. Deleting
-a client registration removes its endorsements.
+On observing that a CIMD or a selected JWK Set has been removed (an HTTP
+404 or 410 status code), the authorization server MUST stop using
+previously cached endorsements or keys from that document, and MUST NOT
+use them again unless a later retrieval of that document succeeds. A
+retrieval failure that is not a removal, such as a timeout or a 5xx
+status code, does not by itself invalidate an unexpired cached copy.
+While the authorization server serves an unexpired cache, it cannot
+observe a removal. Deleting a client registration removes its
+endorsements.
 
 ## Endorsement and Key Changes {#endorsement-changes}
 
