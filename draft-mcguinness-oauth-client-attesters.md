@@ -244,8 +244,8 @@ including by omitting it from an update that {{RFC7592}} treats as a
 deletion request, is treated as replacing it.
 
 An authorization server that does not accept a submitted endorsement
-MUST either reject the request with `invalid_client_metadata`
-({{Section 3.2.2 of RFC7591}}) or omit `client_attesters` from the
+MUST either reject the request with the `invalid_client_metadata` error
+code ({{Section 3.2.2 of RFC7591}}) or omit `client_attesters` from the
 stored metadata and from the client information response
 ({{Section 3.2.1 of RFC7591}}), so that the response never contains an
 endorsement the authorization server has not accepted.
@@ -259,14 +259,15 @@ absence of `client_attesters` does not determine whether this profile
 applies, and publishing it does not require an authorization server to
 apply this profile. This profile is independent of how CIMD handles
 unrecognized metadata, which CIMD leaves unspecified. An authorization
-server advertises the capability with
-`client_attester_endorsement_supported` ({{as-metadata}}). Because that
-parameter applies to the authorization server as a whole, deployments
-relying on endorsement enforcement establish through a trust agreement
-that the authorization server applies this profile to their clients. A
-trust agreement is the out-of-band arrangement between the authorization
-server operator and the client publisher or attester operator that fixes
-which policies the authorization server applies.
+server advertises the capability with the
+`client_attester_endorsement_supported` metadata parameter
+({{as-metadata}}). Because that parameter applies to the authorization
+server as a whole, deployments relying on endorsement enforcement
+establish through a trust agreement that the authorization server
+applies this profile to their clients. A trust agreement is the
+out-of-band arrangement between the authorization server operator and
+the client publisher or attester operator that fixes which policies the
+authorization server applies.
 
 This profile applies at authorization server endpoints that accept
 Client Attestations for client authentication or as an additional
@@ -296,13 +297,13 @@ deployment's token-binding method. In the combined mode defined in
 key {{RFC9449}} and the attested Client Instance Key are one key, so the
 issued token's confirmation claim names the attested key. Where DPoP is
 used alongside a separate Client Attestation proof, that section does
-not require the DPoP key to match the attestation's `cnf`, and the token
-is bound to the DPoP key instead. In both cases, a confirmation claim
-reports a key binding, not an endorsement decision, and introspection
-{{RFC7662}} reports the token's state, not how the authorization server
-evaluated the endorsement. Neither indicates to a resource server
-whether an endorsement was accepted; endorsement policy therefore
-remains at the authorization server.
+not require the DPoP key to match the key in the `cnf` claim of the
+attestation, and the token is bound to the DPoP key instead. In both
+cases, a confirmation claim reports a key binding, not an endorsement
+decision, and introspection {{RFC7662}} reports the token's state, not
+how the authorization server evaluated the endorsement. Neither
+indicates to a resource server whether an endorsement was accepted;
+endorsement policy therefore remains at the authorization server.
 
 ## Conformance
 
@@ -329,13 +330,13 @@ is a JSON array of objects, each a Client Attester Endorsement
 
 | Member | Requirement | Meaning |
 |---|---|---|
-| `issuer` | REQUIRED, nonempty StringOrURI {{RFC7519}} | Exact `iss` of the endorsed Client Attester |
+| `issuer` | REQUIRED, nonempty StringOrURI {{RFC7519}} | Exact `iss` claim value of the endorsed Client Attester |
 | `jwks_uri` | REQUIRED, HTTPS URL without userinfo or fragment | Location of the attester's public JSON Web Key (JWK) Set {{RFC7517}} |
 {: title="Members of a client_attesters entry"}
 
-An `issuer` identifies a namespace, not a discovery endpoint. An issuer
-MUST NOT occur more than once in the array. A missing or empty array
-authorizes no attester. An entry is malformed if it violates the
+An `issuer` value identifies a namespace, not a discovery endpoint. An
+issuer MUST NOT occur more than once in the array. A missing or empty
+array authorizes no attester. An entry is malformed if it violates the
 requirements in the table above. The authorization server MUST:
 
 * reject `client_attesters` for this profile if an entry is malformed
@@ -363,11 +364,12 @@ issuer-to-key-location mapping that has the same meaning under either
 policy; {{key-resolution}} specifies how each policy uses the location.
 
 {{Section 10.8 of ATTEST}} recommends, among other options, resolving
-`kid` through client metadata `jwks_uri`. This profile extends that
-option with a separate key location for each endorsed issuer. A
-top-level `jwks_uri` can hold several issuers' keys, but it neither
-associates them with named attesters nor separates them from client
-authentication keys, so it does not replace `client_attesters`.
+the `kid` header parameter through the client's `jwks_uri` metadata.
+This profile extends that option with a separate key location for each
+endorsed issuer. A top-level `jwks_uri` can hold several issuers' keys,
+but it neither associates them with named attesters nor separates them
+from client authentication keys, so it does not replace
+`client_attesters`.
 
 Secure Production Identity Framework for Everyone (SPIFFE) client
 authentication {{SPIFFE-OAUTH}} publishes one verification-key location,
@@ -378,12 +380,12 @@ location is only compared against it. Publisher-authorized key selection
 lets the publisher name the location, so it does not substitute for
 SPIFFE bundle configuration.
 
-Clients using attestation as client authentication select
-`attest_jwt_client_auth` or `attest_jwt_client_auth_dpop` under
-{{Section 9 of ATTEST}}. When attestation supplements another method
-({{Section 7.6 of ATTEST}}), that method still authenticates the client.
-The member
-does not select a grant, proof method, or the optional
+Clients using attestation as client authentication use the value
+`attest_jwt_client_auth` or `attest_jwt_client_auth_dpop` in
+`token_endpoint_auth_method` ({{Section 9 of ATTEST}}). When attestation
+supplements another method ({{Section 7.6 of ATTEST}}), that method
+still authenticates the client. The `client_attesters` member does not
+select a grant type, proof method, or the optional
 instance-identification profile.
 
 # Authorization Server Metadata {#as-metadata}
@@ -408,8 +410,9 @@ server's validation order, key selection, and error reporting.
 
 ## Issuance and Presentation
 
-Requests under this profile MUST include `client_id` to select the
-client metadata; the parameter alone is not authentication.
+Requests under this profile MUST include the `client_id` parameter to
+select the client metadata; that parameter alone does not authenticate
+the client.
 
 The Client Attester MUST establish that the requesting Client Instance
 is authorized to obtain a Client Attestation naming the specified
@@ -418,23 +421,23 @@ or possession of a newly generated key, alone or together, as
 sufficient. How the attester establishes this authorization is outside
 the scope of this specification.
 
-The attester MUST include:
+The attester MUST include the following in the Client Attestation:
 
-* `iss`: its endorsed `issuer` value;
-* `sub`: the exact client identifier; and
-* `kid`: a nonempty header parameter {{RFC7515}} identifying its
-  signing key.
+* the `iss` claim, containing its endorsed `issuer` value;
+* the `sub` claim, containing the exact client identifier; and
+* the `kid` JOSE header parameter {{RFC7515}}, containing a nonempty
+  value that identifies its signing key.
 
-{{Section 4 of ATTEST}} does not require `iss`. This profile requires it
-because a client can endorse several Client Attesters with independent
-key sets: the issuer selects the endorsement and key source before
-`kid` is resolved, and `kid` identifies a key within a set, not a
-Client Attester or a trust relationship.
+{{Section 4 of ATTEST}} does not require the `iss` claim. This profile
+requires it because a client can endorse several Client Attesters with
+independent key sets: the issuer selects the endorsement and key source
+before the `kid` value is resolved, and a `kid` value identifies a key
+within a JWK Set, not a Client Attester or a trust relationship.
 
-This profile keeps the default `client_id` to `sub` equality of
-{{Section 7.5 of ATTEST}} without relaxation, so an endorsement for one
-client cannot validate an attestation naming another. Other claims and
-proof requirements follow {{ATTEST}}.
+This profile retains, without relaxation, the default requirement of
+{{Section 7.5 of ATTEST}} that the `client_id` parameter equal the `sub`
+claim, so an endorsement for one client cannot validate an attestation
+naming another. Other claims and proof requirements follow {{ATTEST}}.
 
 ## Authorization Server Processing {#as-processing}
 
@@ -451,30 +454,32 @@ For each presentation, the authorization server MUST:
    single source this step selects; an endorsement failure from that
    source is final.
 2. Validate `client_attesters` and select the entry whose `issuer`
-   exactly matches the attestation's nonempty `iss`; because an issuer
-   occurs at most once in the array ({{metadata}}), the selection is
-   unique. Verify that authorization server policy permits that
-   client-to-attester association; selecting an entry does not by itself
-   authorize it. Policy evaluates the selected entry, including its
-   `jwks_uri`, not the issuer alone. Agreement between that `jwks_uri`
-   and a configured key source is checked in step 3
+   member exactly matches the nonempty `iss` claim of the attestation;
+   because an issuer occurs at most once in the array ({{metadata}}),
+   the selection is unique. Verify that authorization server policy
+   permits that client-to-attester association; selecting an entry does
+   not by itself authorize it. Policy evaluates the selected entry,
+   including its `jwks_uri`, not the issuer alone. Agreement between
+   that `jwks_uri` and a configured key source is checked in step 3
    ({{key-resolution}}), not here.
-3. Select the key source under {{key-resolution}}. Resolve `kid` to one
-   eligible public key, refreshing on an unknown `kid` only as
-   {{updates}} permits, and verify the signature using an acceptable
-   asymmetric algorithm. Symmetric keys, private keys, and `alg=none`
-   MUST NOT be accepted under this profile.
-4. Verify `sub` exactly equals the requested `client_id`, then validate
-   the remaining attestation and proof under the selected ATTEST method.
-   When the attestation is an additional security signal alongside
-   another client authentication method ({{Section 7.6 of ATTEST}}),
-   validate that method under its own specification and verify that it
-   authenticates the same client identifier; a mismatch is a failure of
-   that method. Where the companion method also establishes a
-   confirmation key, for example mutual TLS {{RFC8705}}, authorization
-   server configuration selects which key binds the issued token; the
-   authorization server MUST NOT bind a token to the attested key on the
-   strength of an attestation it did not accept.
+3. Select the key source under {{key-resolution}}. Resolve the `kid`
+   header parameter to one eligible public key, refreshing on an unknown
+   `kid` value only as {{updates}} permits, and verify the signature
+   using an acceptable asymmetric algorithm. Symmetric keys, private
+   keys, and an `alg` header parameter value of `none` MUST NOT be
+   accepted under this profile.
+4. Verify that the `sub` claim exactly equals the requested `client_id`,
+   then validate the remaining attestation and proof under the selected
+   ATTEST method. When the attestation is an additional security signal
+   alongside another client authentication method
+   ({{Section 7.6 of ATTEST}}), validate that method under its own
+   specification and verify that it authenticates the same client
+   identifier; a mismatch is a failure of that method. Where the
+   companion method also establishes a confirmation key, for example
+   mutual TLS {{RFC8705}}, authorization server configuration selects
+   which key binds the issued token; the authorization server MUST NOT
+   bind a token to the attested key on the strength of an attestation it
+   did not accept.
 5. Apply grant and authorization policy independently of the
    endorsement.
 
@@ -532,47 +537,47 @@ change identifier comparison.
 
 Key selection MUST bind a key to the client identifier, issuer, selected
 key source, and applicable trust policy, so that a key selected under
-one entry never verifies an attestation evaluated under another; `kid`
-alone or a union of keys from different entries is insufficient. The
-binding applies when a key is selected, not when it is fetched, so a
+one entry never verifies an attestation evaluated under another; a `kid`
+value alone or a union of keys from different entries is insufficient.
+The binding applies when a key is selected, not when it is fetched, so a
 shared HTTP cache keyed by JWK Set URL is compatible with it. The
 authorization server MUST ignore the `jku`, `x5u`, `x5c`, and `jwk` JOSE
 header parameters for key selection under this profile and MUST resolve
-only `kid` against the selected source.
+only the `kid` header parameter against the selected source.
 
 A key is eligible when all of the following hold:
 
-* it is the only key in the selected JWK Set whose `kid` equals the
-  header `kid` by octet comparison;
-* it is an asymmetric public key whose type is consistent with the
-  header `alg`;
-* its `use`, if present, is `sig` or, under AS-configured attester
-  trust, a value the authorization server has configured for that key
-  source as identifying signature keys (for example `jwt-svid` for a
-  SPIFFE trust bundle {{SPIFFE-OAUTH}});
-* its `key_ops`, if present, includes `verify`; and
-* its `alg`, if present, equals the header `alg`.
+* it is the only key in the selected JWK Set whose `kid` parameter
+  equals the `kid` header parameter by octet comparison;
+* it is an asymmetric public key whose key type is consistent with the
+  `alg` header parameter;
+* its `use` parameter, if present, is `sig` or, under AS-configured
+  attester trust, a value the authorization server has configured for
+  that key source as identifying signature keys (for example `jwt-svid`
+  for a SPIFFE trust bundle {{SPIFFE-OAUTH}});
+* its `key_ops` parameter, if present, includes `verify`; and
+* its `alg` parameter, if present, equals the `alg` header parameter.
 
-More than one key matching the `kid` is a failure; the authorization
-server MUST NOT try candidate keys in turn.
+More than one key matching the `kid` value is a failure; the
+authorization server MUST NOT try candidate keys in turn.
 
 When retrieving a JWK Set or client metadata, the authorization server
 MUST authenticate the HTTPS server and MUST NOT follow redirects.
 Bounding response size and request time, and blocking prohibited network
 destinations, are local defenses; see {{security}}. The authorization
-server SHOULD advertise
-`client_attestation_signing_alg_values_supported` consistent with the
-algorithm restrictions in step 3 of {{as-processing}}
-({{Section 8 of ATTEST}}).
+server SHOULD advertise the
+`client_attestation_signing_alg_values_supported` metadata parameter
+with values consistent with the algorithm restrictions in step 3 of
+{{as-processing}} ({{Section 8 of ATTEST}}).
 
 ## Errors {#errors}
 
 Endorsement validation covers these parts of {{as-processing}}:
 
 * selecting a permitted endorsement in step 2;
-* selecting the key source and resolving `kid` in step 3 under
-  {{key-resolution}}, including an endorsed `jwks_uri` that matches
-  neither the configured key source nor a configured alias; and
+* selecting the key source and resolving the `kid` header parameter in
+  step 3 under {{key-resolution}}, including an endorsed `jwks_uri` that
+  matches neither the configured key source nor a configured alias; and
 * finding no eligible key after any refresh permitted by
   {{updates}}.
 
@@ -605,11 +610,11 @@ Attestation is an additional security signal:
   leaves no attestation signal for that request. The authorization
   server MUST NOT treat the failed attestation as a satisfied signal. If
   the deployment requires an attestation alongside that method, the
-  request fails. A server signals that requirement by advertising
-  `client_attestation_pop_methods_supported` without the value `none`; a
-  list containing `none` leaves the attestation optional. Where the
-  attestation is optional, whether the request proceeds on the companion
-  method alone is authorization server policy.
+  request fails. A server signals that requirement by advertising the
+  `client_attestation_pop_methods_supported` metadata parameter without
+  the value `none`; a list containing `none` leaves the attestation
+  optional. Where the attestation is optional, whether the request
+  proceeds on the companion method alone is authorization server policy.
 
 Whenever an endorsement validation failure causes the authorization
 server to reject the request, the authorization server MUST return
@@ -668,18 +673,18 @@ states one in its trust agreement. Fresh entries need not be retrieved
 on each request. These limits apply to cached copies, not to
 authoritative client registrations.
 
-On an unknown `kid`, the authorization server SHOULD refresh the
+On an unknown `kid` value, the authorization server SHOULD refresh the
 selected key source's JWK Set once and retry key selection, subject to
 rate limits. The authorization server MUST rate-limit these refreshes
-per selected key source, independently of `kid`, and MUST reject the
-attestation if no eligible key is available. Where several clients or
-publishers endorse one key source, the authorization server SHOULD also
-limit refreshes per endorsing client and per publisher, so that no
-client or publisher can exhaust another's allowance. Rate-limit
-parameters are deployment-specific. An `iss` matching no endorsement
-MUST NOT cause a client-metadata refresh; the metadata maximum age
-bounds the delay before a newly published endorsement takes effect, as
-it bounds withdrawal.
+per selected key source, independently of the `kid` value, and MUST
+reject the attestation if no eligible key is available. Where several
+clients or publishers endorse one key source, the authorization server
+SHOULD also limit refreshes per endorsing client and per publisher, so
+that no client or publisher can exhaust another's allowance. Rate-limit
+parameters are deployment-specific. An `iss` claim value that matches no
+endorsement MUST NOT cause a client metadata refresh; the metadata
+maximum age bounds the delay before a newly published endorsement takes
+effect, as it bounds withdrawal.
 
 On observing that a CIMD or a selected JWK Set has been removed (HTTP
 404 or 410), the authorization server MUST stop using previously cached
@@ -775,14 +780,15 @@ revocation channel.
 The `client_attesters` member does not itself require attestation, so an
 attacker that obtains the client's other credentials can authenticate
 without one unless the deployment requires attestation, either through
-an attestation `token_endpoint_auth_method` or by advertising
-`client_attestation_pop_methods_supported` without `none` ({{errors}});
-the latter retains mutual TLS or `private_key_jwt` as the client
-authentication method. A registration access token can change
-`token_endpoint_auth_method` or `jwks` through {{RFC7592}} even where it
-cannot change `client_attesters` ({{registered}}), so a deployment
-relying on endorsement also restricts those changes or requires
-attestation by authorization server policy.
+an attestation-based `token_endpoint_auth_method` value or by
+advertising the `client_attestation_pop_methods_supported` metadata
+parameter without the value `none` ({{errors}}); the latter retains
+mutual TLS or `private_key_jwt` as the client authentication method. A
+registration access token can change `token_endpoint_auth_method` or
+`jwks` through {{RFC7592}} even where it cannot change
+`client_attesters` ({{registered}}), so a deployment relying on
+endorsement also restricts those changes or requires attestation by
+authorization server policy.
 
 ## Unscoped Endorsement {#unscoped-endorsement}
 
