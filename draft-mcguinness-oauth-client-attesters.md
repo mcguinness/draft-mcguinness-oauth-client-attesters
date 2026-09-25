@@ -74,7 +74,7 @@ relies on such an attestation, it needs to determine two things: whether
 the attester is trusted ({{Section 7.1 of ATTEST}}) and whether that
 attester is authorized to attest for this particular client.
 
-ATTEST defines the Client Attestation format, presentation, and
+{{ATTEST}} defines the Client Attestation format, presentation, and
 validation, and places the establishment of trust in Client Attesters
 outside its scope ({{Section 10.8 of ATTEST}}). It defines no
 relationship by which a client identifies the attesters authorized to
@@ -121,8 +121,8 @@ the authorization server authorizes the publisher to select keys; where
 the authorization server configures attester trust itself, the change
 also requires acceptance by the authorization server ({{trust}}).
 
-This profile builds on ATTEST and introduces no new credential
-or client authentication method. ATTEST, this profile, and the optional
+This profile builds on {{ATTEST}} and introduces no new credential or
+client authentication method. {{ATTEST}}, this profile, and the optional
 Client Instance ID profile {{INSTANCE-ID}} address separate layers:
 
 ~~~ ascii-art
@@ -203,11 +203,11 @@ configuration. The two policies are defined as follows;
 * **Publisher-authorized key selection:** the authorization server
   authorizes the publisher of specified clients to select both the
   attester and its key source, so the endorsed `jwks_uri` supplies the
-  keys. For CIMD, the authorization server configures exact client URLs
-  or HTTPS origins, optionally restricted to a path prefix. A prefix
-  matches only at a `/` segment boundary. A client URL whose path
-  contains `\`, `;`, or a percent-encoded `/`, `\`, or `.` matches no
-  prefix, because a server can decode or route such a path to a
+  keys. For CIMD clients, the authorization server configures exact
+  client URLs or HTTPS origins, optionally restricted to a path prefix.
+  A prefix matches only at a `/` segment boundary. A client URL whose
+  path contains `\`, `;`, or a percent-encoded `/`, `\`, or `.` matches
+  no prefix, because a server can decode or route such a path to a
   different document than the one compared. Client identifier comparison
   itself remains exact. A path prefix is a publisher boundary only where
   the host serves each path under it from the publisher it names; shared
@@ -260,8 +260,8 @@ whether this profile applies to a request; this out-of-band
 determination satisfies {{Section 13 of ATTEST}}. The presence or
 absence of `client_attesters` does not determine whether this profile
 applies, and publishing it does not require an authorization server to
-apply this profile. This profile is independent of how CIMD handles
-unrecognized metadata, which CIMD leaves unspecified. An authorization
+apply this profile. This profile is independent of how {{CIMD}} handles
+unrecognized metadata, which it leaves unspecified. An authorization
 server advertises the capability with the
 `client_attester_endorsement_supported` metadata parameter
 ({{as-metadata}}). Because that parameter applies to the authorization
@@ -283,7 +283,7 @@ authenticating at any of these endpoints acts as a client, including a
 resource server presenting a Client Attestation to the introspection
 endpoint. Where a flow authenticates more than once, each presentation
 is evaluated on its own under {{as-processing}}. This profile retains
-the wire format, proof methods, and token binding of ATTEST.
+the wire format, proof methods, and token binding of {{ATTEST}}.
 
 A resource server that accepts a Client Attestation presented to it
 ({{Section 7.6 of ATTEST}}) relies on configured attester trust; this
@@ -449,13 +449,13 @@ For each presentation, the authorization server MUST:
 1. Before evaluating endorsements, select the authoritative metadata
    source for the requested `client_id` using authorization server
    registration or discovery policy. Obtain metadata from that source or
-   a fresh cache, following CIMD resolution and validation or registered
-   metadata policy, including {{registered}}. The authorization server
-   MUST NOT combine endorsement lists from different sources or switch
-   sources because endorsement validation fails. A client identifier
-   with both a registration and a reachable CIMD is resolved from the
-   single source this step selects; an endorsement failure from that
-   source is final.
+   a fresh cache, following the resolution and validation rules of
+   {{CIMD}} or registered metadata policy, including {{registered}}. The
+   authorization server MUST NOT combine endorsement lists from
+   different sources or switch sources because endorsement validation
+   fails. A client identifier with both a registration and a reachable
+   CIMD is resolved from the single source this step selects; an
+   endorsement failure from that source is final.
 2. Validate `client_attesters` and select the entry whose `issuer`
    member exactly matches the nonempty `iss` claim of the attestation;
    because an issuer occurs at most once in the array ({{metadata}}),
@@ -472,9 +472,9 @@ For each presentation, the authorization server MUST:
    keys, and an `alg` header parameter value of `none` MUST NOT be
    accepted under this profile.
 4. Verify that the `sub` claim exactly equals the requested `client_id`,
-   then validate the remaining attestation and proof under the selected
-   ATTEST method. When the attestation is an additional security signal
-   alongside another client authentication method
+   then validate the remaining attestation and proof under the method
+   selected from {{ATTEST}}. When the attestation is an additional
+   security signal alongside another client authentication method
    ({{Section 7.6 of ATTEST}}), validate that method under its own
    specification and verify that it authenticates the same client
    identifier; a mismatch is a failure of that method. Where the
@@ -664,8 +664,8 @@ are separately revoked ({{existing-grants}}).
 The authorization server MUST:
 
 * enforce configured finite maximum ages for cached endorsement metadata
-  and JWK Sets, applying CIMD and HTTP caching constraints {{RFC9111}}
-  when stricter; and
+  and JWK Sets, applying the caching constraints of {{CIMD}} and HTTP
+  {{RFC9111}} when stricter; and
 * revalidate or refresh expired entries before use, rejecting stale
   entries if that operation fails.
 
