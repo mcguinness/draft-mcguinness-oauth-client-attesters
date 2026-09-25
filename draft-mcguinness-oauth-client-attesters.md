@@ -527,7 +527,10 @@ A key is eligible when all of the following hold:
   header `kid` by octet comparison;
 * it is an asymmetric public key whose type is consistent with the
   header `alg`;
-* its `use`, if present, is `sig`;
+* its `use`, if present, is `sig`, or, under AS-configured attester
+  trust, a value the configured key source's specification defines for
+  JWT signing keys (for example `jwt-svid` in a SPIFFE trust bundle
+  {{SPIFFE-OAUTH}});
 * its `key_ops`, if present, includes `verify`; and
 * its `alg`, if present, equals the header `alg`.
 
