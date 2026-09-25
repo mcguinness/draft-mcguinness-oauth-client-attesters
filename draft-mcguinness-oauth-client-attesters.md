@@ -152,7 +152,7 @@ This specification uses the OAuth 2.0 terms defined in {{RFC6749}}. The
 terms Client Attestation, Client Attester, Client Instance, and Client
 Instance Key are used as defined in {{ATTEST}}.
 
-client publisher:
+client publisher
 : The party that controls the authoritative client metadata for a
   `client_id`.
 
@@ -176,7 +176,7 @@ accept a Client Attestation only when both of the following hold:
 1. **Client endorsement:** the authoritative metadata for the requested
    `client_id` currently endorses the attestation's issuer
    ({{metadata}}).
-2. **Authorization server acceptance:** Authorization server policy
+2. **Authorization server acceptance:** authorization server policy
    permits that attester for that client and determines how the
    attester's verification keys are trusted ({{key-resolution}}).
 
