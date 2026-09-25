@@ -717,56 +717,79 @@ validation needs a separate revocation mechanism or token expiration.
 
 # Security Considerations {#security}
 
-The considerations in {{ATTEST}}, {{CIMD}}, and {{RFC8725}} apply.
+The security considerations of {{Section 12 of ATTEST}},
+{{Section 8 of CIMD}}, and {{RFC8725}} apply.
 
-* **Publisher compromise:** whoever controls a CIMD host or a client's
-  registration administration can change endorsements, within
-  authorization server policy. The protocol gives the authorization
-  server no signal of this, so operators generally monitor endorsement
-  changes and treat new attesters as policy changes. A separately
-  specified signed-metadata mechanism with independently trusted signing
-  keys could bind publisher intent apart from the HTTPS host; this
-  profile defines none.
-* **Attester compromise:** a client or tenant of a shared attester could
-  obtain attestations naming another, so the attester needs issuance
-  controls that prevent this. Under AS-configured attester trust, the
-  agreement check in {{key-resolution}} isolates tenants only if the
-  configured key source and its aliases preserve the endorsed tenant
-  scope, which is the authorization server operator's responsibility.
-* **Key retrieval:** under publisher-authorized key selection, an
-  authorized publisher chooses both the issuer and the key location, and
-  so can direct a request from the authorization server to an origin of
-  its choosing. {{key-resolution}} constrains that request, deliberately
-  extending CIMD's no-automatic-redirect rule to key retrieval, but does
-  not remove it. An authorization server can also bound response size
-  and request time and block prohibited network destinations. Endorsed
-  URLs remain subject to server-side request forgery (SSRF) defenses;
-  endorsement does not make a network location safe.
-* **Withdrawal latency:** cached copies outlast withdrawal
-  ({{updates}}), so removing a key at its origin is not instantaneous
-  revocation. Urgent incidents require denial by authorization server
-  policy ({{endorsement-changes}}) or another revocation channel.
-* **Omitted attestation:** `client_attesters` does not itself require
-  attestation, so a thief of the client's other credentials can
-  authenticate without one unless the deployment requires attestation,
-  either through an attestation `token_endpoint_auth_method` or by
-  advertising `client_attestation_pop_methods_supported` without `none`
-  ({{errors}}); the latter keeps mutual TLS or `private_key_jwt` in
-  place. A registration access token can change
-  `token_endpoint_auth_method` or `jwks` through {{RFC7592}} even where
-  it cannot change `client_attesters` ({{registered}}), so a deployment
-  relying on endorsement restricts those changes too or requires
-  attestation by authorization server policy.
-* **Unscoped endorsement:** an endorsement carries no audience. Under
-  publisher-authorized key selection, one endorsement selects the
-  attester and its keys at every authorization server whose policy
-  covers that publisher, so a compromised attester authenticates the
-  client at all of them until the endorsement is withdrawn.
-* **Privacy:** public metadata exposes client-to-attester relationships.
-  Such metadata need not enumerate instances or their keys, and this
-  profile gives no reason to do so; it requires no stable instance
-  identifier. Caching reduces the request-timing information observable
-  at metadata and key sources.
+## Publisher Compromise {#publisher-compromise}
+
+Whoever controls a CIMD host or a client's registration administration
+can change endorsements, within authorization server policy. The
+protocol gives the authorization server no signal of this, so operators
+generally monitor endorsement changes and treat new attesters as policy
+changes. A separately specified signed-metadata mechanism with
+independently trusted signing keys could bind publisher intent apart
+from the HTTPS host; this profile defines none.
+
+## Attester Compromise {#attester-compromise}
+
+A client or tenant of a shared attester could obtain attestations naming
+another, so the attester needs issuance controls that prevent this.
+Under AS-configured attester trust, the agreement check in
+{{key-resolution}} isolates tenants only if the configured key source
+and its aliases preserve the endorsed tenant scope, which is the
+authorization server operator's responsibility.
+
+## Key Retrieval {#key-retrieval}
+
+Under publisher-authorized key selection, an authorized publisher
+chooses both the issuer and the key location, and so can direct a
+request from the authorization server to an origin of its choosing.
+{{key-resolution}} constrains that request, deliberately extending
+CIMD's no-automatic-redirect rule to key retrieval, but does not remove
+it. An authorization server can also bound response size and request
+time and block prohibited network destinations. Endorsed URLs remain
+subject to server-side request forgery (SSRF) defenses; endorsement does
+not make a network location safe.
+
+## Withdrawal Latency {#withdrawal-latency}
+
+Cached copies outlast withdrawal ({{updates}}), so removing a key at its
+origin is not instantaneous revocation. Urgent incidents require denial
+by authorization server policy ({{endorsement-changes}}) or another
+revocation channel.
+
+## Omitted Attestation {#omitted-attestation}
+
+The `client_attesters` member does not itself require attestation, so a
+thief of the client's other credentials can authenticate without one
+unless the deployment requires attestation, either through an
+attestation `token_endpoint_auth_method` or by advertising
+`client_attestation_pop_methods_supported` without `none` ({{errors}});
+the latter keeps mutual TLS or `private_key_jwt` in place. A
+registration access token can change `token_endpoint_auth_method` or
+`jwks` through {{RFC7592}} even where it cannot change
+`client_attesters` ({{registered}}), so a deployment relying on
+endorsement restricts those changes too or requires attestation by
+authorization server policy.
+
+## Unscoped Endorsement {#unscoped-endorsement}
+
+An endorsement carries no audience. Under publisher-authorized key
+selection, one endorsement selects the attester and its keys at every
+authorization server whose policy covers that publisher, so a
+compromised attester authenticates the client at all of them until the
+endorsement is withdrawn.
+
+# Privacy Considerations {#privacy}
+
+The privacy considerations of {{Section 11 of ATTEST}} and
+{{Section 9 of CIMD}} apply.
+
+Public metadata exposes client-to-attester relationships. Such metadata
+need not enumerate instances or their keys, and this profile gives no
+reason to do so; it requires no stable instance identifier. Caching
+reduces the request-timing information observable at metadata and key
+sources.
 
 # IANA Considerations
 
