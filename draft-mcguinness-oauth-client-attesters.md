@@ -70,9 +70,9 @@ authentication method.
 OAuth 2.0 Attestation-Based Client Authentication {{ATTEST}} enables a
 Client Attester to make security-relevant statements about a Client
 Instance and the key it holds. Before an authorization server (AS)
-relies on such an attestation, it needs answers to two distinct
-questions: is the attester trusted ({{Section 7.1 of ATTEST}}), and is
-that attester authorized to attest for this particular client?
+relies on such an attestation, it needs to determine two things: whether
+the attester is trusted ({{Section 7.1 of ATTEST}}) and whether that
+attester is authorized to attest for this particular client.
 
 ATTEST defines the Client Attestation format, presentation, and
 validation, and places the establishment of trust in Client Attesters
