@@ -71,12 +71,12 @@ Attestation-Based Client Authentication {{ATTEST}} lets a Client
 Attester make security-relevant statements about a Client Instance and
 the key it holds. Before an authorization server (AS) relies on such an
 attestation, it needs answers to two distinct questions: is the
-attester trusted ({{ATTEST, Section 7.1}}), and is that attester
+attester trusted ({{Section 7.1 of ATTEST}}), and is that attester
 authorized to speak for this particular client?
 
 ATTEST defines the Client Attestation format, presentation, and
 validation, and intentionally leaves establishment of Client Attester
-trust to deployments ({{ATTEST, Section 10.8}}). It defines no
+trust to deployments ({{Section 10.8 of ATTEST}}). It defines no
 relationship by which a client identifies the attesters authorized to
 attest its instances.
 
@@ -243,21 +243,21 @@ deletion request, counts as replacing it.
 
 An authorization server that does not accept a submitted endorsement
 MUST either reject the request with `invalid_client_metadata`
-({{RFC7591, Section 3.2.2}}) or omit `client_attesters` from the stored
-metadata and from the client information response
-({{RFC7591, Section 3.2.1}}), so that the response never shows an
+({{Section 3.2.2 of RFC7591}}) or omit `client_attesters` from the
+stored metadata and from the client information response
+({{Section 3.2.1 of RFC7591}}), so that the response never shows an
 endorsement the authorization server has not accepted.
 
 ## Applicability and Scope {#profile-selection}
 
 authorization server policy, which can be scoped per client, determines
 whether this profile applies to a request; this out-of-band
-determination satisfies {{ATTEST, Section 13}}. The presence or absence
-of `client_attesters` does not select applicability, and publishing it
-does not require an authorization server to apply this profile. The
-profile is independent of how CIMD handles unrecognized metadata, which
-CIMD leaves unspecified. An authorization server advertises the
-capability with `client_attester_endorsement_supported`
+determination satisfies {{Section 13 of ATTEST}}. The presence or
+absence of `client_attesters` does not select applicability, and
+publishing it does not require an authorization server to apply this
+profile. The profile is independent of how CIMD handles unrecognized
+metadata, which CIMD leaves unspecified. An authorization server
+advertises the capability with `client_attester_endorsement_supported`
 ({{as-metadata}}). Because that parameter applies to the authorization
 server as a whole, deployments relying on endorsement enforcement
 establish through a trust agreement that the authorization server
@@ -279,7 +279,7 @@ each presentation is evaluated on its own under {{as-processing}}. The
 profile retains ATTEST's wire format, proof methods, and token binding.
 
 A resource server that accepts a Client Attestation presented to it
-({{ATTEST, Section 7.6}}) relies on configured attester trust; this
+({{Section 7.6 of ATTEST}}) relies on configured attester trust; this
 profile does not define endorsement discovery or acceptance there. This
 keeps client metadata resolution and endorsement policy at the
 authorization server rather than at each resource server, with one
@@ -289,12 +289,12 @@ resource server that validates attestations directly.
 The authorization server conveys its decision through the artifacts it
 issues, not through endorsement data, and what they carry depends on the
 deployment's token-binding method. In ATTEST's combined mode
-({{ATTEST, Section 5.2}}), the Demonstrating Proof of Possession (DPoP)
-key {{RFC9449}} and the attested Client Instance Key are one key, so the
-issued token's confirmation claim names the attested key. Where DPoP is
-used alongside a separate Client Attestation proof, that section does
-not require the DPoP key to match the attestation's `cnf`, and the token
-is bound to the DPoP key instead. Either way, a confirmation claim
+({{Section 5.2 of ATTEST}}), the Demonstrating Proof of Possession
+(DPoP) key {{RFC9449}} and the attested Client Instance Key are one key,
+so the issued token's confirmation claim names the attested key. Where
+DPoP is used alongside a separate Client Attestation proof, that section
+does not require the DPoP key to match the attestation's `cnf`, and the
+token is bound to the DPoP key instead. Either way, a confirmation claim
 reports a binding, not an endorsement verdict, and introspection
 {{RFC7662}} reports the token's state, not how the authorization server
 evaluated the endorsement. Neither tells a resource server whether an
@@ -358,7 +358,7 @@ authorization server applies, so each entry carries a complete
 issuer-to-key-location mapping that means the same under either policy;
 {{key-resolution}} specifies how each policy uses the location.
 
-{{ATTEST, Section 10.8}} recommends, among other options, resolving
+{{Section 10.8 of ATTEST}} recommends, among other options, resolving
 `kid` through client metadata `jwks_uri`. This profile extends that
 option with a separate key location for each endorsed issuer. A
 top-level `jwks_uri` can hold several issuers' keys, but it neither
@@ -375,15 +375,15 @@ location, so it is no substitute for SPIFFE bundle configuration.
 
 Clients using attestation as client authentication select
 `attest_jwt_client_auth` or `attest_jwt_client_auth_dpop` under
-{{ATTEST, Section 9}}. When attestation supplements another method
-({{ATTEST, Section 7.6}}), that method still authenticates the client.
+{{Section 9 of ATTEST}}. When attestation supplements another method
+({{Section 7.6 of ATTEST}}), that method still authenticates the client.
 The member
 does not select a grant, proof method, or the optional
 instance-identification profile.
 
 # Authorization Server Metadata {#as-metadata}
 
-In addition to the parameters in {{ATTEST, Section 8}}, this profile
+In addition to the parameters in {{Section 8 of ATTEST}}, this profile
 defines one OPTIONAL authorization server metadata parameter
 {{RFC8414}}:
 
@@ -419,14 +419,14 @@ The attester MUST include:
 * `kid`: a nonempty header parameter {{RFC7515}} identifying its
   signing key.
 
-{{ATTEST, Section 4}} does not require `iss`. This profile requires it
+{{Section 4 of ATTEST}} does not require `iss`. This profile requires it
 because a client can endorse several Client Attesters with independent
 key sets: the issuer selects the endorsement and key source before
 `kid` is resolved, and `kid` identifies a key within a set, not a
 Client Attester or a trust relationship.
 
 This profile keeps the default `client_id` to `sub` equality of
-{{ATTEST, Section 7.5}} without relaxation, so an endorsement for one
+{{Section 7.5 of ATTEST}} without relaxation, so an endorsement for one
 client cannot validate an attestation naming another. Other claims and
 proof requirements follow {{ATTEST}}.
 
@@ -461,7 +461,7 @@ For each presentation, the authorization server MUST:
 4. Verify `sub` exactly equals the requested `client_id`, then validate
    the remaining attestation and proof under the selected ATTEST method.
    When the attestation is an additional security signal alongside
-   another client authentication method ({{ATTEST, Section 7.6}}),
+   another client authentication method ({{Section 7.6 of ATTEST}}),
    validate that method under its own specification and verify that it
    authenticates the same client identifier; a mismatch is a failure of
    that method. Where the companion method also establishes a
@@ -557,7 +557,7 @@ destinations, are local defenses; see {{security}}. The authorization
 server SHOULD advertise
 `client_attestation_signing_alg_values_supported` consistent with the
 algorithm restrictions in step 3 of {{as-processing}}
-({{ATTEST, Section 8}}).
+({{Section 8 of ATTEST}}).
 
 ## Errors {#errors}
 
@@ -575,7 +575,7 @@ plays in the request.
 
 Attestation is the client authentication method:
 : An endorsement validation failure MUST produce
-  `invalid_client_attestation`. {{ATTEST, Section 7.4}} defines that
+  `invalid_client_attestation`. {{Section 7.4 of ATTEST}} defines that
   code alongside the more general `invalid_client`; this profile
   requires the specific code so the response identifies the Client
   Attestation, not another client credential, as the cause. The code
@@ -585,9 +585,9 @@ Attestation is the client authentication method:
   This profile does not change the HTTP status code an endpoint assigns
   to a client authentication failure. The token endpoint responds 400
   by default and requires 401 only when the client authenticated
-  through the `Authorization` header field ({{RFC6749, Section 5.2}}),
+  through the `Authorization` header field ({{Section 5.2 of RFC6749}}),
   which a Client Attestation does not use. The introspection endpoint
-  requires 401 ({{RFC7662, Section 2.3}}). Other endpoints follow their
+  requires 401 ({{Section 2.3 of RFC7662}}). Other endpoints follow their
   own specifications.
 
   A client library that recognizes only `invalid_client` treats this
@@ -595,7 +595,7 @@ Attestation is the client authentication method:
 
 Attestation is an additional security signal:
 : Where the Client Attestation accompanies another client authentication
-  method ({{ATTEST, Section 7.6}}), an endorsement validation failure
+  method ({{Section 7.6 of ATTEST}}), an endorsement validation failure
   leaves no attestation signal for that request. The authorization
   server MUST NOT treat the failed attestation as a satisfied signal. If
   the deployment requires an attestation alongside that method, the
@@ -623,8 +623,8 @@ under the trust agreement ({{profile-selection}}), not by client retry.
 
 Everything else keeps its own error. Signature verification with a
 resolved key and the remaining attestation and proof checks follow
-{{ATTEST, Section 7.4}}, including challenge and freshness responses. A
-companion client authentication method that fails, or that
+{{Section 7.4 of ATTEST}}, including challenge and freshness responses.
+A companion client authentication method that fails, or that
 authenticates a different client identifier, produces the error defined
 by its own specification. Other metadata-discovery, registration,
 authentication, and grant errors follow their base specifications. The
@@ -888,7 +888,7 @@ key source, and the endorsed `jwks_uri` has to equal it, as it does
 here. An attestation from an unendorsed issuer, an endorsement naming
 the trusted issuer with a different key location, or a `kid` that
 resolves to no key in the configured key source produces the response
-below. {{RFC6749, Section 5.2}} requires 401 only for a client that
+below. {{Section 5.2 of RFC6749}} requires 401 only for a client that
 authenticated through the `Authorization` header field, which this
 client does not use, so the example shows the default 400:
 
