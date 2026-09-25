@@ -182,9 +182,9 @@ accept a Client Attestation only when both of the following hold:
 
 Endorsement alone does not make an attester trusted, and authorization
 server trust in an attester alone does not authorize it for a client.
-authorization server policy can narrow the endorsed set, and authorizing
+Authorization server policy can narrow the endorsed set, and authorizing
 a publisher to select keys permits each attester that publisher
-endorses, subject to {{key-resolution}}. authorization server policy
+endorses, subject to {{key-resolution}}. Authorization server policy
 MUST NOT add an unendorsed attester or accept an attestation through
 another attester-trust mechanism. Where the attestation is optional,
 proceeding on a companion client authentication method without it
@@ -255,7 +255,7 @@ endorsement the authorization server has not accepted.
 
 ## Applicability and Scope {#profile-selection}
 
-authorization server policy, which can be scoped per client, determines
+Authorization server policy, which can be scoped per client, determines
 whether this profile applies to a request; this out-of-band
 determination satisfies {{Section 13 of ATTEST}}. The presence or
 absence of `client_attesters` does not determine whether this profile
