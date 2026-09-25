@@ -55,10 +55,7 @@ informative:
 OAuth 2.0 Attestation-Based Client Authentication requires an
 authorization server to trust the attester that vouches for a client
 instance, but does not define how a client identifies the attesters
-authorized to speak for it. This specification closes that gap with a
-client metadata member, usable by registered clients and Client ID
-Metadata Documents, that names endorsed attesters and their
-verification-key locations. It defines how an authorization server
+authorized to speak for it. This specification defines a client metadata member, usable by registered clients and in Client ID Metadata Documents, that names the endorsed attesters and the locations of their verification keys. It defines how an authorization server
 validates endorsements and processes their withdrawal while retaining
 control over whether to trust them. It introduces no new credential or
 client authentication method.
@@ -67,26 +64,26 @@ client authentication method.
 
 # Introduction
 
-Attestation-Based Client Authentication {{ATTEST}} lets a Client
-Attester make security-relevant statements about a Client Instance and
-the key it holds. Before an authorization server (AS) relies on such an
-attestation, it needs answers to two distinct questions: is the
-attester trusted ({{Section 7.1 of ATTEST}}), and is that attester
-authorized to speak for this particular client?
+OAuth 2.0 Attestation-Based Client Authentication {{ATTEST}} enables a
+Client Attester to make security-relevant statements about a Client
+Instance and the key it holds. Before an authorization server (AS)
+relies on such an attestation, it needs answers to two distinct
+questions: is the attester trusted ({{Section 7.1 of ATTEST}}), and is
+that attester authorized to speak for this particular client?
 
 ATTEST defines the Client Attestation format, presentation, and
-validation, and intentionally leaves establishment of Client Attester
-trust to deployments ({{Section 10.8 of ATTEST}}). It defines no
+validation, and places the establishment of trust in Client Attesters
+outside its scope ({{Section 10.8 of ATTEST}}). It defines no
 relationship by which a client identifies the attesters authorized to
 attest its instances.
 
-That relationship matters when a client has many independently
+That relationship is needed when a client has many independently
 provisioned instances, uses a platform or workload attester, migrates
 between attesters, or is identified by a Client ID Metadata Document
 (CIMD) {{CIMD}} rather than by pre-established bilateral configuration.
 If the authorization server configures every client-to-attester
 association, the client cannot withdraw or narrow its attesters without
-the authorization server.
+the involvement of the authorization server.
 
 This specification makes the relationship explicit with a Client
 Attester Endorsement in client metadata:
@@ -96,17 +93,17 @@ Client metadata --endorses--> Attester --attests--> Client Instance
        \__________________ AS validates __________________/
 ~~~
 
-An endorsement says that the client publisher authorizes the named
+An endorsement states that the client publisher authorizes the named
 Client Attester to speak for the client. It does not make that attester
 trusted by the authorization server, which still decides whether to
 accept the endorsed attester and how to trust its verification keys
 ({{trust}}). The `client_attesters` client metadata member
 ({{metadata}}) carries the endorsed attesters and their verification-key
-locations. It serves registered and CIMD clients alike and can hold
-several endorsements, for example across heterogeneous platforms or
-during attester migration.
+locations. It can be used by registered clients and by clients
+identified by a CIMD, and it can hold several endorsements, for example
+across heterogeneous platforms or during attester migration.
 
-This separates two authorities that are otherwise easily conflated:
+This separates two distinct authorities:
 
 * the client publisher determines which attesters are authorized to
   speak for the client; and
@@ -118,10 +115,10 @@ gaining control of authorization server trust policy. It can always
 withdraw or narrow its endorsements. Adding an attester or moving its
 key location takes effect without authorization server action only where
 the authorization server authorizes the publisher to select keys; where
-the authorization server configures attester trust itself, the
-authorization server also has to accept the change ({{trust}}).
+the authorization server configures attester trust itself, the change
+also requires acceptance by the authorization server ({{trust}}).
 
-The profile builds directly on ATTEST and introduces no new credential
+This profile builds on ATTEST and introduces no new credential
 or client authentication method. ATTEST, this profile, and the optional
 Client Instance ID profile {{INSTANCE-ID}} address separate layers:
 
@@ -140,17 +137,21 @@ does not establish attester trust. Neither establishes user delegation.
 
 Deployments that can manage client-to-attester associations entirely
 through authorization server configuration can use {{ATTEST}} without
-this profile. The profile is for deployments where the client publisher
-expresses and maintains that association, subject to authorization
-server policy ({{acceptance}}).
+this profile. This profile is intended for deployments in which the
+client publisher expresses and maintains that association, subject to
+authorization server policy ({{acceptance}}).
 
 # Conventions and Trust Model {#trust}
 
 {::boilerplate bcp14-tagged}
 
-OAuth terms follow {{RFC6749}}; Client Attester, Client Attestation,
-and Client Instance Key follow {{ATTEST}}. The client publisher controls
-the authoritative metadata for a `client_id`.
+This specification uses the OAuth 2.0 terms defined in {{RFC6749}}. The
+terms Client Attestation, Client Attester, Client Instance, and Client
+Instance Key are used as defined in {{ATTEST}}.
+
+client publisher:
+: The party that controls the authoritative client metadata for a
+  `client_id`.
 
 Client Attester Endorsement
 : A statement in the authoritative client metadata for a `client_id`
@@ -158,8 +159,8 @@ Client Attester Endorsement
   `client_id` are eligible for acceptance under this profile, subject to
   authorization server policy ({{acceptance}}). It expresses the
   publisher's authorization for that attester to speak for the client;
-  it does not say which Client Instances the attester may attest, which
-  {{processing}} leaves to the attester. An endorsement delegates
+  it does not specify which Client Instances the attester may attest,
+  which {{processing}} leaves to the attester. An endorsement delegates
   attestation authority for the named client only. It does not delegate
   OAuth authorization, user authority, or authority to further delegate
   attestation.
@@ -187,13 +188,14 @@ proceeding on a companion client authentication method without it
 ({{errors}}) is not such a fallback. An endorsement does not by itself
 establish that the client is trusted or authorized to access a resource.
 
-Two key-trust policies exist, and authorization server policy determines
-which one applies. The choice is not free per association: AS-configured
-attester trust is keyed by exact issuer string and, once configured for
-any client, governs that issuer string for every client.
-Publisher-authorized key selection is keyed by the client publisher and
-needs no per-attester configuration. The two policies are below;
-{{key-resolution}} gives the procedure that selects between them:
+This specification defines two key-trust policies, and authorization
+server policy determines which one applies. The policy cannot be chosen
+independently for each association: AS-configured attester trust is
+keyed by the exact issuer string and, once configured for any client,
+governs that issuer string for every client. Publisher-authorized key
+selection is keyed by the client publisher and requires no per-attester
+configuration. The two policies are defined as follows;
+{{key-resolution}} specifies the procedure that selects between them:
 
 * **Publisher-authorized key selection:** the authorization server
   authorizes the publisher of specified clients to select both the
@@ -204,7 +206,7 @@ needs no per-attester configuration. The two policies are below;
   contains `\`, `;`, or a percent-encoded `/`, `\`, or `.` matches no
   prefix, because a server can decode or route such a path to a
   different document than the one compared. Client identifier comparison
-  itself stays exact. A path prefix is a publisher boundary only where
+  itself remains exact. A path prefix is a publisher boundary only where
   the host serves each path under it from the publisher it names; shared
   hosting requires such a boundary. Successful metadata retrieval does
   not establish this authorization. For a registered client, the
@@ -216,12 +218,12 @@ needs no per-attester configuration. The two policies are below;
   source. The endorsement authorizes that attester to act for the
   client; it cannot supply the trust anchor ({{key-resolution}}).
 
-Publisher-authorized key selection covers what authorization server
-configuration does not reach: an authorization server serving many CIMD
-clients, each published by a different operator and attested by that
-operator's own platform attester, would otherwise need a configured
-entry for every attester of every client before any of them could
-authenticate.
+Publisher-authorized key selection serves deployments in which
+per-attester configuration is impractical: an authorization server
+serving many CIMD clients, each published by a different operator and
+attested by that operator's own platform attester, would otherwise need
+a configured entry for every attester of every client before any of them
+could authenticate.
 
 When combined with {{INSTANCE-ID}}, the same two conditions establish
 attester authority; instance continuity remains independent.
@@ -231,7 +233,7 @@ attester authority; instance continuity remains independent.
 Registered endorsements MUST originate from a party authenticated and
 authorized to set them for that client, or be covered by a validated
 software statement from an issuer approved for that purpose under
-{{RFC7591}}. Open registration alone supplies neither assurance; issuing
+{{RFC7591}}. Open registration alone provides neither assurance; issuing
 a client credential does not retroactively approve its endorsements.
 The same restriction applies to endorsement updates, including updates
 made through the registration management protocol {{RFC7592}}.
@@ -239,13 +241,13 @@ Possession of a registration access token establishes control of the
 registration, not authority to endorse, and MUST NOT by itself
 authorize setting or replacing `client_attesters`. Removing the member,
 including by omitting it from an update that {{RFC7592}} treats as a
-deletion request, counts as replacing it.
+deletion request, is treated as replacing it.
 
 An authorization server that does not accept a submitted endorsement
 MUST either reject the request with `invalid_client_metadata`
 ({{Section 3.2.2 of RFC7591}}) or omit `client_attesters` from the
 stored metadata and from the client information response
-({{Section 3.2.1 of RFC7591}}), so that the response never shows an
+({{Section 3.2.1 of RFC7591}}), so that the response never contains an
 endorsement the authorization server has not accepted.
 
 ## Applicability and Scope {#profile-selection}
@@ -253,57 +255,58 @@ endorsement the authorization server has not accepted.
 authorization server policy, which can be scoped per client, determines
 whether this profile applies to a request; this out-of-band
 determination satisfies {{Section 13 of ATTEST}}. The presence or
-absence of `client_attesters` does not select applicability, and
-publishing it does not require an authorization server to apply this
-profile. The profile is independent of how CIMD handles unrecognized
-metadata, which CIMD leaves unspecified. An authorization server
-advertises the capability with `client_attester_endorsement_supported`
-({{as-metadata}}). Because that parameter applies to the authorization
-server as a whole, deployments relying on endorsement enforcement
-establish through a trust agreement that the authorization server
-applies this profile to their clients. A trust agreement is the
-out-of-band arrangement between the authorization server operator and
-the client publisher or attester operator that fixes which policies the
-authorization server applies.
+absence of `client_attesters` does not determine whether this profile
+applies, and publishing it does not require an authorization server to
+apply this profile. This profile is independent of how CIMD handles
+unrecognized metadata, which CIMD leaves unspecified. An authorization
+server advertises the capability with
+`client_attester_endorsement_supported` ({{as-metadata}}). Because that
+parameter applies to the authorization server as a whole, deployments
+relying on endorsement enforcement establish through a trust agreement
+that the authorization server applies this profile to their clients. A
+trust agreement is the out-of-band arrangement between the authorization
+server operator and the client publisher or attester operator that fixes
+which policies the authorization server applies.
 
-The profile applies at authorization server endpoints that accept Client
-Attestations for client authentication or as an additional security
-signal: typically the token endpoint, the pushed authorization request
-endpoint {{RFC9126}}, the device authorization endpoint {{RFC8628}}, and
-the introspection {{RFC7662}} and revocation {{RFC7009}} endpoints. The
-authorization endpoint does not authenticate clients and is out of
-scope. A party authenticating at any of these endpoints acts as a
-client, including a resource server presenting a Client Attestation to
-the introspection endpoint. Where a flow authenticates more than once,
-each presentation is evaluated on its own under {{as-processing}}. The
-profile retains ATTEST's wire format, proof methods, and token binding.
+This profile applies at authorization server endpoints that accept
+Client Attestations for client authentication or as an additional
+security signal: typically the token endpoint, the pushed authorization
+request endpoint {{RFC9126}}, the device authorization endpoint
+{{RFC8628}}, and the introspection {{RFC7662}} and revocation
+{{RFC7009}} endpoints. The authorization endpoint does not authenticate
+clients and is outside the scope of this specification. A party
+authenticating at any of these endpoints acts as a client, including a
+resource server presenting a Client Attestation to the introspection
+endpoint. Where a flow authenticates more than once, each presentation
+is evaluated on its own under {{as-processing}}. This profile retains
+the wire format, proof methods, and token binding of ATTEST.
 
 A resource server that accepts a Client Attestation presented to it
 ({{Section 7.6 of ATTEST}}) relies on configured attester trust; this
 profile does not define endorsement discovery or acceptance there. This
 keeps client metadata resolution and endorsement policy at the
-authorization server rather than at each resource server, with one
-consequence: withdrawing an endorsement ({{updates}}) does not reach a
+authorization server rather than at each resource server. As a
+consequence, withdrawing an endorsement ({{updates}}) has no effect at a
 resource server that validates attestations directly.
 
 The authorization server conveys its decision through the artifacts it
 issues, not through endorsement data, and what they carry depends on the
-deployment's token-binding method. In ATTEST's combined mode
-({{Section 5.2 of ATTEST}}), the Demonstrating Proof of Possession
-(DPoP) key {{RFC9449}} and the attested Client Instance Key are one key,
-so the issued token's confirmation claim names the attested key. Where
-DPoP is used alongside a separate Client Attestation proof, that section
-does not require the DPoP key to match the attestation's `cnf`, and the
-token is bound to the DPoP key instead. Either way, a confirmation claim
-reports a binding, not an endorsement verdict, and introspection
+deployment's token-binding method. In the combined mode defined in
+{{Section 5.2 of ATTEST}}, the Demonstrating Proof of Possession (DPoP)
+key {{RFC9449}} and the attested Client Instance Key are one key, so the
+issued token's confirmation claim names the attested key. Where DPoP is
+used alongside a separate Client Attestation proof, that section does
+not require the DPoP key to match the attestation's `cnf`, and the token
+is bound to the DPoP key instead. In both cases, a confirmation claim
+reports a key binding, not an endorsement decision, and introspection
 {{RFC7662}} reports the token's state, not how the authorization server
-evaluated the endorsement. Neither tells a resource server whether an
-endorsement was accepted, which is another reason endorsement policy
-stays at the authorization server.
+evaluated the endorsement. Neither indicates to a resource server
+whether an endorsement was accepted; endorsement policy therefore
+remains at the authorization server.
 
 ## Conformance
 
-Conformance is role-specific:
+Conformance requirements depend on the role:
 
 * Client publishers publish and maintain `client_attesters` under
   {{metadata}}, and withdraw an endorsement by updating that metadata
@@ -321,8 +324,8 @@ requirements. Instance identification is optional.
 
 The `client_attesters` member is OPTIONAL client metadata, usable in
 registered client metadata (including {{RFC7591}}) or a CIMD. Its value
-is an array of objects, each a Client Attester Endorsement ({{trust}})
-for the `client_id` whose metadata contains it:
+is a JSON array of objects, each a Client Attester Endorsement
+({{trust}}) for the `client_id` whose metadata contains it:
 
 | Member | Requirement | Meaning |
 |---|---|---|
@@ -343,8 +346,9 @@ requirements in the table above. The authorization server MUST:
 Rejection under this profile does not affect the client's other
 authentication methods and does not by itself make a CIMD invalid or
 uncacheable under {{CIMD}}. An extension to this member is safe only if
-an implementation that ignores it reads the endorsement the same way;
-this profile defines no way to mark an extension critical.
+an implementation that ignores it interprets the endorsement the same
+way; this specification defines no means to mark an extension as
+critical.
 
 Endorsed keys authenticate attesters, not clients. A key obtained from
 an endorsement MUST NOT be used to verify a client authentication
@@ -355,8 +359,8 @@ is identical to the client's own `jwks_uri` is also malformed.
 An endorsement identifies a Client Attester by both issuer and key
 location. The publisher cannot know which key-trust policy the
 authorization server applies, so each entry carries a complete
-issuer-to-key-location mapping that means the same under either policy;
-{{key-resolution}} specifies how each policy uses the location.
+issuer-to-key-location mapping that has the same meaning under either
+policy; {{key-resolution}} specifies how each policy uses the location.
 
 {{Section 10.8 of ATTEST}} recommends, among other options, resolving
 `kid` through client metadata `jwks_uri`. This profile extends that
@@ -365,13 +369,14 @@ top-level `jwks_uri` can hold several issuers' keys, but it neither
 associates them with named attesters nor separates them from client
 authentication keys, so it does not replace `client_attesters`.
 
-SPIFFE client authentication {{SPIFFE-OAUTH}} publishes one
-verification-key location, `spiffe_bundle_endpoint`, per trust domain.
-Under AS-configured attester trust, the endorsed `jwks_uri` plays that
-role for each named attester, but the key source is established out of
-band and the endorsed location is only compared against it.
-Publisher-authorized key selection lets the publisher name the
-location, so it is no substitute for SPIFFE bundle configuration.
+Secure Production Identity Framework for Everyone (SPIFFE) client
+authentication {{SPIFFE-OAUTH}} publishes one verification-key location,
+`spiffe_bundle_endpoint`, per trust domain. Under AS-configured attester
+trust, the endorsed `jwks_uri` serves that function for each named
+attester, but the key source is established out of band and the endorsed
+location is only compared against it. Publisher-authorized key selection
+lets the publisher name the location, so it does not substitute for
+SPIFFE bundle configuration.
 
 Clients using attestation as client authentication select
 `attest_jwt_client_auth` or `attest_jwt_client_auth_dpop` under
@@ -383,17 +388,18 @@ instance-identification profile.
 
 # Authorization Server Metadata {#as-metadata}
 
-In addition to the parameters in {{Section 8 of ATTEST}}, this profile
-defines one OPTIONAL authorization server metadata parameter
-{{RFC8414}}:
+In addition to the parameters in {{Section 8 of ATTEST}}, this
+specification defines the following OPTIONAL authorization server
+metadata parameter {{RFC8414}}:
 
 `client_attester_endorsement_supported`
-: Boolean. `true` indicates that the authorization server can process
-  `client_attesters` under this profile. The default is `false`.
+: Boolean value indicating whether the authorization server supports
+  processing the `client_attesters` client metadata member as defined in
+  this specification. If omitted, the default value is `false`.
 
-Whether the profile governs a particular client, and which key-trust
-policy applies to an attester, remain authorization server policy
-({{profile-selection}}, {{acceptance}}).
+Whether this profile governs a particular client, and which key-trust
+policy applies to an attester, remain matters of authorization server
+policy ({{profile-selection}}, {{acceptance}}).
 
 # Attestation and Authorization Server Processing {#processing}
 
@@ -486,30 +492,30 @@ no key source is available and the endorsement fails.
 After a configured entry is removed, the authorization server MUST NOT
 verify an attestation under that issuer with publisher-selected keys
 unless an operator has since decided that publishers may select keys for
-that issuer; otherwise removing a configured entry would hand key
+that issuer; otherwise, removing a configured entry would transfer key
 selection to the publisher. Restoring a configured key source for the
 issuer returns it to AS-configured attester trust. Until one of these
-happens, no key source is available and the endorsement fails.
+occurs, no key source is available and the endorsement fails.
 
 * **AS-configured attester trust:** use only the independently
   configured key source for the exact issuer; no origin relationship
   between that source and the issuer is required. The endorsed
   `jwks_uri` MUST equal that source's URI or one of its configured
-  aliases. This check surfaces, rather than silently resolves,
-  disagreement between the endorsement and authorization server
-  configuration, including endorsement of a different key set behind a
-  shared issuer string. An alias is an endorsed URI that the
-  authorization server treats as equivalent to the issuer's configured
-  key source; it does not change where keys are retrieved. Aliases are
-  issuer-wide: an alias applies to every client that endorses the
-  issuer, not only the client whose endorsement prompted it. A
-  configured alias MUST preserve the endorsed attestation authority,
-  including tenant scope; a shared issuer or origin alone does not
-  establish equivalence, and tenant isolation ({{security}}) depends on
-  this. An endorsed `jwks_uri` MUST NOT select, override, or provide a
-  fallback for the configured key source. The authorization server MUST
-  NOT retrieve the endorsed `jwks_uri` under this policy; the endorsed
-  value is compared, never fetched.
+  aliases. This check causes a disagreement between the endorsement and
+  authorization server configuration, including endorsement of a
+  different key set behind a shared issuer string, to fail validation
+  instead of being resolved in favor of either. An alias is an endorsed
+  URI that the authorization server treats as equivalent to the issuer's
+  configured key source; it does not change where keys are retrieved.
+  Aliases are issuer-wide: an alias applies to every client that
+  endorses the issuer, not only the client whose endorsement prompted
+  it. A configured alias MUST preserve the endorsed attestation
+  authority, including tenant scope; a shared issuer or origin alone
+  does not establish equivalence, and tenant isolation ({{security}})
+  depends on this. An endorsed `jwks_uri` MUST NOT select, override, or
+  provide a fallback for the configured key source. The authorization
+  server MUST NOT retrieve the endorsed `jwks_uri` under this policy;
+  the endorsed value is compared, never fetched.
 * **Publisher-authorized key selection:** use the endorsed `jwks_uri`.
   The `issuer` MUST be an HTTPS URL and `jwks_uri` MUST have the same
   origin {{RFC6454}}. This origin check neither isolates tenants sharing
@@ -614,32 +620,34 @@ A fresh attestation does not correct an endorsement validation failure
 caused by disagreement between the endorsement and authorization server
 configuration, such as an endorsed `jwks_uri` matching neither the
 configured key source nor a configured alias ({{key-resolution}}).
-Because the response deliberately carries no policy detail, a client
-cannot tell that case from one a fresh attestation would fix, or from a
-transient retrieval failure ({{updates}}) that a later presentation can
-clear. The client publisher and the authorization server operator
-resolve a configuration disagreement outside the protocol, for example
-under the trust agreement ({{profile-selection}}), not by client retry.
+Because the response carries no policy detail, a client cannot
+distinguish that case from one that a fresh attestation would correct,
+or from a transient retrieval failure ({{updates}}) that a later
+presentation can resolve. The client publisher and the authorization
+server operator resolve a configuration disagreement outside the
+protocol, for example under the trust agreement ({{profile-selection}}),
+not by client retry.
 
-Everything else keeps its own error. Signature verification with a
-resolved key and the remaining attestation and proof checks follow
-{{Section 7.4 of ATTEST}}, including challenge and freshness responses.
-A companion client authentication method that fails, or that
-authenticates a different client identifier, produces the error defined
-by its own specification. Other metadata-discovery, registration,
-authentication, and grant errors follow their base specifications. The
-prohibition on other attester-trust mechanisms in {{acceptance}}
-applies.
+Other failures produce the errors defined by their own specifications.
+Signature verification with a resolved key and the remaining attestation
+and proof checks follow {{Section 7.4 of ATTEST}}, including challenge
+and freshness responses. A companion client authentication method that
+fails, or that authenticates a different client identifier, produces the
+error defined by its own specification. Other metadata-discovery,
+registration, authentication, and grant errors follow their base
+specifications. The prohibition on other attester-trust mechanisms in
+{{acceptance}} applies.
 
 # Updates and Withdrawal {#updates}
 
 A publisher withdraws an endorsement by removing it from the
-authoritative client metadata ({{metadata}}). The removal reaches the
-authorization server as cached copies expire (below), binds from the
-next presentation once retrieved ({{endorsement-changes}}), and leaves
-issued grants in place unless separately revoked ({{existing-grants}}).
+authoritative client metadata ({{metadata}}). The removal takes effect
+at the authorization server as cached copies expire
+({{cache-freshness}}), applies from the next presentation once retrieved
+({{endorsement-changes}}), and does not affect issued grants unless they
+are separately revoked ({{existing-grants}}).
 
-## Cache Freshness and Removal
+## Cache Freshness and Removal {#cache-freshness}
 
 The authorization server MUST:
 
@@ -653,12 +661,12 @@ Configured maximum ages bound withdrawal latency: a withdrawn
 endorsement or key can remain acceptable until the applicable age
 expires. The authorization server operator chooses maximum ages that
 keep this latency within the deployment's security requirements; short
-ages, for example one hour, keep it small. This profile specifies no
-ceiling, so a publisher cannot predict withdrawal latency from the
-protocol alone; a deployment that needs a predictable bound states one
-in its trust agreement. Fresh entries need not be retrieved on each
-request. These limits expire cached copies, not authoritative client
-registrations.
+maximum ages, for example one hour, reduce it. This specification
+defines no upper limit, so a publisher cannot predict withdrawal latency
+from the protocol alone; a deployment that needs a predictable bound
+states one in its trust agreement. Fresh entries need not be retrieved
+on each request. These limits apply to cached copies, not to
+authoritative client registrations.
 
 On an unknown `kid`, the authorization server SHOULD refresh the
 selected key source's JWK Set once and retry key selection, subject to
@@ -696,24 +704,26 @@ For planned key rotation, the attester adds the new key to the JWK Set
 the authorization server reads (the configured key source or the
 endorsed `jwks_uri`, {{key-resolution}}) and waits for JWK Set cache
 lifetimes to elapse before signing with it. It keeps the old key
-published until attestations signed with it expire, since removing the
-key rejects them. A new key location takes effect only after the
-publisher updates the endorsement and the authorization server's cached
-metadata refreshes. Under AS-configured attester trust, it also fails
-endorsement validation until the authorization server configures a
-matching alias or updates its configured key source, so the attester and
-publisher coordinate the move with the authorization server operator.
+published until attestations signed with it expire, because removing the
+key causes them to be rejected. A new key location takes effect only
+after the publisher updates the endorsement and the authorization
+server's cached metadata refreshes. Under AS-configured attester trust,
+it also fails endorsement validation until the authorization server
+configures a matching alias or updates its configured key source, so the
+attester and publisher coordinate the change with the authorization
+server operator.
 
 ## Existing Grants {#existing-grants}
 
 Endorsement withdrawal is prospective: it prevents future client
 authentication under the removed endorsement but does not revoke
-existing grants or access tokens. Refresh requests that require a
-Client Attestation are checked again under {{processing}}. A deployment
-that requires termination separately revokes the affected grants and
-their tokens and stops further refresh issuance. Introspection
-{{RFC7662}} then reports the revoked tokens inactive; offline
-validation needs a separate revocation mechanism or token expiration.
+existing grants or access tokens. Refresh requests that require a Client
+Attestation are checked again under {{processing}}. A deployment that
+requires termination separately revokes the affected grants and their
+tokens and stops further refresh issuance. Introspection {{RFC7662}}
+then reports the revoked tokens inactive; a resource server that
+validates tokens locally relies on a separate revocation mechanism or on
+token expiration.
 
 # Security Considerations {#security}
 
@@ -722,13 +732,14 @@ The security considerations of {{Section 12 of ATTEST}},
 
 ## Publisher Compromise {#publisher-compromise}
 
-Whoever controls a CIMD host or a client's registration administration
-can change endorsements, within authorization server policy. The
-protocol gives the authorization server no signal of this, so operators
-generally monitor endorsement changes and treat new attesters as policy
-changes. A separately specified signed-metadata mechanism with
-independently trusted signing keys could bind publisher intent apart
-from the HTTPS host; this profile defines none.
+A party that controls a CIMD host or a client's registration
+administration can change endorsements, within authorization server
+policy. This specification gives the authorization server no indication
+of such a change, so operators typically monitor endorsement changes and
+treat new attesters as policy changes. A separately specified
+signed-metadata mechanism with independently trusted signing keys could
+bind publisher intent independently of the HTTPS host; this
+specification defines none.
 
 ## Attester Compromise {#attester-compromise}
 
@@ -743,13 +754,14 @@ authorization server operator's responsibility.
 
 Under publisher-authorized key selection, an authorized publisher
 chooses both the issuer and the key location, and so can direct a
-request from the authorization server to an origin of its choosing.
-{{key-resolution}} constrains that request, deliberately extending
-CIMD's no-automatic-redirect rule to key retrieval, but does not remove
-it. An authorization server can also bound response size and request
-time and block prohibited network destinations. Endorsed URLs remain
-subject to server-side request forgery (SSRF) defenses; endorsement does
-not make a network location safe.
+request from the authorization server to an origin of its choosing. The
+requirements in {{key-resolution}} constrain that request, and extend to
+key retrieval the prohibition on automatically following HTTP redirects
+in {{Section 5 of CIMD}}, but they do not prevent it. An authorization
+server can also bound response size and request time and block
+prohibited network destinations. Endorsed URLs remain subject to
+server-side request forgery (SSRF) defenses; endorsement does not make a
+network location safe.
 
 ## Withdrawal Latency {#withdrawal-latency}
 
@@ -760,17 +772,17 @@ revocation channel.
 
 ## Omitted Attestation {#omitted-attestation}
 
-The `client_attesters` member does not itself require attestation, so a
-thief of the client's other credentials can authenticate without one
-unless the deployment requires attestation, either through an
-attestation `token_endpoint_auth_method` or by advertising
+The `client_attesters` member does not itself require attestation, so an
+attacker that obtains the client's other credentials can authenticate
+without one unless the deployment requires attestation, either through
+an attestation `token_endpoint_auth_method` or by advertising
 `client_attestation_pop_methods_supported` without `none` ({{errors}});
-the latter keeps mutual TLS or `private_key_jwt` in place. A
-registration access token can change `token_endpoint_auth_method` or
-`jwks` through {{RFC7592}} even where it cannot change
-`client_attesters` ({{registered}}), so a deployment relying on
-endorsement restricts those changes too or requires attestation by
-authorization server policy.
+the latter retains mutual TLS or `private_key_jwt` as the client
+authentication method. A registration access token can change
+`token_endpoint_auth_method` or `jwks` through {{RFC7592}} even where it
+cannot change `client_attesters` ({{registered}}), so a deployment
+relying on endorsement also restricts those changes or requires
+attestation by authorization server policy.
 
 ## Unscoped Endorsement {#unscoped-endorsement}
 
