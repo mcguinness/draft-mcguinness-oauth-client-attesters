@@ -246,12 +246,14 @@ replacing `client_attesters`. Removing the parameter, including by
 omitting it from an update that {{RFC7592}} treats as a deletion
 request, is treated as replacing it.
 
-An authorization server that does not accept a submitted endorsement
-MUST either reject the request with the `invalid_client_metadata` error
-code ({{Section 3.2.2 of RFC7591}}) or omit `client_attesters` from the
-stored metadata and from the client information response
-({{Section 3.2.1 of RFC7591}}), so that the response never contains an
-endorsement the authorization server has not accepted.
+An authorization server that does not accept a submitted value or
+removal of `client_attesters` MUST either reject the request with the
+`invalid_client_metadata` error code ({{Section 3.2.2 of RFC7591}}) or
+keep the previously stored value, if any, instead of the submitted one,
+as {{Section 2.2 of RFC7592}} permits for an ignored value. The client
+information response ({{Section 3.2.1 of RFC7591}}) then never contains
+an endorsement the authorization server has not accepted, and an
+unauthorized request never removes a stored endorsement.
 
 ## Applicability and Scope {#profile-selection}
 
