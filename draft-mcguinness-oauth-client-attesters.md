@@ -763,7 +763,7 @@ signed-metadata mechanism with independently trusted signing keys could
 bind publisher intent independently of the HTTPS host; this
 specification defines none.
 
-## Attester Compromise {#attester-compromise}
+## Shared Attesters {#shared-attesters}
 
 A client or tenant of a shared attester could obtain attestations naming
 another, so the attester needs issuance controls that prevent this.
@@ -954,7 +954,8 @@ claim names the client:
 There is one Client ID Metadata Document, not one per Client Instance.
 An endorsement for this client does not let the attester authenticate
 another client, even if both use the same Client Attester. The flow does
-not require a `client_instance_id` claim or an `act` claim.
+not require the `client_instance_id` claim of {{INSTANCE-ID}} or an
+`act` claim ({{Section 4.1 of RFC8693}}).
 
 Under AS-configured attester trust, keys come only from the configured
 key source, and the endorsed `jwks_uri` is required to equal it, as it
