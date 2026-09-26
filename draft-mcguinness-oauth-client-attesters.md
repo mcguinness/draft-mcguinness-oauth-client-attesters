@@ -6,6 +6,7 @@ docname: draft-mcguinness-oauth-client-attesters-latest
 submissiontype: IETF
 stand_alone: yes
 ipr: trust200902
+pi: [toc, sortrefs, symrefs]
 area: "Security"
 workgroup: "Web Authorization Protocol"
 keyword:
@@ -26,21 +27,22 @@ author:
 normative:
   ATTEST: I-D.ietf-oauth-attestation-based-client-auth
   CIMD: I-D.ietf-oauth-client-id-metadata-document
-  RFC6749:
   RFC6454:
+  RFC6749:
   RFC7515:
   RFC7517:
   RFC7519:
   RFC7591:
-  RFC7662:
   RFC8414:
-  RFC8705:
   RFC8725:
   RFC9111:
 informative:
   RFC7009:
   RFC7592:
+  RFC7662:
   RFC8628:
+  RFC8693:
+  RFC8705:
   RFC9126:
   RFC9449:
   SPIFFE-OAUTH: I-D.ietf-oauth-spiffe-client-auth
