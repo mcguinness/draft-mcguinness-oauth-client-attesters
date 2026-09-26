@@ -571,11 +571,11 @@ authorization server MUST NOT try candidate keys in turn.
 When retrieving a JWK Set or client metadata, the authorization server
 MUST authenticate the HTTPS server and MUST NOT follow redirects.
 Bounding response size and request time, and blocking prohibited network
-destinations, are local defenses; see {{security}}. The authorization
-server SHOULD advertise the
+destinations, are local defenses; see {{security}}. The values that the
+authorization server advertises in the
 `client_attestation_signing_alg_values_supported` metadata parameter
-with values consistent with the algorithm restrictions in step 3 of
-{{as-processing}} ({{Section 8 of ATTEST}}).
+({{Section 8 of ATTEST}}) SHOULD be consistent with the algorithm
+restrictions in step 3 of {{as-processing}}.
 
 ## Errors {#errors}
 
