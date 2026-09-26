@@ -153,8 +153,10 @@ terms Client Attestation, Client Attester, Client Instance, and Client
 Instance Key are used as defined in {{ATTEST}}.
 
 client publisher
-: The party that controls the authoritative client metadata for a
-  `client_id`.
+: The party authorized to publish the endorsements for a `client_id`:
+  for a client identified by a CIMD, the party that controls that
+  document; for a registered client, the party authorized to set its
+  endorsements ({{registered}}).
 
 Client Attester Endorsement
 : A statement in the authoritative client metadata for a `client_id`
