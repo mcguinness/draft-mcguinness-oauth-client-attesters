@@ -369,9 +369,10 @@ issuer-to-key-location mapping that has the same meaning under either
 policy; {{key-resolution}} specifies how each policy uses the location.
 
 {{Section 10.8 of ATTEST}} recommends, among other options, resolving
-the `kid` header parameter through the client's own `jwks_uri`. This
-profile extends that option with a separate key location for each
-endorsed issuer. The client's own `jwks_uri` can hold several issuers'
+the `kid` header parameter through client metadata, such as the
+`jwks_uri` parameter. This profile applies that option through a
+separate key location for each endorsed issuer, not through the client's
+own `jwks_uri`. The client's own `jwks_uri` can hold several issuers'
 keys, but it neither associates them with named attesters nor separates
 them from client authentication keys, so it does not replace
 `client_attesters`.
