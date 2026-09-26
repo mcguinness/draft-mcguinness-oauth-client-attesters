@@ -622,8 +622,8 @@ as a satisfied signal. If the deployment requires an attestation
 alongside that method, the request fails. An authorization server
 signals that requirement by advertising the
 `client_attestation_pop_methods_supported` metadata parameter without
-the value `none`; a list containing `none` leaves the attestation
-optional. Where the attestation is optional, whether the request
+the value `none`; a list containing `none` signals that the attestation
+is optional. Where the attestation is optional, whether the request
 proceeds on the companion method alone is authorization server policy.
 
 Whenever an endorsement validation failure causes the authorization
@@ -794,14 +794,16 @@ The `client_attesters` parameter does not itself require attestation, so
 an attacker that obtains the client's other credentials can authenticate
 without one unless the deployment requires attestation, either through
 an attestation-based `token_endpoint_auth_method` value or by
-advertising the `client_attestation_pop_methods_supported` metadata
-parameter without the value `none` ({{errors}}); the latter retains
-mutual TLS or `private_key_jwt` as the client authentication method. A
-registration access token can change the `token_endpoint_auth_method` or
-`jwks` parameter through {{RFC7592}} even where it cannot change
-`client_attesters` ({{registered}}), so a deployment relying on
-endorsement also restricts those changes or requires attestation by
-authorization server policy.
+authorization server policy that requires an attestation alongside
+another method ({{errors}}); the latter retains mutual TLS or
+`private_key_jwt` as the client authentication method. Advertising the
+`client_attestation_pop_methods_supported` metadata parameter without
+the value `none` signals such a policy to clients but does not enforce
+it ({{Section 7.6 of ATTEST}}). A registration access token can change
+the `token_endpoint_auth_method` or `jwks` parameter through {{RFC7592}}
+even where it cannot change `client_attesters` ({{registered}}), so a
+deployment relying on endorsement also restricts those changes or
+requires attestation by authorization server policy.
 
 ## Unscoped Endorsement {#unscoped-endorsement}
 
