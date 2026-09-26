@@ -604,11 +604,11 @@ NOT expose policy details.
 This profile does not change the HTTP status code that an endpoint
 returns for a client authentication failure. The token endpoint responds
 with HTTP status code 400 (Bad Request) by default and requires 401
-(Unauthorized) only when the client authenticated through the
-`Authorization` request header field ({{Section 5.2 of RFC6749}}), which
-a Client Attestation does not use. The introspection endpoint responds
-with 401 (Unauthorized) ({{Section 2.3 of RFC7662}}). Other endpoints
-follow their own specifications.
+(Unauthorized) only when the client attempted to authenticate through
+the `Authorization` request header field ({{Section 5.2 of RFC6749}}),
+which a Client Attestation does not use. The introspection endpoint
+responds with 401 (Unauthorized) ({{Section 2.3 of RFC7662}}). Other
+endpoints follow their own specifications.
 
 A client library that recognizes only the `invalid_client` error code
 treats the `invalid_client_attestation` error code as an unrecognized
@@ -958,9 +958,10 @@ does here. An attestation from an unendorsed issuer, an endorsement
 naming the trusted issuer with a different key location, or a `kid`
 value that resolves to no key in the configured key source results in
 the following error response. {{Section 5.2 of RFC6749}} requires a 401
-(Unauthorized) status code only for a client that authenticated through
-the `Authorization` request header field, which this client does not
-use, so the example shows the default 400 (Bad Request) status code:
+(Unauthorized) status code only for a client that attempted to
+authenticate through the `Authorization` request header field, which
+this client does not use, so the example shows the default 400 (Bad
+Request) status code:
 
 ~~~ http-message
 HTTP/1.1 400 Bad Request
