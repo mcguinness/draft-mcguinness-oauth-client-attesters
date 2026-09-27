@@ -1867,13 +1867,18 @@ non-HTTPS issuer has no HTTPS origin binding and so requires
 AS-configured attester trust.<a href="#section-5.3-3.2.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-5.3-4">The authorization server <span class="bcp14">MUST</span> use exact, case-sensitive string
+<p id="section-5.3-4">Configuring or changing trust for an issuer can affect every client that
+endorses that issuer. Before applying such a change, operators should
+evaluate existing endorsements for compatibility with the configured key
+source. Configured aliases represent equivalent attestation authority
+and cannot be used solely to accommodate different tenant key sets.<a href="#section-5.3-4" class="pilcrow">¶</a></p>
+<p id="section-5.3-5">The authorization server <span class="bcp14">MUST</span> use exact, case-sensitive string
 comparison, without URI normalization, for issuer identifiers, for
 client identifiers, and when comparing endorsed <code>jwks_uri</code> values with
 configured source URIs and aliases. An alternative spelling of a
 location requires an explicit alias, and origin comparison does not
-change identifier comparison.<a href="#section-5.3-4" class="pilcrow">¶</a></p>
-<p id="section-5.3-5">Key selection <span class="bcp14">MUST</span> bind a key to the client identifier, issuer, selected
+change identifier comparison.<a href="#section-5.3-5" class="pilcrow">¶</a></p>
+<p id="section-5.3-6">Key selection <span class="bcp14">MUST</span> bind a key to the client identifier, issuer, selected
 key source, and applicable key-trust policy, so that a key selected
 under one entry never verifies an attestation evaluated under another; a
 <code>kid</code> value alone or a union of keys from different entries is
@@ -1882,40 +1887,40 @@ retrieved, so a shared HTTP cache keyed by JWK Set URL is compatible
 with it. The authorization server <span class="bcp14">MUST</span> ignore the <code>jku</code>, <code>x5u</code>, <code>x5c</code>,
 and <code>jwk</code> JOSE header parameters for key selection under this profile
 and <span class="bcp14">MUST</span> resolve only the <code>kid</code> header parameter against the selected
-source.<a href="#section-5.3-5" class="pilcrow">¶</a></p>
-<p id="section-5.3-6">A key is eligible when all of the following hold:<a href="#section-5.3-6" class="pilcrow">¶</a></p>
+source.<a href="#section-5.3-6" class="pilcrow">¶</a></p>
+<p id="section-5.3-7">A key is eligible when all of the following hold:<a href="#section-5.3-7" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-5.3-7.1">
-            <p id="section-5.3-7.1.1">it is the only key in the selected JWK Set whose <code>kid</code> parameter
-equals the <code>kid</code> header parameter by octet comparison;<a href="#section-5.3-7.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-5.3-8.1">
+            <p id="section-5.3-8.1.1">it is the only key in the selected JWK Set whose <code>kid</code> parameter
+equals the <code>kid</code> header parameter by octet comparison;<a href="#section-5.3-8.1.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-5.3-7.2">
-            <p id="section-5.3-7.2.1">it is an asymmetric public key whose key type is consistent with the
-<code>alg</code> header parameter;<a href="#section-5.3-7.2.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-5.3-8.2">
+            <p id="section-5.3-8.2.1">it is an asymmetric public key whose key type is consistent with the
+<code>alg</code> header parameter;<a href="#section-5.3-8.2.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-5.3-7.3">
-            <p id="section-5.3-7.3.1">its <code>use</code> parameter, if present, is <code>sig</code> or, under AS-configured
+          <li class="normal" id="section-5.3-8.3">
+            <p id="section-5.3-8.3.1">its <code>use</code> parameter, if present, is <code>sig</code> or, under AS-configured
 attester trust, a value the authorization server has configured for
 that key source as identifying signature keys (for example <code>jwt-svid</code>
-for a SPIFFE trust bundle <span>[<a href="#SPIFFE-OAUTH" class="cite xref">SPIFFE-OAUTH</a>]</span>);<a href="#section-5.3-7.3.1" class="pilcrow">¶</a></p>
+for a SPIFFE trust bundle <span>[<a href="#SPIFFE-OAUTH" class="cite xref">SPIFFE-OAUTH</a>]</span>);<a href="#section-5.3-8.3.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-5.3-7.4">
-            <p id="section-5.3-7.4.1">its <code>key_ops</code> parameter, if present, includes <code>verify</code>; and<a href="#section-5.3-7.4.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-5.3-8.4">
+            <p id="section-5.3-8.4.1">its <code>key_ops</code> parameter, if present, includes <code>verify</code>; and<a href="#section-5.3-8.4.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-5.3-7.5">
-            <p id="section-5.3-7.5.1">its <code>alg</code> parameter, if present, equals the <code>alg</code> header parameter.<a href="#section-5.3-7.5.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-5.3-8.5">
+            <p id="section-5.3-8.5.1">its <code>alg</code> parameter, if present, equals the <code>alg</code> header parameter.<a href="#section-5.3-8.5.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-5.3-8">If more than one key matches the <code>kid</code> value, key selection fails; the
-authorization server <span class="bcp14">MUST NOT</span> try candidate keys in turn.<a href="#section-5.3-8" class="pilcrow">¶</a></p>
-<p id="section-5.3-9">When retrieving a JWK Set or client metadata, the authorization server
+<p id="section-5.3-9">If more than one key matches the <code>kid</code> value, key selection fails; the
+authorization server <span class="bcp14">MUST NOT</span> try candidate keys in turn.<a href="#section-5.3-9" class="pilcrow">¶</a></p>
+<p id="section-5.3-10">When retrieving a JWK Set or client metadata, the authorization server
 <span class="bcp14">MUST</span> authenticate the HTTPS server and <span class="bcp14">MUST NOT</span> follow redirects.
 Bounding response size and request time, and blocking prohibited network
 destinations, are local defenses; see <a href="#security" class="auto internal xref">Section 7</a>. The values that the
 authorization server advertises in the
 <code>client_attestation_signing_alg_values_supported</code> metadata parameter
 (<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-8" class="relref">Section 8</a> of [<a href="#ATTEST" class="cite xref">ATTEST</a>]</span>) <span class="bcp14">SHOULD</span> be consistent with the algorithm
-restrictions in step 3 of <a href="#as-processing" class="auto internal xref">Section 5.2</a>.<a href="#section-5.3-9" class="pilcrow">¶</a></p>
+restrictions in step 3 of <a href="#as-processing" class="auto internal xref">Section 5.2</a>.<a href="#section-5.3-10" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="errors">
