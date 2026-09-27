@@ -425,12 +425,12 @@ select the client metadata; that parameter alone does not authenticate
 the client.
 
 This narrows {{Section 7.1 of ATTEST}}, which compares `client_id` with
-the `sub` claim only when the request includes it. The authorization
-server selects the verification key from the client's metadata before it
-can verify the Client Attestation, so it cannot use the unverified `sub`
-claim to identify the client. When this profile applies to a request
-that omits `client_id`, the authorization server MUST reject the request
-with the `invalid_request` error code ({{Section 5.2 of RFC6749}}).
+the `sub` claim only when the request includes it. This profile selects
+the client metadata from the `client_id` parameter rather than from the
+`sub` claim, and step 4 of {{as-processing}} then requires the two to be
+equal. When this profile applies to a request that omits `client_id`,
+the authorization server MUST reject the request with the
+`invalid_request` error code ({{Section 5.2 of RFC6749}}).
 
 The Client Attester MUST establish that the requesting Client Instance
 is authorized to obtain a Client Attestation naming the specified
