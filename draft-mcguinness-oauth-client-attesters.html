@@ -2006,15 +2006,19 @@ different error code, such as <code>invalid_dpop_proof</code> for an invalid DPo
 proof in DPoP combined mode (<span><a href="https://rfc-editor.org/rfc/rfc9449#section-5" class="relref">Section 5</a> of [<a href="#RFC9449" class="cite xref">RFC9449</a>]</span>), the
 authorization server <span class="bcp14">MUST</span> use <code>invalid_client_attestation</code> rather than
 <code>invalid_client</code> wherever <span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-7.4" class="relref">Section 7.4</a> of [<a href="#ATTEST" class="cite xref">ATTEST</a>]</span> permits it, so that
-the error code does not reveal whether endorsement validation succeeded.
-A DPoP key that does not match the <code>cnf</code> claim of the Client Attestation
-(<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-7.3" class="relref">Section 7.3</a> of [<a href="#ATTEST" class="cite xref">ATTEST</a>]</span>) still produces <code>invalid_client_attestation</code>.
-A companion client authentication method that fails, or that
-authenticates a different client identifier, produces the error defined
-by its own specification. Other metadata-discovery, registration,
-authentication, and grant errors follow their base specifications. The
-prohibition on other attester-trust mechanisms in <a href="#acceptance" class="auto internal xref">Section 2.1</a>
-applies.<a href="#section-5.4-10" class="pilcrow">¶</a></p>
+a generic attestation failure does not reveal whether endorsement
+validation succeeded. The specific responses that ATTEST and the proof
+method require, such as <code>use_fresh_attestation</code>,
+<code>use_attestation_challenge</code>, and <code>invalid_dpop_proof</code>, occur only after
+endorsement validation succeeds and so reveal that it did; this profile
+preserves them. A DPoP key that does not match the <code>cnf</code> claim of the
+Client Attestation (<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-7.3" class="relref">Section 7.3</a> of [<a href="#ATTEST" class="cite xref">ATTEST</a>]</span>) still produces
+<code>invalid_client_attestation</code>. A companion client authentication method
+that fails, or that authenticates a different client identifier,
+produces the error defined by its own specification. Other
+metadata-discovery, registration, authentication, and grant errors
+follow their base specifications. The prohibition on other
+attester-trust mechanisms in <a href="#acceptance" class="auto internal xref">Section 2.1</a> applies.<a href="#section-5.4-10" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -2138,12 +2142,12 @@ token expiration.<a href="#section-6.3-1" class="pilcrow">¶</a></p>
         </h3>
 <p id="section-7.1-1">A party that controls a CIMD host or a client's registration
 administration can change endorsements, within authorization server
-policy. This specification gives the authorization server no indication
-of such a change, so operators typically monitor endorsement changes and
-treat new attesters as policy changes. A separately specified
-signed-metadata mechanism with independently trusted signing keys could
-bind publisher intent independently of the HTTPS host; this
-specification defines none.<a href="#section-7.1-1" class="pilcrow">¶</a></p>
+policy. This specification provides no independent indication that an
+endorsement change resulted from publisher compromise, so operators
+typically monitor endorsement changes and treat new attesters as policy
+changes. A separately specified signed-metadata mechanism with
+independently trusted signing keys could bind publisher intent
+independently of the HTTPS host; this specification defines none.<a href="#section-7.1-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="publisher-selected-attesters">
