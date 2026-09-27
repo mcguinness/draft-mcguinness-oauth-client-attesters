@@ -36,6 +36,7 @@ normative:
   RFC8414:
   RFC8725:
   RFC9111:
+  RFC9449:
 informative:
   RFC7009:
   RFC7592:
@@ -44,7 +45,6 @@ informative:
   RFC8693:
   RFC8705:
   RFC9126:
-  RFC9449:
   SPIFFE-OAUTH: I-D.ietf-oauth-spiffe-client-auth
   INSTANCE-ID:
     title: "Client Instance Identification for Attestation-Based Client Authentication"
@@ -663,6 +663,14 @@ Other failures produce the errors defined by their own specifications.
 Failures of signature verification with a resolved key and of the
 remaining attestation and proof checks produce the errors of
 {{Section 7.4 of ATTEST}}, including challenge and freshness responses.
+Except where the selected proof method's own specification requires a
+different error code, such as `invalid_dpop_proof` for an invalid DPoP
+proof in DPoP combined mode ({{Section 5 of RFC9449}}), the
+authorization server MUST use `invalid_client_attestation` rather than
+`invalid_client` wherever {{Section 7.4 of ATTEST}} permits it, so that
+the error code does not reveal whether endorsement validation succeeded.
+A DPoP key that does not match the `cnf` claim of the Client Attestation
+({{Section 7.3 of ATTEST}}) still produces `invalid_client_attestation`.
 A companion client authentication method that fails, or that
 authenticates a different client identifier, produces the error defined
 by its own specification. Other metadata-discovery, registration,
