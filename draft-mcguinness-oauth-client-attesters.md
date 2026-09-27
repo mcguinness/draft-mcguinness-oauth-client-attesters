@@ -781,12 +781,12 @@ The security considerations of {{Section 12 of ATTEST}},
 
 A party that controls a CIMD host or a client's registration
 administration can change endorsements, within authorization server
-policy. This specification gives the authorization server no indication
-of such a change, so operators typically monitor endorsement changes and
-treat new attesters as policy changes. A separately specified
-signed-metadata mechanism with independently trusted signing keys could
-bind publisher intent independently of the HTTPS host; this
-specification defines none.
+policy. This specification provides no independent indication that an
+endorsement change resulted from publisher compromise, so operators
+typically monitor endorsement changes and treat new attesters as policy
+changes. A separately specified signed-metadata mechanism with
+independently trusted signing keys could bind publisher intent
+independently of the HTTPS host; this specification defines none.
 
 ## Publisher-Selected Attesters {#publisher-selected-attesters}
 
