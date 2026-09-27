@@ -663,10 +663,15 @@ Other failures produce the errors defined by their own specifications.
 Failures of signature verification with a resolved key and of the
 remaining attestation and proof checks produce the errors of
 {{Section 7.4 of ATTEST}}, including challenge and freshness responses.
-Where {{Section 7.4 of ATTEST}} permits `invalid_client_attestation`,
-the authorization server MUST use it rather than `invalid_client`, so
-that the error code does not reveal whether endorsement validation
-succeeded. A companion client authentication method that fails, or that
+Except where the selected proof method's own specification requires a
+different error code, such as `invalid_dpop_proof` for an invalid DPoP
+proof in DPoP combined mode ({{Section 5 of RFC9449}}), the
+authorization server MUST use `invalid_client_attestation` rather than
+`invalid_client` wherever {{Section 7.4 of ATTEST}} permits it, so that
+the error code does not reveal whether endorsement validation succeeded.
+A DPoP key that does not match the `cnf` claim of the Client Attestation
+({{Section 7.3 of ATTEST}}) still produces `invalid_client_attestation`.
+A companion client authentication method that fails, or that
 authenticates a different client identifier, produces the error defined
 by its own specification. Other metadata-discovery, registration,
 authentication, and grant errors follow their base specifications. The
