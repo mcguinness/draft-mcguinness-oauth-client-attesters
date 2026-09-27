@@ -774,6 +774,18 @@ signed-metadata mechanism with independently trusted signing keys could
 bind publisher intent independently of the HTTPS host; this
 specification defines none.
 
+## Publisher-Selected Attesters {#publisher-selected-attesters}
+
+Under publisher-authorized key selection, the authorization server
+accepts each attester that an authorized publisher endorses
+({{acceptance}}). The publisher, or a party that controls its CIMD host,
+can therefore operate its own attester, and a Client Attestation
+verified under this policy carries no assurance independent of the
+publisher. Claims it makes about the Client Instance, such as platform
+or hardware integrity, are only as trustworthy as the publisher. A
+deployment that relies on attester assurance independent of the
+publisher uses AS-configured attester trust for those attesters.
+
 ## Shared Attesters {#shared-attesters}
 
 A client or tenant of a shared attester could obtain attestations naming
