@@ -753,12 +753,21 @@ Table of Contents
    specifications.  Failures of signature verification with a resolved
    key and of the remaining attestation and proof checks produce the
    errors of Section 7.4 of [ATTEST], including challenge and freshness
-   responses.  A companion client authentication method that fails, or
-   that authenticates a different client identifier, produces the error
-   defined by its own specification.  Other metadata-discovery,
-   registration, authentication, and grant errors follow their base
-   specifications.  The prohibition on other attester-trust mechanisms
-   in Section 2.1 applies.
+   responses.  Except where the selected proof method's own
+   specification requires a different error code, such as
+   invalid_dpop_proof for an invalid DPoP proof in DPoP combined mode
+   (Section 5 of [RFC9449]), the authorization server MUST use
+   invalid_client_attestation rather than invalid_client wherever
+   Section 7.4 of [ATTEST] permits it, so that the error code does not
+   reveal whether endorsement validation succeeded.  A DPoP key that
+   does not match the cnf claim of the Client Attestation (Section 7.3
+   of [ATTEST]) still produces invalid_client_attestation.  A companion
+   client authentication method that fails, or that authenticates a
+   different client identifier, produces the error defined by its own
+   specification.  Other metadata-discovery, registration,
+   authentication, and grant errors follow their base specifications.
+   The prohibition on other attester-trust mechanisms in Section 2.1
+   applies.
 
 6.  Updates and Withdrawal
 
@@ -1045,6 +1054,11 @@ Table of Contents
               DOI 10.17487/RFC9111, June 2022,
               <https://www.rfc-editor.org/rfc/rfc9111>.
 
+   [RFC9449]  Fett, D., Campbell, B., Bradley, J., Lodderstedt, T.,
+              Jones, M., and D. Waite, "OAuth 2.0 Demonstrating Proof of
+              Possession (DPoP)", RFC 9449, DOI 10.17487/RFC9449,
+              September 2023, <https://www.rfc-editor.org/rfc/rfc9449>.
+
 10.2.  Informative References
 
    [INSTANCE-ID]
@@ -1087,11 +1101,6 @@ Table of Contents
               and F. Skokan, "OAuth 2.0 Pushed Authorization Requests",
               RFC 9126, DOI 10.17487/RFC9126, September 2021,
               <https://www.rfc-editor.org/rfc/rfc9126>.
-
-   [RFC9449]  Fett, D., Campbell, B., Bradley, J., Lodderstedt, T.,
-              Jones, M., and D. Waite, "OAuth 2.0 Demonstrating Proof of
-              Possession (DPoP)", RFC 9449, DOI 10.17487/RFC9449,
-              September 2023, <https://www.rfc-editor.org/rfc/rfc9449>.
 
    [SPIFFE-OAUTH]
               Schwenkschuster, A., Kasselman, P., Rose, S., Thorgersen,
