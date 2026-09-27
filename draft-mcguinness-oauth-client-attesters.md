@@ -36,6 +36,7 @@ normative:
   RFC8414:
   RFC8725:
   RFC9111:
+  RFC9449:
 informative:
   RFC7009:
   RFC7592:
@@ -44,7 +45,6 @@ informative:
   RFC8693:
   RFC8705:
   RFC9126:
-  RFC9449:
   SPIFFE-OAUTH: I-D.ietf-oauth-spiffe-client-auth
   INSTANCE-ID:
     title: "Client Instance Identification for Attestation-Based Client Authentication"
