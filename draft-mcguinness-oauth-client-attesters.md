@@ -546,6 +546,12 @@ occurs, no key source is available and endorsement validation fails.
   non-HTTPS issuer has no HTTPS origin binding and so requires
   AS-configured attester trust.
 
+Configuring or changing trust for an issuer can affect every client that
+endorses that issuer. Before applying such a change, operators should
+evaluate existing endorsements for compatibility with the configured key
+source. Configured aliases represent equivalent attestation authority
+and cannot be used solely to accommodate different tenant key sets.
+
 The authorization server MUST use exact, case-sensitive string
 comparison, without URI normalization, for issuer identifiers, for
 client identifiers, and when comparing endorsed `jwks_uri` values with
