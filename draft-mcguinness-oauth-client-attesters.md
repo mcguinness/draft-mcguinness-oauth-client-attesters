@@ -674,15 +674,19 @@ different error code, such as `invalid_dpop_proof` for an invalid DPoP
 proof in DPoP combined mode ({{Section 5 of RFC9449}}), the
 authorization server MUST use `invalid_client_attestation` rather than
 `invalid_client` wherever {{Section 7.4 of ATTEST}} permits it, so that
-the error code does not reveal whether endorsement validation succeeded.
-A DPoP key that does not match the `cnf` claim of the Client Attestation
-({{Section 7.3 of ATTEST}}) still produces `invalid_client_attestation`.
-A companion client authentication method that fails, or that
-authenticates a different client identifier, produces the error defined
-by its own specification. Other metadata-discovery, registration,
-authentication, and grant errors follow their base specifications. The
-prohibition on other attester-trust mechanisms in {{acceptance}}
-applies.
+a generic attestation failure does not reveal whether endorsement
+validation succeeded. The specific responses that ATTEST and the proof
+method require, such as `use_fresh_attestation`,
+`use_attestation_challenge`, and `invalid_dpop_proof`, occur only after
+endorsement validation succeeds and so reveal that it did; this profile
+preserves them. A DPoP key that does not match the `cnf` claim of the
+Client Attestation ({{Section 7.3 of ATTEST}}) still produces
+`invalid_client_attestation`. A companion client authentication method
+that fails, or that authenticates a different client identifier,
+produces the error defined by its own specification. Other
+metadata-discovery, registration, authentication, and grant errors
+follow their base specifications. The prohibition on other
+attester-trust mechanisms in {{acceptance}} applies.
 
 # Updates and Withdrawal {#updates}
 
