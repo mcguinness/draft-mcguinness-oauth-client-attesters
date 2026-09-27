@@ -424,6 +424,14 @@ Requests under this profile MUST include the `client_id` parameter to
 select the client metadata; that parameter alone does not authenticate
 the client.
 
+This narrows {{Section 7.1 of ATTEST}}, which compares `client_id` with
+the `sub` claim only when the request includes it. This profile selects
+the client metadata from the `client_id` parameter rather than from the
+`sub` claim, and step 4 of {{as-processing}} then requires the two to be
+equal. When this profile applies to a request that omits `client_id`,
+the authorization server MUST reject the request with the
+`invalid_request` error code ({{Section 5.2 of RFC6749}}).
+
 The Client Attester MUST establish that the requesting Client Instance
 is authorized to obtain a Client Attestation naming the specified
 `client_id`. The attester MUST NOT treat knowledge of the `client_id`
@@ -585,6 +593,9 @@ restrictions in step 3 of {{as-processing}}.
 
 Endorsement validation covers these parts of {{as-processing}}:
 
+* obtaining the client metadata in step 1, when neither the
+  authoritative source nor a fresh cached copy provides it, including a
+  CIMD that has been removed ({{cache-freshness}});
 * selecting a permitted endorsement in step 2;
 * selecting the key source and resolving the `kid` header parameter in
   step 3 under {{key-resolution}}, including an endorsed `jwks_uri` that
@@ -602,8 +613,7 @@ with the `invalid_client_attestation` error code.
 general `invalid_client` error code; this profile requires the specific
 code so that the response identifies the Client Attestation, not another
 client credential, as the cause. The code does not distinguish
-endorsement failures from other attestation failures. The response MUST
-NOT expose policy details.
+endorsement failures from other attestation failures.
 
 This profile does not change the HTTP status code that an endpoint
 returns for a client authentication failure. The token endpoint responds
@@ -634,7 +644,8 @@ Whenever an endorsement validation failure causes the authorization
 server to reject the request, the authorization server MUST respond with
 the `invalid_client_attestation` error code, whether the Client
 Attestation served as the client authentication method or as an
-additional security signal.
+additional security signal. In either case, the response MUST NOT expose
+policy details.
 
 A fresh attestation does not correct an endorsement validation failure
 caused by disagreement between the endorsement and authorization server
@@ -762,6 +773,18 @@ treat new attesters as policy changes. A separately specified
 signed-metadata mechanism with independently trusted signing keys could
 bind publisher intent independently of the HTTPS host; this
 specification defines none.
+
+## Publisher-Selected Attesters {#publisher-selected-attesters}
+
+Under publisher-authorized key selection, the authorization server
+accepts each attester that an authorized publisher endorses
+({{acceptance}}). The publisher, or a party that controls its CIMD host,
+can therefore operate its own attester, and a Client Attestation
+verified under this policy carries no assurance independent of the
+publisher. Claims it makes about the Client Instance, such as platform
+or hardware integrity, are only as trustworthy as the publisher. A
+deployment that relies on attester assurance independent of the
+publisher uses AS-configured attester trust for those attesters.
 
 ## Shared Attesters {#shared-attesters}
 
