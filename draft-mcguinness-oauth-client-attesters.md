@@ -663,7 +663,10 @@ Other failures produce the errors defined by their own specifications.
 Failures of signature verification with a resolved key and of the
 remaining attestation and proof checks produce the errors of
 {{Section 7.4 of ATTEST}}, including challenge and freshness responses.
-A companion client authentication method that fails, or that
+Where {{Section 7.4 of ATTEST}} permits `invalid_client_attestation`,
+the authorization server MUST use it rather than `invalid_client`, so
+that the error code does not reveal whether endorsement validation
+succeeded. A companion client authentication method that fails, or that
 authenticates a different client identifier, produces the error defined
 by its own specification. Other metadata-discovery, registration,
 authentication, and grant errors follow their base specifications. The
