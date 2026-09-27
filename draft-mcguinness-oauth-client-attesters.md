@@ -613,8 +613,7 @@ with the `invalid_client_attestation` error code.
 general `invalid_client` error code; this profile requires the specific
 code so that the response identifies the Client Attestation, not another
 client credential, as the cause. The code does not distinguish
-endorsement failures from other attestation failures. The response MUST
-NOT expose policy details.
+endorsement failures from other attestation failures.
 
 This profile does not change the HTTP status code that an endpoint
 returns for a client authentication failure. The token endpoint responds
@@ -645,7 +644,8 @@ Whenever an endorsement validation failure causes the authorization
 server to reject the request, the authorization server MUST respond with
 the `invalid_client_attestation` error code, whether the Client
 Attestation served as the client authentication method or as an
-additional security signal.
+additional security signal. In either case, the response MUST NOT expose
+policy details.
 
 A fresh attestation does not correct an endorsement validation failure
 caused by disagreement between the endorsement and authorization server
