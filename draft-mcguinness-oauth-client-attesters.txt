@@ -4,8 +4,8 @@
 
 Web Authorization Protocol                                 K. McGuinness
 Internet-Draft                                               Independent
-Intended status: Standards Track                       25 September 2026
-Expires: 29 March 2027
+Intended status: Standards Track                       27 September 2026
+Expires: 31 March 2027
 
 
                  OAuth 2.0 Client Attester Endorsement
@@ -58,7 +58,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 29 March 2027.
+   This Internet-Draft will expire on 31 March 2027.
 
 Copyright Notice
 
@@ -95,7 +95,7 @@ Table of Contents
      6.3.  Existing Grants
    7.  Security Considerations
      7.1.  Publisher Compromise
-     7.2.  Attester Compromise
+     7.2.  Shared Attesters
      7.3.  Key Retrieval
      7.4.  Withdrawal Latency
      7.5.  Omitted Attestation
@@ -203,8 +203,10 @@ Table of Contents
    The terms Client Attestation, Client Attester, Client Instance, and
    Client Instance Key are used as defined in [ATTEST].
 
-   client publisher  The party that controls the authoritative client
-      metadata for a client_id.
+   client publisher  The party authorized to publish the endorsements
+      for a client_id: for a client identified by a CIMD, the party that
+      controls that document; for a registered client, the party
+      authorized to set its endorsements (Section 2.2).
 
    Client Attester Endorsement  A statement in the authoritative client
       metadata for a client_id identifying a Client Attester whose
@@ -301,12 +303,14 @@ Table of Contents
    the parameter, including by omitting it from an update that [RFC7592]
    treats as a deletion request, is treated as replacing it.
 
-   An authorization server that does not accept a submitted endorsement
-   MUST either reject the request with the invalid_client_metadata error
-   code (Section 3.2.2 of [RFC7591]) or omit client_attesters from the
-   stored metadata and from the client information response
-   (Section 3.2.1 of [RFC7591]), so that the response never contains an
-   endorsement the authorization server has not accepted.
+   An authorization server that does not accept a submitted value or
+   removal of client_attesters MUST either reject the request with the
+   invalid_client_metadata error code (Section 3.2.2 of [RFC7591]) or
+   keep the previously stored value, if any, instead of the submitted
+   one, as Section 2.2 of [RFC7592] permits for an ignored value.  The
+   client information response (Section 3.2.1 of [RFC7591]) then never
+   contains an endorsement the authorization server has not accepted,
+   and an unauthorized request never removes a stored endorsement.
 
 2.3.  Applicability and Scope
 
@@ -436,11 +440,12 @@ Table of Contents
    policy; Section 5.3 specifies how each policy uses the location.
 
    Section 10.8 of [ATTEST] recommends, among other options, resolving
-   the kid header parameter through the client's own jwks_uri.  This
-   profile extends that option with a separate key location for each
-   endorsed issuer.  The client's own jwks_uri can hold several issuers'
-   keys, but it neither associates them with named attesters nor
-   separates them from client authentication keys, so it does not
+   the kid header parameter through client metadata, such as the
+   jwks_uri parameter.  This profile applies that option through a
+   separate key location for each endorsed issuer, not through the
+   client's own jwks_uri.  The client's own jwks_uri can hold several
+   issuers' keys, but it neither associates them with named attesters
+   nor separates them from client authentication keys, so it does not
    replace client_attesters.
 
    Secure Production Identity Framework for Everyone (SPIFFE) client
@@ -655,10 +660,10 @@ Table of Contents
    server MUST authenticate the HTTPS server and MUST NOT follow
    redirects.  Bounding response size and request time, and blocking
    prohibited network destinations, are local defenses; see Section 7.
-   The authorization server SHOULD advertise the
+   The values that the authorization server advertises in the
    client_attestation_signing_alg_values_supported metadata parameter
-   with values consistent with the algorithm restrictions in step 3 of
-   Section 5.2 (Section 8 of [ATTEST]).
+   (Section 8 of [ATTEST]) SHOULD be consistent with the algorithm
+   restrictions in step 3 of Section 5.2.
 
 5.4.  Errors
 
@@ -689,11 +694,12 @@ Table of Contents
    This profile does not change the HTTP status code that an endpoint
    returns for a client authentication failure.  The token endpoint
    responds with HTTP status code 400 (Bad Request) by default and
-   requires 401 (Unauthorized) only when the client authenticated
-   through the Authorization request header field (Section 5.2 of
-   [RFC6749]), which a Client Attestation does not use.  The
-   introspection endpoint responds with 401 (Unauthorized) (Section 2.3
-   of [RFC7662]).  Other endpoints follow their own specifications.
+   requires 401 (Unauthorized) only when the client attempted to
+   authenticate through the Authorization request header field
+   (Section 5.2 of [RFC6749]), which a Client Attestation does not use.
+   The introspection endpoint responds with 401 (Unauthorized)
+   (Section 2.3 of [RFC7662]).  Other endpoints follow their own
+   specifications.
 
    A client library that recognizes only the invalid_client error code
    treats the invalid_client_attestation error code as an unrecognized
@@ -707,8 +713,8 @@ Table of Contents
    attestation alongside that method, the request fails.  An
    authorization server signals that requirement by advertising the
    client_attestation_pop_methods_supported metadata parameter without
-   the value none; a list containing none leaves the attestation
-   optional.  Where the attestation is optional, whether the request
+   the value none; a list containing none signals that the attestation
+   is optional.  Where the attestation is optional, whether the request
    proceeds on the companion method alone is authorization server
    policy.
 
@@ -731,15 +737,15 @@ Table of Contents
    (Section 2.3), not by client retry.
 
    Other failures produce the errors defined by their own
-   specifications.  Signature verification with a resolved key and the
-   remaining attestation and proof checks follow Section 7.4 of
-   [ATTEST], including challenge and freshness responses.  A companion
-   client authentication method that fails, or that authenticates a
-   different client identifier, produces the error defined by its own
-   specification.  Other metadata-discovery, registration,
-   authentication, and grant errors follow their base specifications.
-   The prohibition on other attester-trust mechanisms in Section 2.1
-   applies.
+   specifications.  Failures of signature verification with a resolved
+   key and of the remaining attestation and proof checks produce the
+   errors of Section 7.4 of [ATTEST], including challenge and freshness
+   responses.  A companion client authentication method that fails, or
+   that authenticates a different client identifier, produces the error
+   defined by its own specification.  Other metadata-discovery,
+   registration, authentication, and grant errors follow their base
+   specifications.  The prohibition on other attester-trust mechanisms
+   in Section 2.1 applies.
 
 6.  Updates and Withdrawal
 
@@ -848,7 +854,7 @@ Table of Contents
    trusted signing keys could bind publisher intent independently of the
    HTTPS host; this specification defines none.
 
-7.2.  Attester Compromise
+7.2.  Shared Attesters
 
    A client or tenant of a shared attester could obtain attestations
    naming another, so the attester needs issuance controls that prevent
@@ -883,14 +889,16 @@ Table of Contents
    so an attacker that obtains the client's other credentials can
    authenticate without one unless the deployment requires attestation,
    either through an attestation-based token_endpoint_auth_method value
-   or by advertising the client_attestation_pop_methods_supported
-   metadata parameter without the value none (Section 5.4); the latter
-   retains mutual TLS or private_key_jwt as the client authentication
-   method.  A registration access token can change the
-   token_endpoint_auth_method or jwks parameter through [RFC7592] even
-   where it cannot change client_attesters (Section 2.2), so a
-   deployment relying on endorsement also restricts those changes or
-   requires attestation by authorization server policy.
+   or by authorization server policy that requires an attestation
+   alongside another method (Section 5.4); the latter retains mutual TLS
+   or private_key_jwt as the client authentication method.  Advertising
+   the client_attestation_pop_methods_supported metadata parameter
+   without the value none signals such a policy to clients but does not
+   enforce it (Section 7.6 of [ATTEST]).  A registration access token
+   can change the token_endpoint_auth_method or jwks parameter through
+   [RFC7592] even where it cannot change client_attesters (Section 2.2),
+   so a deployment relying on endorsement also restricts those changes
+   or requires attestation by authorization server policy.
 
 7.6.  Unscoped Endorsement
 
@@ -962,13 +970,18 @@ Table of Contents
               <https://datatracker.ietf.org/doc/html/draft-ietf-oauth-
               client-id-metadata-document-02>.
 
-   [RFC6749]  Hardt, D., Ed., "The OAuth 2.0 Authorization Framework",
-              RFC 6749, DOI 10.17487/RFC6749, October 2012,
-              <https://www.rfc-editor.org/rfc/rfc6749>.
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119,
+              DOI 10.17487/RFC2119, March 1997,
+              <https://www.rfc-editor.org/rfc/rfc2119>.
 
    [RFC6454]  Barth, A., "The Web Origin Concept", RFC 6454,
               DOI 10.17487/RFC6454, December 2011,
               <https://www.rfc-editor.org/rfc/rfc6454>.
+
+   [RFC6749]  Hardt, D., Ed., "The OAuth 2.0 Authorization Framework",
+              RFC 6749, DOI 10.17487/RFC6749, October 2012,
+              <https://www.rfc-editor.org/rfc/rfc6749>.
 
    [RFC7515]  Jones, M., Bradley, J., and N. Sakimura, "JSON Web
               Signature (JWS)", RFC 7515, DOI 10.17487/RFC7515, May
@@ -987,20 +1000,14 @@ Table of Contents
               RFC 7591, DOI 10.17487/RFC7591, July 2015,
               <https://www.rfc-editor.org/rfc/rfc7591>.
 
-   [RFC7662]  Richer, J., Ed., "OAuth 2.0 Token Introspection",
-              RFC 7662, DOI 10.17487/RFC7662, October 2015,
-              <https://www.rfc-editor.org/rfc/rfc7662>.
+   [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
+              2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
+              May 2017, <https://www.rfc-editor.org/rfc/rfc8174>.
 
    [RFC8414]  Jones, M., Sakimura, N., and J. Bradley, "OAuth 2.0
               Authorization Server Metadata", RFC 8414,
               DOI 10.17487/RFC8414, June 2018,
               <https://www.rfc-editor.org/rfc/rfc8414>.
-
-   [RFC8705]  Campbell, B., Bradley, J., Sakimura, N., and T.
-              Lodderstedt, "OAuth 2.0 Mutual-TLS Client Authentication
-              and Certificate-Bound Access Tokens", RFC 8705,
-              DOI 10.17487/RFC8705, February 2020,
-              <https://www.rfc-editor.org/rfc/rfc8705>.
 
    [RFC8725]  Sheffer, Y., Hardt, D., and M. Jones, "JSON Web Token Best
               Current Practices", BCP 225, RFC 8725,
@@ -1012,16 +1019,14 @@ Table of Contents
               DOI 10.17487/RFC9111, June 2022,
               <https://www.rfc-editor.org/rfc/rfc9111>.
 
-   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
-              Requirement Levels", BCP 14, RFC 2119,
-              DOI 10.17487/RFC2119, March 1997,
-              <https://www.rfc-editor.org/rfc/rfc2119>.
-
-   [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
-              2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
-              May 2017, <https://www.rfc-editor.org/rfc/rfc8174>.
-
 10.2.  Informative References
+
+   [INSTANCE-ID]
+              McGuinness, K., "Client Instance Identification for
+              Attestation-Based Client Authentication", 14 September
+              2026, <https://mcguinness.github.io/draft-mcguinness-
+              oauth-client-instance-id/draft-mcguinness-oauth-client-
+              instance-id.html>.
 
    [RFC7009]  Lodderstedt, T., Ed., Dronia, S., and M. Scurtescu, "OAuth
               2.0 Token Revocation", RFC 7009, DOI 10.17487/RFC7009,
@@ -1032,10 +1037,25 @@ Table of Contents
               Protocol", RFC 7592, DOI 10.17487/RFC7592, July 2015,
               <https://www.rfc-editor.org/rfc/rfc7592>.
 
+   [RFC7662]  Richer, J., Ed., "OAuth 2.0 Token Introspection",
+              RFC 7662, DOI 10.17487/RFC7662, October 2015,
+              <https://www.rfc-editor.org/rfc/rfc7662>.
+
    [RFC8628]  Denniss, W., Bradley, J., Jones, M., and H. Tschofenig,
               "OAuth 2.0 Device Authorization Grant", RFC 8628,
               DOI 10.17487/RFC8628, August 2019,
               <https://www.rfc-editor.org/rfc/rfc8628>.
+
+   [RFC8693]  Jones, M., Nadalin, A., Campbell, B., Ed., Bradley, J.,
+              and C. Mortimore, "OAuth 2.0 Token Exchange", RFC 8693,
+              DOI 10.17487/RFC8693, January 2020,
+              <https://www.rfc-editor.org/rfc/rfc8693>.
+
+   [RFC8705]  Campbell, B., Bradley, J., Sakimura, N., and T.
+              Lodderstedt, "OAuth 2.0 Mutual-TLS Client Authentication
+              and Certificate-Bound Access Tokens", RFC 8705,
+              DOI 10.17487/RFC8705, February 2020,
+              <https://www.rfc-editor.org/rfc/rfc8705>.
 
    [RFC9126]  Lodderstedt, T., Campbell, B., Sakimura, N., Tonge, D.,
               and F. Skokan, "OAuth 2.0 Pushed Authorization Requests",
@@ -1054,13 +1074,6 @@ Table of Contents
               ietf-oauth-spiffe-client-auth-02, 15 June 2026,
               <https://datatracker.ietf.org/doc/html/draft-ietf-oauth-
               spiffe-client-auth-02>.
-
-   [INSTANCE-ID]
-              McGuinness, K., "Client Instance Identification for
-              Attestation-Based Client Authentication", 14 September
-              2026, <https://mcguinness.github.io/draft-mcguinness-
-              oauth-client-instance-id/draft-mcguinness-oauth-client-
-              instance-id.html>.
 
 Appendix A.  Client ID Metadata Document Example
 
@@ -1139,7 +1152,7 @@ Appendix A.  Client ID Metadata Document Example
    {
      "iss": "https://attester.example/tenant/acme",
      "sub": "https://platform.example/oauth-client",
-     "exp": 1789434000,
+     "exp": 2524608000,
      "cnf": {
        "jwk": {
          "kty": "EC",
@@ -1166,8 +1179,8 @@ Appendix A.  Client ID Metadata Document Example
    There is one Client ID Metadata Document, not one per Client
    Instance.  An endorsement for this client does not let the attester
    authenticate another client, even if both use the same Client
-   Attester.  The flow does not require a client_instance_id claim or an
-   act claim.
+   Attester.  The flow does not require the client_instance_id claim of
+   [INSTANCE-ID] or an act claim (Section 4.1 of [RFC8693]).
 
    Under AS-configured attester trust, keys come only from the
    configured key source, and the endorsed jwks_uri is required to equal
@@ -1176,9 +1189,9 @@ Appendix A.  Client ID Metadata Document Example
    or a kid value that resolves to no key in the configured key source
    results in the following error response.  Section 5.2 of [RFC6749]
    requires a 401 (Unauthorized) status code only for a client that
-   authenticated through the Authorization request header field, which
-   this client does not use, so the example shows the default 400 (Bad
-   Request) status code:
+   attempted to authenticate through the Authorization request header
+   field, which this client does not use, so the example shows the
+   default 400 (Bad Request) status code:
 
    HTTP/1.1 400 Bad Request
    Content-Type: application/json
@@ -1240,7 +1253,7 @@ Appendix B.  Registered Client Example
    {
      "iss": "https://attester.example/tenant/acme",
      "sub": "s6BhdRkqt3",
-     "exp": 1789434000,
+     "exp": 2524608000,
      "cnf": {
        "jwk": {
          "kty": "EC",

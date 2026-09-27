@@ -1056,7 +1056,7 @@ svg {
 </tr></thead>
 <tfoot><tr>
 <td class="left">McGuinness</td>
-<td class="center">Expires 29 March 2027</td>
+<td class="center">Expires 31 March 2027</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1069,12 +1069,12 @@ svg {
 <dd class="internet-draft">draft-mcguinness-oauth-client-attesters-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-09-25" class="published">25 September 2026</time>
+<time datetime="2026-09-27" class="published">27 September 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2027-03-29">29 March 2027</time></dd>
+<dd class="expires"><time datetime="2027-03-31">31 March 2027</time></dd>
 <dt class="label-authors">Author:</dt>
 <dd class="authors">
 <div class="author">
@@ -1133,7 +1133,7 @@ client authentication method.<a href="#section-abstract-1" class="pilcrow">¶</a
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 29 March 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 31 March 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1226,7 +1226,7 @@ client authentication method.<a href="#section-abstract-1" class="pilcrow">¶</a
                 <p id="section-toc.1-1.7.2.1.1"><a href="#section-7.1" class="auto internal xref">7.1</a>.  <a href="#name-publisher-compromise" class="internal xref">Publisher Compromise</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.2">
-                <p id="section-toc.1-1.7.2.2.1"><a href="#section-7.2" class="auto internal xref">7.2</a>.  <a href="#name-attester-compromise" class="internal xref">Attester Compromise</a></p>
+                <p id="section-toc.1-1.7.2.2.1"><a href="#section-7.2" class="auto internal xref">7.2</a>.  <a href="#name-shared-attesters" class="internal xref">Shared Attesters</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.3">
                 <p id="section-toc.1-1.7.2.3.1"><a href="#section-7.3" class="auto internal xref">7.3</a>.  <a href="#name-key-retrieval" class="internal xref">Key Retrieval</a></p>
@@ -1379,8 +1379,10 @@ Instance Key are used as defined in <span>[<a href="#ATTEST" class="cite xref">A
 <span class="break"></span><dl class="dlParallel" id="section-2-3">
         <dt id="section-2-3.1">client publisher</dt>
         <dd style="margin-left: 1.5em" id="section-2-3.2">
-          <p id="section-2-3.2.1">The party that controls the authoritative client metadata for a
-<code>client_id</code>.<a href="#section-2-3.2.1" class="pilcrow">¶</a></p>
+          <p id="section-2-3.2.1">The party authorized to publish the endorsements for a <code>client_id</code>:
+for a client identified by a CIMD, the party that controls that
+document; for a registered client, the party authorized to set its
+endorsements (<a href="#registered" class="auto internal xref">Section 2.2</a>).<a href="#section-2-3.2.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
 <dt id="section-2-3.3">Client Attester Endorsement</dt>
@@ -1488,12 +1490,14 @@ authority to endorse, and <span class="bcp14">MUST NOT</span> by itself authoriz
 replacing <code>client_attesters</code>. Removing the parameter, including by
 omitting it from an update that <span>[<a href="#RFC7592" class="cite xref">RFC7592</a>]</span> treats as a deletion
 request, is treated as replacing it.<a href="#section-2.2-1" class="pilcrow">¶</a></p>
-<p id="section-2.2-2">An authorization server that does not accept a submitted endorsement
-<span class="bcp14">MUST</span> either reject the request with the <code>invalid_client_metadata</code> error
-code (<span><a href="https://rfc-editor.org/rfc/rfc7591#section-3.2.2" class="relref">Section 3.2.2</a> of [<a href="#RFC7591" class="cite xref">RFC7591</a>]</span>) or omit <code>client_attesters</code> from the
-stored metadata and from the client information response
-(<span><a href="https://rfc-editor.org/rfc/rfc7591#section-3.2.1" class="relref">Section 3.2.1</a> of [<a href="#RFC7591" class="cite xref">RFC7591</a>]</span>), so that the response never contains an
-endorsement the authorization server has not accepted.<a href="#section-2.2-2" class="pilcrow">¶</a></p>
+<p id="section-2.2-2">An authorization server that does not accept a submitted value or
+removal of <code>client_attesters</code> <span class="bcp14">MUST</span> either reject the request with the
+<code>invalid_client_metadata</code> error code (<span><a href="https://rfc-editor.org/rfc/rfc7591#section-3.2.2" class="relref">Section 3.2.2</a> of [<a href="#RFC7591" class="cite xref">RFC7591</a>]</span>) or
+keep the previously stored value, if any, instead of the submitted one,
+as <span><a href="https://rfc-editor.org/rfc/rfc7592#section-2.2" class="relref">Section 2.2</a> of [<a href="#RFC7592" class="cite xref">RFC7592</a>]</span> permits for an ignored value. The client
+information response (<span><a href="https://rfc-editor.org/rfc/rfc7591#section-3.2.1" class="relref">Section 3.2.1</a> of [<a href="#RFC7591" class="cite xref">RFC7591</a>]</span>) then never contains
+an endorsement the authorization server has not accepted, and an
+unauthorized request never removes a stored endorsement.<a href="#section-2.2-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="profile-selection">
@@ -1652,9 +1656,10 @@ authorization server applies, so each entry carries a complete
 issuer-to-key-location mapping that has the same meaning under either
 policy; <a href="#key-resolution" class="auto internal xref">Section 5.3</a> specifies how each policy uses the location.<a href="#section-3-7" class="pilcrow">¶</a></p>
 <p id="section-3-8"><span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-10.8" class="relref">Section 10.8</a> of [<a href="#ATTEST" class="cite xref">ATTEST</a>]</span> recommends, among other options, resolving
-the <code>kid</code> header parameter through the client's own <code>jwks_uri</code>. This
-profile extends that option with a separate key location for each
-endorsed issuer. The client's own <code>jwks_uri</code> can hold several issuers'
+the <code>kid</code> header parameter through client metadata, such as the
+<code>jwks_uri</code> parameter. This profile applies that option through a
+separate key location for each endorsed issuer, not through the client's
+own <code>jwks_uri</code>. The client's own <code>jwks_uri</code> can hold several issuers'
 keys, but it neither associates them with named attesters nor separates
 them from client authentication keys, so it does not replace
 <code>client_attesters</code>.<a href="#section-3-8" class="pilcrow">¶</a></p>
@@ -1896,11 +1901,11 @@ authorization server <span class="bcp14">MUST NOT</span> try candidate keys in t
 <p id="section-5.3-9">When retrieving a JWK Set or client metadata, the authorization server
 <span class="bcp14">MUST</span> authenticate the HTTPS server and <span class="bcp14">MUST NOT</span> follow redirects.
 Bounding response size and request time, and blocking prohibited network
-destinations, are local defenses; see <a href="#security" class="auto internal xref">Section 7</a>. The authorization
-server <span class="bcp14">SHOULD</span> advertise the
+destinations, are local defenses; see <a href="#security" class="auto internal xref">Section 7</a>. The values that the
+authorization server advertises in the
 <code>client_attestation_signing_alg_values_supported</code> metadata parameter
-with values consistent with the algorithm restrictions in step 3 of
-<a href="#as-processing" class="auto internal xref">Section 5.2</a> (<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-8" class="relref">Section 8</a> of [<a href="#ATTEST" class="cite xref">ATTEST</a>]</span>).<a href="#section-5.3-9" class="pilcrow">¶</a></p>
+(<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-8" class="relref">Section 8</a> of [<a href="#ATTEST" class="cite xref">ATTEST</a>]</span>) <span class="bcp14">SHOULD</span> be consistent with the algorithm
+restrictions in step 3 of <a href="#as-processing" class="auto internal xref">Section 5.2</a>.<a href="#section-5.3-9" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="errors">
@@ -1936,11 +1941,11 @@ endorsement failures from other attestation failures. The response <span class="
 <p id="section-5.4-5">This profile does not change the HTTP status code that an endpoint
 returns for a client authentication failure. The token endpoint responds
 with HTTP status code 400 (Bad Request) by default and requires 401
-(Unauthorized) only when the client authenticated through the
-<code>Authorization</code> request header field (<span><a href="https://rfc-editor.org/rfc/rfc6749#section-5.2" class="relref">Section 5.2</a> of [<a href="#RFC6749" class="cite xref">RFC6749</a>]</span>), which
-a Client Attestation does not use. The introspection endpoint responds
-with 401 (Unauthorized) (<span><a href="https://rfc-editor.org/rfc/rfc7662#section-2.3" class="relref">Section 2.3</a> of [<a href="#RFC7662" class="cite xref">RFC7662</a>]</span>). Other endpoints
-follow their own specifications.<a href="#section-5.4-5" class="pilcrow">¶</a></p>
+(Unauthorized) only when the client attempted to authenticate through
+the <code>Authorization</code> request header field (<span><a href="https://rfc-editor.org/rfc/rfc6749#section-5.2" class="relref">Section 5.2</a> of [<a href="#RFC6749" class="cite xref">RFC6749</a>]</span>),
+which a Client Attestation does not use. The introspection endpoint
+responds with 401 (Unauthorized) (<span><a href="https://rfc-editor.org/rfc/rfc7662#section-2.3" class="relref">Section 2.3</a> of [<a href="#RFC7662" class="cite xref">RFC7662</a>]</span>). Other
+endpoints follow their own specifications.<a href="#section-5.4-5" class="pilcrow">¶</a></p>
 <p id="section-5.4-6">A client library that recognizes only the <code>invalid_client</code> error code
 treats the <code>invalid_client_attestation</code> error code as an unrecognized
 failure rather than a credential failure.<a href="#section-5.4-6" class="pilcrow">¶</a></p>
@@ -1952,8 +1957,8 @@ as a satisfied signal. If the deployment requires an attestation
 alongside that method, the request fails. An authorization server
 signals that requirement by advertising the
 <code>client_attestation_pop_methods_supported</code> metadata parameter without
-the value <code>none</code>; a list containing <code>none</code> leaves the attestation
-optional. Where the attestation is optional, whether the request
+the value <code>none</code>; a list containing <code>none</code> signals that the attestation
+is optional. Where the attestation is optional, whether the request
 proceeds on the companion method alone is authorization server policy.<a href="#section-5.4-7" class="pilcrow">¶</a></p>
 <p id="section-5.4-8">Whenever an endorsement validation failure causes the authorization
 server to reject the request, the authorization server <span class="bcp14">MUST</span> respond with
@@ -1972,14 +1977,15 @@ server operator resolve a configuration disagreement outside the
 protocol, for example under the trust agreement (<a href="#profile-selection" class="auto internal xref">Section 2.3</a>),
 not by client retry.<a href="#section-5.4-9" class="pilcrow">¶</a></p>
 <p id="section-5.4-10">Other failures produce the errors defined by their own specifications.
-Signature verification with a resolved key and the remaining attestation
-and proof checks follow <span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-7.4" class="relref">Section 7.4</a> of [<a href="#ATTEST" class="cite xref">ATTEST</a>]</span>, including challenge
-and freshness responses. A companion client authentication method that
-fails, or that authenticates a different client identifier, produces the
-error defined by its own specification. Other metadata-discovery,
-registration, authentication, and grant errors follow their base
-specifications. The prohibition on other attester-trust mechanisms in
-<a href="#acceptance" class="auto internal xref">Section 2.1</a> applies.<a href="#section-5.4-10" class="pilcrow">¶</a></p>
+Failures of signature verification with a resolved key and of the
+remaining attestation and proof checks produce the errors of
+<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-7.4" class="relref">Section 7.4</a> of [<a href="#ATTEST" class="cite xref">ATTEST</a>]</span>, including challenge and freshness responses.
+A companion client authentication method that fails, or that
+authenticates a different client identifier, produces the error defined
+by its own specification. Other metadata-discovery, registration,
+authentication, and grant errors follow their base specifications. The
+prohibition on other attester-trust mechanisms in <a href="#acceptance" class="auto internal xref">Section 2.1</a>
+applies.<a href="#section-5.4-10" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -2111,10 +2117,10 @@ bind publisher intent independently of the HTTPS host; this
 specification defines none.<a href="#section-7.1-1" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="attester-compromise">
+<div id="shared-attesters">
 <section id="section-7.2">
-        <h3 id="name-attester-compromise">
-<a href="#section-7.2" class="section-number selfRef">7.2. </a><a href="#name-attester-compromise" class="section-name selfRef">Attester Compromise</a>
+        <h3 id="name-shared-attesters">
+<a href="#section-7.2" class="section-number selfRef">7.2. </a><a href="#name-shared-attesters" class="section-name selfRef">Shared Attesters</a>
         </h3>
 <p id="section-7.2-1">A client or tenant of a shared attester could obtain attestations naming
 another, so the attester needs issuance controls that prevent this.
@@ -2161,14 +2167,16 @@ termination requires denial by authorization server policy
 an attacker that obtains the client's other credentials can authenticate
 without one unless the deployment requires attestation, either through
 an attestation-based <code>token_endpoint_auth_method</code> value or by
-advertising the <code>client_attestation_pop_methods_supported</code> metadata
-parameter without the value <code>none</code> (<a href="#errors" class="auto internal xref">Section 5.4</a>); the latter retains
-mutual TLS or <code>private_key_jwt</code> as the client authentication method. A
-registration access token can change the <code>token_endpoint_auth_method</code> or
-<code>jwks</code> parameter through <span>[<a href="#RFC7592" class="cite xref">RFC7592</a>]</span> even where it cannot change
-<code>client_attesters</code> (<a href="#registered" class="auto internal xref">Section 2.2</a>), so a deployment relying on
-endorsement also restricts those changes or requires attestation by
-authorization server policy.<a href="#section-7.5-1" class="pilcrow">¶</a></p>
+authorization server policy that requires an attestation alongside
+another method (<a href="#errors" class="auto internal xref">Section 5.4</a>); the latter retains mutual TLS or
+<code>private_key_jwt</code> as the client authentication method. Advertising the
+<code>client_attestation_pop_methods_supported</code> metadata parameter without
+the value <code>none</code> signals such a policy to clients but does not enforce
+it (<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-7.6" class="relref">Section 7.6</a> of [<a href="#ATTEST" class="cite xref">ATTEST</a>]</span>). A registration access token can change
+the <code>token_endpoint_auth_method</code> or <code>jwks</code> parameter through <span>[<a href="#RFC7592" class="cite xref">RFC7592</a>]</span>
+even where it cannot change <code>client_attesters</code> (<a href="#registered" class="auto internal xref">Section 2.2</a>), so a
+deployment relying on endorsement also restricts those changes or
+requires attestation by authorization server policy.<a href="#section-7.5-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="unscoped-endorsement">
@@ -2276,13 +2284,17 @@ metadata parameter<a href="#section-9.2-2.2.1" class="pilcrow">¶</a></p>
         <dd>
 <span class="refAuthor">Parecki, A.</span> and <span class="refAuthor">E. Smith</span>, <span class="refTitle">"OAuth Client ID Metadata Document"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-oauth-client-id-metadata-document-02</span>, <time datetime="2026-07-06" class="refDate">6 July 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-client-id-metadata-document-02">https://datatracker.ietf.org/doc/html/draft-ietf-oauth-client-id-metadata-document-02</a>&gt;</span>. </dd>
 <dd class="break"></dd>
-<dt id="RFC6749">[RFC6749]</dt>
+<dt id="RFC2119">[RFC2119]</dt>
         <dd>
-<span class="refAuthor">Hardt, D., Ed.</span>, <span class="refTitle">"The OAuth 2.0 Authorization Framework"</span>, <span class="seriesInfo">RFC 6749</span>, <span class="seriesInfo">DOI 10.17487/RFC6749</span>, <time datetime="2012-10" class="refDate">October 2012</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc6749">https://www.rfc-editor.org/rfc/rfc6749</a>&gt;</span>. </dd>
+<span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2119">https://www.rfc-editor.org/rfc/rfc2119</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC6454">[RFC6454]</dt>
         <dd>
 <span class="refAuthor">Barth, A.</span>, <span class="refTitle">"The Web Origin Concept"</span>, <span class="seriesInfo">RFC 6454</span>, <span class="seriesInfo">DOI 10.17487/RFC6454</span>, <time datetime="2011-12" class="refDate">December 2011</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc6454">https://www.rfc-editor.org/rfc/rfc6454</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC6749">[RFC6749]</dt>
+        <dd>
+<span class="refAuthor">Hardt, D., Ed.</span>, <span class="refTitle">"The OAuth 2.0 Authorization Framework"</span>, <span class="seriesInfo">RFC 6749</span>, <span class="seriesInfo">DOI 10.17487/RFC6749</span>, <time datetime="2012-10" class="refDate">October 2012</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc6749">https://www.rfc-editor.org/rfc/rfc6749</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC7515">[RFC7515]</dt>
         <dd>
@@ -2300,33 +2312,21 @@ metadata parameter<a href="#section-9.2-2.2.1" class="pilcrow">¶</a></p>
         <dd>
 <span class="refAuthor">Richer, J., Ed.</span>, <span class="refAuthor">Jones, M.</span>, <span class="refAuthor">Bradley, J.</span>, <span class="refAuthor">Machulak, M.</span>, and <span class="refAuthor">P. Hunt</span>, <span class="refTitle">"OAuth 2.0 Dynamic Client Registration Protocol"</span>, <span class="seriesInfo">RFC 7591</span>, <span class="seriesInfo">DOI 10.17487/RFC7591</span>, <time datetime="2015-07" class="refDate">July 2015</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7591">https://www.rfc-editor.org/rfc/rfc7591</a>&gt;</span>. </dd>
 <dd class="break"></dd>
-<dt id="RFC7662">[RFC7662]</dt>
+<dt id="RFC8174">[RFC8174]</dt>
         <dd>
-<span class="refAuthor">Richer, J., Ed.</span>, <span class="refTitle">"OAuth 2.0 Token Introspection"</span>, <span class="seriesInfo">RFC 7662</span>, <span class="seriesInfo">DOI 10.17487/RFC7662</span>, <time datetime="2015-10" class="refDate">October 2015</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7662">https://www.rfc-editor.org/rfc/rfc7662</a>&gt;</span>. </dd>
+<span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8174">https://www.rfc-editor.org/rfc/rfc8174</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC8414">[RFC8414]</dt>
         <dd>
 <span class="refAuthor">Jones, M.</span>, <span class="refAuthor">Sakimura, N.</span>, and <span class="refAuthor">J. Bradley</span>, <span class="refTitle">"OAuth 2.0 Authorization Server Metadata"</span>, <span class="seriesInfo">RFC 8414</span>, <span class="seriesInfo">DOI 10.17487/RFC8414</span>, <time datetime="2018-06" class="refDate">June 2018</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8414">https://www.rfc-editor.org/rfc/rfc8414</a>&gt;</span>. </dd>
-<dd class="break"></dd>
-<dt id="RFC8705">[RFC8705]</dt>
-        <dd>
-<span class="refAuthor">Campbell, B.</span>, <span class="refAuthor">Bradley, J.</span>, <span class="refAuthor">Sakimura, N.</span>, and <span class="refAuthor">T. Lodderstedt</span>, <span class="refTitle">"OAuth 2.0 Mutual-TLS Client Authentication and Certificate-Bound Access Tokens"</span>, <span class="seriesInfo">RFC 8705</span>, <span class="seriesInfo">DOI 10.17487/RFC8705</span>, <time datetime="2020-02" class="refDate">February 2020</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8705">https://www.rfc-editor.org/rfc/rfc8705</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC8725">[RFC8725]</dt>
         <dd>
 <span class="refAuthor">Sheffer, Y.</span>, <span class="refAuthor">Hardt, D.</span>, and <span class="refAuthor">M. Jones</span>, <span class="refTitle">"JSON Web Token Best Current Practices"</span>, <span class="seriesInfo">BCP 225</span>, <span class="seriesInfo">RFC 8725</span>, <span class="seriesInfo">DOI 10.17487/RFC8725</span>, <time datetime="2020-02" class="refDate">February 2020</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8725">https://www.rfc-editor.org/rfc/rfc8725</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC9111">[RFC9111]</dt>
-        <dd>
-<span class="refAuthor">Fielding, R., Ed.</span>, <span class="refAuthor">Nottingham, M., Ed.</span>, and <span class="refAuthor">J. Reschke, Ed.</span>, <span class="refTitle">"HTTP Caching"</span>, <span class="seriesInfo">STD 98</span>, <span class="seriesInfo">RFC 9111</span>, <span class="seriesInfo">DOI 10.17487/RFC9111</span>, <time datetime="2022-06" class="refDate">June 2022</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9111">https://www.rfc-editor.org/rfc/rfc9111</a>&gt;</span>. </dd>
-<dd class="break"></dd>
-<dt id="RFC2119">[RFC2119]</dt>
-        <dd>
-<span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2119">https://www.rfc-editor.org/rfc/rfc2119</a>&gt;</span>. </dd>
-<dd class="break"></dd>
-<dt id="RFC8174">[RFC8174]</dt>
       <dd>
-<span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8174">https://www.rfc-editor.org/rfc/rfc8174</a>&gt;</span>. </dd>
+<span class="refAuthor">Fielding, R., Ed.</span>, <span class="refAuthor">Nottingham, M., Ed.</span>, and <span class="refAuthor">J. Reschke, Ed.</span>, <span class="refTitle">"HTTP Caching"</span>, <span class="seriesInfo">STD 98</span>, <span class="seriesInfo">RFC 9111</span>, <span class="seriesInfo">DOI 10.17487/RFC9111</span>, <time datetime="2022-06" class="refDate">June 2022</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9111">https://www.rfc-editor.org/rfc/rfc9111</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 </dl>
 </section>
@@ -2337,6 +2337,10 @@ metadata parameter<a href="#section-9.2-2.2.1" class="pilcrow">¶</a></p>
 <a href="#section-10.2" class="section-number selfRef">10.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
         </h3>
 <dl class="references">
+<dt id="INSTANCE-ID">[INSTANCE-ID]</dt>
+        <dd>
+<span class="refAuthor">McGuinness, K.</span>, <span class="refTitle">"Client Instance Identification for Attestation-Based Client Authentication"</span>, <time datetime="2026-09-14" class="refDate">14 September 2026</time>, <span>&lt;<a href="https://mcguinness.github.io/draft-mcguinness-oauth-client-instance-id/draft-mcguinness-oauth-client-instance-id.html">https://mcguinness.github.io/draft-mcguinness-oauth-client-instance-id/draft-mcguinness-oauth-client-instance-id.html</a>&gt;</span>. </dd>
+<dd class="break"></dd>
 <dt id="RFC7009">[RFC7009]</dt>
         <dd>
 <span class="refAuthor">Lodderstedt, T., Ed.</span>, <span class="refAuthor">Dronia, S.</span>, and <span class="refAuthor">M. Scurtescu</span>, <span class="refTitle">"OAuth 2.0 Token Revocation"</span>, <span class="seriesInfo">RFC 7009</span>, <span class="seriesInfo">DOI 10.17487/RFC7009</span>, <time datetime="2013-08" class="refDate">August 2013</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7009">https://www.rfc-editor.org/rfc/rfc7009</a>&gt;</span>. </dd>
@@ -2345,9 +2349,21 @@ metadata parameter<a href="#section-9.2-2.2.1" class="pilcrow">¶</a></p>
         <dd>
 <span class="refAuthor">Richer, J., Ed.</span>, <span class="refAuthor">Jones, M.</span>, <span class="refAuthor">Bradley, J.</span>, and <span class="refAuthor">M. Machulak</span>, <span class="refTitle">"OAuth 2.0 Dynamic Client Registration Management Protocol"</span>, <span class="seriesInfo">RFC 7592</span>, <span class="seriesInfo">DOI 10.17487/RFC7592</span>, <time datetime="2015-07" class="refDate">July 2015</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7592">https://www.rfc-editor.org/rfc/rfc7592</a>&gt;</span>. </dd>
 <dd class="break"></dd>
+<dt id="RFC7662">[RFC7662]</dt>
+        <dd>
+<span class="refAuthor">Richer, J., Ed.</span>, <span class="refTitle">"OAuth 2.0 Token Introspection"</span>, <span class="seriesInfo">RFC 7662</span>, <span class="seriesInfo">DOI 10.17487/RFC7662</span>, <time datetime="2015-10" class="refDate">October 2015</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7662">https://www.rfc-editor.org/rfc/rfc7662</a>&gt;</span>. </dd>
+<dd class="break"></dd>
 <dt id="RFC8628">[RFC8628]</dt>
         <dd>
 <span class="refAuthor">Denniss, W.</span>, <span class="refAuthor">Bradley, J.</span>, <span class="refAuthor">Jones, M.</span>, and <span class="refAuthor">H. Tschofenig</span>, <span class="refTitle">"OAuth 2.0 Device Authorization Grant"</span>, <span class="seriesInfo">RFC 8628</span>, <span class="seriesInfo">DOI 10.17487/RFC8628</span>, <time datetime="2019-08" class="refDate">August 2019</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8628">https://www.rfc-editor.org/rfc/rfc8628</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8693">[RFC8693]</dt>
+        <dd>
+<span class="refAuthor">Jones, M.</span>, <span class="refAuthor">Nadalin, A.</span>, <span class="refAuthor">Campbell, B., Ed.</span>, <span class="refAuthor">Bradley, J.</span>, and <span class="refAuthor">C. Mortimore</span>, <span class="refTitle">"OAuth 2.0 Token Exchange"</span>, <span class="seriesInfo">RFC 8693</span>, <span class="seriesInfo">DOI 10.17487/RFC8693</span>, <time datetime="2020-01" class="refDate">January 2020</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8693">https://www.rfc-editor.org/rfc/rfc8693</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8705">[RFC8705]</dt>
+        <dd>
+<span class="refAuthor">Campbell, B.</span>, <span class="refAuthor">Bradley, J.</span>, <span class="refAuthor">Sakimura, N.</span>, and <span class="refAuthor">T. Lodderstedt</span>, <span class="refTitle">"OAuth 2.0 Mutual-TLS Client Authentication and Certificate-Bound Access Tokens"</span>, <span class="seriesInfo">RFC 8705</span>, <span class="seriesInfo">DOI 10.17487/RFC8705</span>, <time datetime="2020-02" class="refDate">February 2020</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8705">https://www.rfc-editor.org/rfc/rfc8705</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC9126">[RFC9126]</dt>
         <dd>
@@ -2358,12 +2374,8 @@ metadata parameter<a href="#section-9.2-2.2.1" class="pilcrow">¶</a></p>
 <span class="refAuthor">Fett, D.</span>, <span class="refAuthor">Campbell, B.</span>, <span class="refAuthor">Bradley, J.</span>, <span class="refAuthor">Lodderstedt, T.</span>, <span class="refAuthor">Jones, M.</span>, and <span class="refAuthor">D. Waite</span>, <span class="refTitle">"OAuth 2.0 Demonstrating Proof of Possession (DPoP)"</span>, <span class="seriesInfo">RFC 9449</span>, <span class="seriesInfo">DOI 10.17487/RFC9449</span>, <time datetime="2023-09" class="refDate">September 2023</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9449">https://www.rfc-editor.org/rfc/rfc9449</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="SPIFFE-OAUTH">[SPIFFE-OAUTH]</dt>
-        <dd>
-<span class="refAuthor">Schwenkschuster, A.</span>, <span class="refAuthor">Kasselman, P.</span>, <span class="refAuthor">Rose, S.</span>, <span class="refAuthor">Thorgersen, S.</span>, and <span class="refAuthor">N. Cam-Winget</span>, <span class="refTitle">"OAuth SPIFFE Client Authentication"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-oauth-spiffe-client-auth-02</span>, <time datetime="2026-06-15" class="refDate">15 June 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-spiffe-client-auth-02">https://datatracker.ietf.org/doc/html/draft-ietf-oauth-spiffe-client-auth-02</a>&gt;</span>. </dd>
-<dd class="break"></dd>
-<dt id="INSTANCE-ID">[INSTANCE-ID]</dt>
       <dd>
-<span class="refAuthor">McGuinness, K.</span>, <span class="refTitle">"Client Instance Identification for Attestation-Based Client Authentication"</span>, <time datetime="2026-09-14" class="refDate">14 September 2026</time>, <span>&lt;<a href="https://mcguinness.github.io/draft-mcguinness-oauth-client-instance-id/draft-mcguinness-oauth-client-instance-id.html">https://mcguinness.github.io/draft-mcguinness-oauth-client-instance-id/draft-mcguinness-oauth-client-instance-id.html</a>&gt;</span>. </dd>
+<span class="refAuthor">Schwenkschuster, A.</span>, <span class="refAuthor">Kasselman, P.</span>, <span class="refAuthor">Rose, S.</span>, <span class="refAuthor">Thorgersen, S.</span>, and <span class="refAuthor">N. Cam-Winget</span>, <span class="refTitle">"OAuth SPIFFE Client Authentication"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-oauth-spiffe-client-auth-02</span>, <time datetime="2026-06-15" class="refDate">15 June 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-spiffe-client-auth-02">https://datatracker.ietf.org/doc/html/draft-ietf-oauth-spiffe-client-auth-02</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 </dl>
 </section>
@@ -2475,7 +2487,7 @@ claim names the client:<a href="#appendix-A-9" class="pilcrow">¶</a></p>
 {
   "iss": "https://attester.example/tenant/acme",
   "sub": "https://platform.example/oauth-client",
-  "exp": 1789434000,
+  "exp": 2524608000,
   "cnf": {
     "jwk": {
       "kty": "EC",
@@ -2509,16 +2521,18 @@ attestation, proof, and grant before issuing the access token.<a href="#appendix
 <p id="appendix-A-12">There is one Client ID Metadata Document, not one per Client Instance.
 An endorsement for this client does not let the attester authenticate
 another client, even if both use the same Client Attester. The flow does
-not require a <code>client_instance_id</code> claim or an <code>act</code> claim.<a href="#appendix-A-12" class="pilcrow">¶</a></p>
+not require the <code>client_instance_id</code> claim of <span>[<a href="#INSTANCE-ID" class="cite xref">INSTANCE-ID</a>]</span> or an
+<code>act</code> claim (<span><a href="https://rfc-editor.org/rfc/rfc8693#section-4.1" class="relref">Section 4.1</a> of [<a href="#RFC8693" class="cite xref">RFC8693</a>]</span>).<a href="#appendix-A-12" class="pilcrow">¶</a></p>
 <p id="appendix-A-13">Under AS-configured attester trust, keys come only from the configured
 key source, and the endorsed <code>jwks_uri</code> is required to equal it, as it
 does here. An attestation from an unendorsed issuer, an endorsement
 naming the trusted issuer with a different key location, or a <code>kid</code>
 value that resolves to no key in the configured key source results in
 the following error response. <span><a href="https://rfc-editor.org/rfc/rfc6749#section-5.2" class="relref">Section 5.2</a> of [<a href="#RFC6749" class="cite xref">RFC6749</a>]</span> requires a 401
-(Unauthorized) status code only for a client that authenticated through
-the <code>Authorization</code> request header field, which this client does not
-use, so the example shows the default 400 (Bad Request) status code:<a href="#appendix-A-13" class="pilcrow">¶</a></p>
+(Unauthorized) status code only for a client that attempted to
+authenticate through the <code>Authorization</code> request header field, which
+this client does not use, so the example shows the default 400 (Bad
+Request) status code:<a href="#appendix-A-13" class="pilcrow">¶</a></p>
 <div class="lang-http-message sourcecode" id="appendix-A-14">
 <pre>
 HTTP/1.1 400 Bad Request
@@ -2590,7 +2604,7 @@ differs:<a href="#appendix-B-6" class="pilcrow">¶</a></p>
 {
   "iss": "https://attester.example/tenant/acme",
   "sub": "s6BhdRkqt3",
-  "exp": 1789434000,
+  "exp": 2524608000,
   "cnf": {
     "jwk": {
       "kty": "EC",
