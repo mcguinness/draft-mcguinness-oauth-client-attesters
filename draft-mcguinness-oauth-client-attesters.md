@@ -593,6 +593,9 @@ restrictions in step 3 of {{as-processing}}.
 
 Endorsement validation covers these parts of {{as-processing}}:
 
+* obtaining the client metadata in step 1, when neither the
+  authoritative source nor a fresh cached copy provides it, including a
+  CIMD that has been removed ({{cache-freshness}});
 * selecting a permitted endorsement in step 2;
 * selecting the key source and resolving the `kid` header parameter in
   step 3 under {{key-resolution}}, including an endorsed `jwks_uri` that
