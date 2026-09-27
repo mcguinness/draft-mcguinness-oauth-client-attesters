@@ -1226,19 +1226,22 @@ client authentication method.<a href="#section-abstract-1" class="pilcrow">¶</a
                 <p id="section-toc.1-1.7.2.1.1"><a href="#section-7.1" class="auto internal xref">7.1</a>.  <a href="#name-publisher-compromise" class="internal xref">Publisher Compromise</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.2">
-                <p id="section-toc.1-1.7.2.2.1"><a href="#section-7.2" class="auto internal xref">7.2</a>.  <a href="#name-shared-attesters" class="internal xref">Shared Attesters</a></p>
+                <p id="section-toc.1-1.7.2.2.1"><a href="#section-7.2" class="auto internal xref">7.2</a>.  <a href="#name-publisher-selected-attester" class="internal xref">Publisher-Selected Attesters</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.3">
-                <p id="section-toc.1-1.7.2.3.1"><a href="#section-7.3" class="auto internal xref">7.3</a>.  <a href="#name-key-retrieval" class="internal xref">Key Retrieval</a></p>
+                <p id="section-toc.1-1.7.2.3.1"><a href="#section-7.3" class="auto internal xref">7.3</a>.  <a href="#name-shared-attesters" class="internal xref">Shared Attesters</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.4">
-                <p id="section-toc.1-1.7.2.4.1"><a href="#section-7.4" class="auto internal xref">7.4</a>.  <a href="#name-withdrawal-latency" class="internal xref">Withdrawal Latency</a></p>
+                <p id="section-toc.1-1.7.2.4.1"><a href="#section-7.4" class="auto internal xref">7.4</a>.  <a href="#name-key-retrieval" class="internal xref">Key Retrieval</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.5">
-                <p id="section-toc.1-1.7.2.5.1"><a href="#section-7.5" class="auto internal xref">7.5</a>.  <a href="#name-omitted-attestation" class="internal xref">Omitted Attestation</a></p>
+                <p id="section-toc.1-1.7.2.5.1"><a href="#section-7.5" class="auto internal xref">7.5</a>.  <a href="#name-withdrawal-latency" class="internal xref">Withdrawal Latency</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.6">
-                <p id="section-toc.1-1.7.2.6.1"><a href="#section-7.6" class="auto internal xref">7.6</a>.  <a href="#name-unscoped-endorsement" class="internal xref">Unscoped Endorsement</a></p>
+                <p id="section-toc.1-1.7.2.6.1"><a href="#section-7.6" class="auto internal xref">7.6</a>.  <a href="#name-omitted-attestation" class="internal xref">Omitted Attestation</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.7">
+                <p id="section-toc.1-1.7.2.7.1"><a href="#section-7.7" class="auto internal xref">7.7</a>.  <a href="#name-unscoped-endorsement" class="internal xref">Unscoped Endorsement</a></p>
 </li>
             </ul>
 </li>
@@ -1717,34 +1720,41 @@ server's validation order, key selection, and error reporting.<a href="#section-
 <p id="section-5.1-1">Requests under this profile <span class="bcp14">MUST</span> include the <code>client_id</code> parameter to
 select the client metadata; that parameter alone does not authenticate
 the client.<a href="#section-5.1-1" class="pilcrow">¶</a></p>
-<p id="section-5.1-2">The Client Attester <span class="bcp14">MUST</span> establish that the requesting Client Instance
+<p id="section-5.1-2">This narrows <span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-7.1" class="relref">Section 7.1</a> of [<a href="#ATTEST" class="cite xref">ATTEST</a>]</span>, which compares <code>client_id</code> with
+the <code>sub</code> claim only when the request includes it. This profile selects
+the client metadata from the <code>client_id</code> parameter rather than from the
+<code>sub</code> claim, and step 4 of <a href="#as-processing" class="auto internal xref">Section 5.2</a> then requires the two to be
+equal. When this profile applies to a request that omits <code>client_id</code>,
+the authorization server <span class="bcp14">MUST</span> reject the request with the
+<code>invalid_request</code> error code (<span><a href="https://rfc-editor.org/rfc/rfc6749#section-5.2" class="relref">Section 5.2</a> of [<a href="#RFC6749" class="cite xref">RFC6749</a>]</span>).<a href="#section-5.1-2" class="pilcrow">¶</a></p>
+<p id="section-5.1-3">The Client Attester <span class="bcp14">MUST</span> establish that the requesting Client Instance
 is authorized to obtain a Client Attestation naming the specified
 <code>client_id</code>. The attester <span class="bcp14">MUST NOT</span> treat knowledge of the <code>client_id</code>
 or possession of a newly generated key, alone or together, as
 sufficient. How the attester establishes this authorization is outside
-the scope of this specification.<a href="#section-5.1-2" class="pilcrow">¶</a></p>
-<p id="section-5.1-3">The attester <span class="bcp14">MUST</span> include the following in the Client Attestation:<a href="#section-5.1-3" class="pilcrow">¶</a></p>
+the scope of this specification.<a href="#section-5.1-3" class="pilcrow">¶</a></p>
+<p id="section-5.1-4">The attester <span class="bcp14">MUST</span> include the following in the Client Attestation:<a href="#section-5.1-4" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-5.1-4.1">
-            <p id="section-5.1-4.1.1">the <code>iss</code> claim, containing its endorsed <code>issuer</code> value;<a href="#section-5.1-4.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-5.1-5.1">
+            <p id="section-5.1-5.1.1">the <code>iss</code> claim, containing its endorsed <code>issuer</code> value;<a href="#section-5.1-5.1.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-5.1-4.2">
-            <p id="section-5.1-4.2.1">the <code>sub</code> claim, containing the exact client identifier; and<a href="#section-5.1-4.2.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-5.1-5.2">
+            <p id="section-5.1-5.2.1">the <code>sub</code> claim, containing the exact client identifier; and<a href="#section-5.1-5.2.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-5.1-4.3">
-            <p id="section-5.1-4.3.1">the <code>kid</code> JOSE header parameter <span>[<a href="#RFC7515" class="cite xref">RFC7515</a>]</span>, containing a nonempty
-value that identifies its signing key.<a href="#section-5.1-4.3.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-5.1-5.3">
+            <p id="section-5.1-5.3.1">the <code>kid</code> JOSE header parameter <span>[<a href="#RFC7515" class="cite xref">RFC7515</a>]</span>, containing a nonempty
+value that identifies its signing key.<a href="#section-5.1-5.3.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-5.1-5"><span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-4" class="relref">Section 4</a> of [<a href="#ATTEST" class="cite xref">ATTEST</a>]</span> does not require the <code>iss</code> claim. This profile
+<p id="section-5.1-6"><span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-4" class="relref">Section 4</a> of [<a href="#ATTEST" class="cite xref">ATTEST</a>]</span> does not require the <code>iss</code> claim. This profile
 requires it because a client can endorse several Client Attesters with
 independent key sets: the issuer selects the endorsement and key source
 before the <code>kid</code> value is resolved, and a <code>kid</code> value identifies a key
-within a JWK Set, not a Client Attester or a trust relationship.<a href="#section-5.1-5" class="pilcrow">¶</a></p>
-<p id="section-5.1-6">This profile retains, without relaxation, the default requirement of
+within a JWK Set, not a Client Attester or a trust relationship.<a href="#section-5.1-6" class="pilcrow">¶</a></p>
+<p id="section-5.1-7">This profile retains, without relaxation, the default requirement of
 <span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-11#section-7.5" class="relref">Section 7.5</a> of [<a href="#ATTEST" class="cite xref">ATTEST</a>]</span> that the <code>client_id</code> parameter equal the <code>sub</code>
 claim, so an endorsement for one client cannot validate an attestation
-naming another. Other claims and proof requirements follow <span>[<a href="#ATTEST" class="cite xref">ATTEST</a>]</span>.<a href="#section-5.1-6" class="pilcrow">¶</a></p>
+naming another. Other claims and proof requirements follow <span>[<a href="#ATTEST" class="cite xref">ATTEST</a>]</span>.<a href="#section-5.1-7" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="as-processing">
@@ -1916,16 +1926,21 @@ restrictions in step 3 of <a href="#as-processing" class="auto internal xref">Se
 <p id="section-5.4-1">Endorsement validation covers these parts of <a href="#as-processing" class="auto internal xref">Section 5.2</a>:<a href="#section-5.4-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-5.4-2.1">
-            <p id="section-5.4-2.1.1">selecting a permitted endorsement in step 2;<a href="#section-5.4-2.1.1" class="pilcrow">¶</a></p>
+            <p id="section-5.4-2.1.1">obtaining the client metadata in step 1, when neither the
+authoritative source nor a fresh cached copy provides it, including a
+CIMD that has been removed (<a href="#cache-freshness" class="auto internal xref">Section 6.1</a>);<a href="#section-5.4-2.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-5.4-2.2">
-            <p id="section-5.4-2.2.1">selecting the key source and resolving the <code>kid</code> header parameter in
-step 3 under <a href="#key-resolution" class="auto internal xref">Section 5.3</a>, including an endorsed <code>jwks_uri</code> that
-matches neither the configured key source nor a configured alias; and<a href="#section-5.4-2.2.1" class="pilcrow">¶</a></p>
+            <p id="section-5.4-2.2.1">selecting a permitted endorsement in step 2;<a href="#section-5.4-2.2.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-5.4-2.3">
-            <p id="section-5.4-2.3.1">finding no eligible key after any refresh permitted by
-<a href="#updates" class="auto internal xref">Section 6</a>.<a href="#section-5.4-2.3.1" class="pilcrow">¶</a></p>
+            <p id="section-5.4-2.3.1">selecting the key source and resolving the <code>kid</code> header parameter in
+step 3 under <a href="#key-resolution" class="auto internal xref">Section 5.3</a>, including an endorsed <code>jwks_uri</code> that
+matches neither the configured key source nor a configured alias; and<a href="#section-5.4-2.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.4-2.4">
+            <p id="section-5.4-2.4.1">finding no eligible key after any refresh permitted by
+<a href="#updates" class="auto internal xref">Section 6</a>.<a href="#section-5.4-2.4.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 <p id="section-5.4-3">How a failure is reported depends on how the Client Attestation is used
@@ -1937,7 +1952,7 @@ with the <code>invalid_client_attestation</code> error code.
 general <code>invalid_client</code> error code; this profile requires the specific
 code so that the response identifies the Client Attestation, not another
 client credential, as the cause. The code does not distinguish
-endorsement failures from other attestation failures. The response <span class="bcp14">MUST NOT</span> expose policy details.<a href="#section-5.4-4" class="pilcrow">¶</a></p>
+endorsement failures from other attestation failures.<a href="#section-5.4-4" class="pilcrow">¶</a></p>
 <p id="section-5.4-5">This profile does not change the HTTP status code that an endpoint
 returns for a client authentication failure. The token endpoint responds
 with HTTP status code 400 (Bad Request) by default and requires 401
@@ -1964,7 +1979,8 @@ proceeds on the companion method alone is authorization server policy.<a href="#
 server to reject the request, the authorization server <span class="bcp14">MUST</span> respond with
 the <code>invalid_client_attestation</code> error code, whether the Client
 Attestation served as the client authentication method or as an
-additional security signal.<a href="#section-5.4-8" class="pilcrow">¶</a></p>
+additional security signal. In either case, the response <span class="bcp14">MUST NOT</span> expose
+policy details.<a href="#section-5.4-8" class="pilcrow">¶</a></p>
 <p id="section-5.4-9">A fresh attestation does not correct an endorsement validation failure
 caused by disagreement between the endorsement and authorization server
 configuration, such as an endorsed <code>jwks_uri</code> matching neither the
@@ -2117,25 +2133,41 @@ bind publisher intent independently of the HTTPS host; this
 specification defines none.<a href="#section-7.1-1" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="shared-attesters">
+<div id="publisher-selected-attesters">
 <section id="section-7.2">
-        <h3 id="name-shared-attesters">
-<a href="#section-7.2" class="section-number selfRef">7.2. </a><a href="#name-shared-attesters" class="section-name selfRef">Shared Attesters</a>
+        <h3 id="name-publisher-selected-attester">
+<a href="#section-7.2" class="section-number selfRef">7.2. </a><a href="#name-publisher-selected-attester" class="section-name selfRef">Publisher-Selected Attesters</a>
         </h3>
-<p id="section-7.2-1">A client or tenant of a shared attester could obtain attestations naming
+<p id="section-7.2-1">Under publisher-authorized key selection, the authorization server
+accepts each attester that an authorized publisher endorses
+(<a href="#acceptance" class="auto internal xref">Section 2.1</a>). The publisher, or a party that controls its CIMD host,
+can therefore operate its own attester, and a Client Attestation
+verified under this policy carries no assurance independent of the
+publisher. Claims it makes about the Client Instance, such as platform
+or hardware integrity, are only as trustworthy as the publisher. A
+deployment that relies on attester assurance independent of the
+publisher uses AS-configured attester trust for those attesters.<a href="#section-7.2-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="shared-attesters">
+<section id="section-7.3">
+        <h3 id="name-shared-attesters">
+<a href="#section-7.3" class="section-number selfRef">7.3. </a><a href="#name-shared-attesters" class="section-name selfRef">Shared Attesters</a>
+        </h3>
+<p id="section-7.3-1">A client or tenant of a shared attester could obtain attestations naming
 another, so the attester needs issuance controls that prevent this.
 Under AS-configured attester trust, the agreement check in
 <a href="#key-resolution" class="auto internal xref">Section 5.3</a> isolates tenants only if the configured key source
 and its aliases preserve the endorsed tenant scope, which is the
-authorization server operator's responsibility.<a href="#section-7.2-1" class="pilcrow">¶</a></p>
+authorization server operator's responsibility.<a href="#section-7.3-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="key-retrieval">
-<section id="section-7.3">
+<section id="section-7.4">
         <h3 id="name-key-retrieval">
-<a href="#section-7.3" class="section-number selfRef">7.3. </a><a href="#name-key-retrieval" class="section-name selfRef">Key Retrieval</a>
+<a href="#section-7.4" class="section-number selfRef">7.4. </a><a href="#name-key-retrieval" class="section-name selfRef">Key Retrieval</a>
         </h3>
-<p id="section-7.3-1">Under publisher-authorized key selection, an authorized publisher
+<p id="section-7.4-1">Under publisher-authorized key selection, an authorized publisher
 chooses both the issuer and the key location, and so can direct a
 request from the authorization server to an origin of its choosing. The
 requirements in <a href="#key-resolution" class="auto internal xref">Section 5.3</a> constrain that request, and extend to
@@ -2144,26 +2176,26 @@ in <span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-client-
 server can also bound response size and request time and block
 prohibited network destinations. Endorsed URLs remain subject to
 server-side request forgery (SSRF) defenses; endorsement does not make a
-network location safe.<a href="#section-7.3-1" class="pilcrow">¶</a></p>
+network location safe.<a href="#section-7.4-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="withdrawal-latency">
-<section id="section-7.4">
+<section id="section-7.5">
         <h3 id="name-withdrawal-latency">
-<a href="#section-7.4" class="section-number selfRef">7.4. </a><a href="#name-withdrawal-latency" class="section-name selfRef">Withdrawal Latency</a>
+<a href="#section-7.5" class="section-number selfRef">7.5. </a><a href="#name-withdrawal-latency" class="section-name selfRef">Withdrawal Latency</a>
         </h3>
-<p id="section-7.4-1">Cached copies can remain in use after withdrawal (<a href="#updates" class="auto internal xref">Section 6</a>), so
+<p id="section-7.5-1">Cached copies can remain in use after withdrawal (<a href="#updates" class="auto internal xref">Section 6</a>), so
 removing a key at its origin is not instantaneous revocation. Prompt
 termination requires denial by authorization server policy
-(<a href="#endorsement-changes" class="auto internal xref">Section 6.2</a>) or another revocation channel.<a href="#section-7.4-1" class="pilcrow">¶</a></p>
+(<a href="#endorsement-changes" class="auto internal xref">Section 6.2</a>) or another revocation channel.<a href="#section-7.5-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="omitted-attestation">
-<section id="section-7.5">
+<section id="section-7.6">
         <h3 id="name-omitted-attestation">
-<a href="#section-7.5" class="section-number selfRef">7.5. </a><a href="#name-omitted-attestation" class="section-name selfRef">Omitted Attestation</a>
+<a href="#section-7.6" class="section-number selfRef">7.6. </a><a href="#name-omitted-attestation" class="section-name selfRef">Omitted Attestation</a>
         </h3>
-<p id="section-7.5-1">The <code>client_attesters</code> parameter does not itself require attestation, so
+<p id="section-7.6-1">The <code>client_attesters</code> parameter does not itself require attestation, so
 an attacker that obtains the client's other credentials can authenticate
 without one unless the deployment requires attestation, either through
 an attestation-based <code>token_endpoint_auth_method</code> value or by
@@ -2176,19 +2208,19 @@ it (<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attest
 the <code>token_endpoint_auth_method</code> or <code>jwks</code> parameter through <span>[<a href="#RFC7592" class="cite xref">RFC7592</a>]</span>
 even where it cannot change <code>client_attesters</code> (<a href="#registered" class="auto internal xref">Section 2.2</a>), so a
 deployment relying on endorsement also restricts those changes or
-requires attestation by authorization server policy.<a href="#section-7.5-1" class="pilcrow">¶</a></p>
+requires attestation by authorization server policy.<a href="#section-7.6-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="unscoped-endorsement">
-<section id="section-7.6">
+<section id="section-7.7">
         <h3 id="name-unscoped-endorsement">
-<a href="#section-7.6" class="section-number selfRef">7.6. </a><a href="#name-unscoped-endorsement" class="section-name selfRef">Unscoped Endorsement</a>
+<a href="#section-7.7" class="section-number selfRef">7.7. </a><a href="#name-unscoped-endorsement" class="section-name selfRef">Unscoped Endorsement</a>
         </h3>
-<p id="section-7.6-1">An endorsement carries no audience. Under publisher-authorized key
+<p id="section-7.7-1">An endorsement carries no audience. Under publisher-authorized key
 selection, one endorsement selects the attester and its keys at every
 authorization server whose policy covers that publisher, so a
 compromised attester authenticates the client at all of them until the
-endorsement is withdrawn.<a href="#section-7.6-1" class="pilcrow">¶</a></p>
+endorsement is withdrawn.<a href="#section-7.7-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>

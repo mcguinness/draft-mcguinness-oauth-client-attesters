@@ -95,11 +95,12 @@ Table of Contents
      6.3.  Existing Grants
    7.  Security Considerations
      7.1.  Publisher Compromise
-     7.2.  Shared Attesters
-     7.3.  Key Retrieval
-     7.4.  Withdrawal Latency
-     7.5.  Omitted Attestation
-     7.6.  Unscoped Endorsement
+     7.2.  Publisher-Selected Attesters
+     7.3.  Shared Attesters
+     7.4.  Key Retrieval
+     7.5.  Withdrawal Latency
+     7.6.  Omitted Attestation
+     7.7.  Unscoped Endorsement
    8.  Privacy Considerations
    9.  IANA Considerations
      9.1.  OAuth Dynamic Client Registration Metadata Registration
@@ -492,6 +493,14 @@ Table of Contents
    select the client metadata; that parameter alone does not
    authenticate the client.
 
+   This narrows Section 7.1 of [ATTEST], which compares client_id with
+   the sub claim only when the request includes it.  This profile
+   selects the client metadata from the client_id parameter rather than
+   from the sub claim, and step 4 of Section 5.2 then requires the two
+   to be equal.  When this profile applies to a request that omits
+   client_id, the authorization server MUST reject the request with the
+   invalid_request error code (Section 5.2 of [RFC6749]).
+
    The Client Attester MUST establish that the requesting Client
    Instance is authorized to obtain a Client Attestation naming the
    specified client_id.  The attester MUST NOT treat knowledge of the
@@ -669,6 +678,10 @@ Table of Contents
 
    Endorsement validation covers these parts of Section 5.2:
 
+   *  obtaining the client metadata in step 1, when neither the
+      authoritative source nor a fresh cached copy provides it,
+      including a CIMD that has been removed (Section 6.1);
+
    *  selecting a permitted endorsement in step 2;
 
    *  selecting the key source and resolving the kid header parameter in
@@ -688,8 +701,7 @@ Table of Contents
    invalid_client error code; this profile requires the specific code so
    that the response identifies the Client Attestation, not another
    client credential, as the cause.  The code does not distinguish
-   endorsement failures from other attestation failures.  The response
-   MUST NOT expose policy details.
+   endorsement failures from other attestation failures.
 
    This profile does not change the HTTP status code that an endpoint
    returns for a client authentication failure.  The token endpoint
@@ -722,7 +734,8 @@ Table of Contents
    server to reject the request, the authorization server MUST respond
    with the invalid_client_attestation error code, whether the Client
    Attestation served as the client authentication method or as an
-   additional security signal.
+   additional security signal.  In either case, the response MUST NOT
+   expose policy details.
 
    A fresh attestation does not correct an endorsement validation
    failure caused by disagreement between the endorsement and
@@ -854,7 +867,20 @@ Table of Contents
    trusted signing keys could bind publisher intent independently of the
    HTTPS host; this specification defines none.
 
-7.2.  Shared Attesters
+7.2.  Publisher-Selected Attesters
+
+   Under publisher-authorized key selection, the authorization server
+   accepts each attester that an authorized publisher endorses
+   (Section 2.1).  The publisher, or a party that controls its CIMD
+   host, can therefore operate its own attester, and a Client
+   Attestation verified under this policy carries no assurance
+   independent of the publisher.  Claims it makes about the Client
+   Instance, such as platform or hardware integrity, are only as
+   trustworthy as the publisher.  A deployment that relies on attester
+   assurance independent of the publisher uses AS-configured attester
+   trust for those attesters.
+
+7.3.  Shared Attesters
 
    A client or tenant of a shared attester could obtain attestations
    naming another, so the attester needs issuance controls that prevent
@@ -863,7 +889,7 @@ Table of Contents
    its aliases preserve the endorsed tenant scope, which is the
    authorization server operator's responsibility.
 
-7.3.  Key Retrieval
+7.4.  Key Retrieval
 
    Under publisher-authorized key selection, an authorized publisher
    chooses both the issuer and the key location, and so can direct a
@@ -876,14 +902,14 @@ Table of Contents
    subject to server-side request forgery (SSRF) defenses; endorsement
    does not make a network location safe.
 
-7.4.  Withdrawal Latency
+7.5.  Withdrawal Latency
 
    Cached copies can remain in use after withdrawal (Section 6), so
    removing a key at its origin is not instantaneous revocation.  Prompt
    termination requires denial by authorization server policy
    (Section 6.2) or another revocation channel.
 
-7.5.  Omitted Attestation
+7.6.  Omitted Attestation
 
    The client_attesters parameter does not itself require attestation,
    so an attacker that obtains the client's other credentials can
@@ -900,7 +926,7 @@ Table of Contents
    so a deployment relying on endorsement also restricts those changes
    or requires attestation by authorization server policy.
 
-7.6.  Unscoped Endorsement
+7.7.  Unscoped Endorsement
 
    An endorsement carries no audience.  Under publisher-authorized key
    selection, one endorsement selects the attester and its keys at every
