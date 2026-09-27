@@ -6,6 +6,7 @@ docname: draft-mcguinness-oauth-client-attesters-latest
 submissiontype: IETF
 stand_alone: yes
 ipr: trust200902
+pi: [toc, sortrefs, symrefs]
 area: "Security"
 workgroup: "Web Authorization Protocol"
 keyword:
@@ -26,21 +27,22 @@ author:
 normative:
   ATTEST: I-D.ietf-oauth-attestation-based-client-auth
   CIMD: I-D.ietf-oauth-client-id-metadata-document
-  RFC6749:
   RFC6454:
+  RFC6749:
   RFC7515:
   RFC7517:
   RFC7519:
   RFC7591:
-  RFC7662:
   RFC8414:
-  RFC8705:
   RFC8725:
   RFC9111:
 informative:
   RFC7009:
   RFC7592:
+  RFC7662:
   RFC8628:
+  RFC8693:
+  RFC8705:
   RFC9126:
   RFC9449:
   SPIFFE-OAUTH: I-D.ietf-oauth-spiffe-client-auth
@@ -153,8 +155,10 @@ terms Client Attestation, Client Attester, Client Instance, and Client
 Instance Key are used as defined in {{ATTEST}}.
 
 client publisher
-: The party that controls the authoritative client metadata for a
-  `client_id`.
+: The party authorized to publish the endorsements for a `client_id`:
+  for a client identified by a CIMD, the party that controls that
+  document; for a registered client, the party authorized to set its
+  endorsements ({{registered}}).
 
 Client Attester Endorsement
 : A statement in the authoritative client metadata for a `client_id`
@@ -246,12 +250,14 @@ replacing `client_attesters`. Removing the parameter, including by
 omitting it from an update that {{RFC7592}} treats as a deletion
 request, is treated as replacing it.
 
-An authorization server that does not accept a submitted endorsement
-MUST either reject the request with the `invalid_client_metadata` error
-code ({{Section 3.2.2 of RFC7591}}) or omit `client_attesters` from the
-stored metadata and from the client information response
-({{Section 3.2.1 of RFC7591}}), so that the response never contains an
-endorsement the authorization server has not accepted.
+An authorization server that does not accept a submitted value or
+removal of `client_attesters` MUST either reject the request with the
+`invalid_client_metadata` error code ({{Section 3.2.2 of RFC7591}}) or
+keep the previously stored value, if any, instead of the submitted one,
+as {{Section 2.2 of RFC7592}} permits for an ignored value. The client
+information response ({{Section 3.2.1 of RFC7591}}) then never contains
+an endorsement the authorization server has not accepted, and an
+unauthorized request never removes a stored endorsement.
 
 ## Applicability and Scope {#profile-selection}
 
@@ -367,9 +373,10 @@ issuer-to-key-location mapping that has the same meaning under either
 policy; {{key-resolution}} specifies how each policy uses the location.
 
 {{Section 10.8 of ATTEST}} recommends, among other options, resolving
-the `kid` header parameter through the client's own `jwks_uri`. This
-profile extends that option with a separate key location for each
-endorsed issuer. The client's own `jwks_uri` can hold several issuers'
+the `kid` header parameter through client metadata, such as the
+`jwks_uri` parameter. This profile applies that option through a
+separate key location for each endorsed issuer, not through the client's
+own `jwks_uri`. The client's own `jwks_uri` can hold several issuers'
 keys, but it neither associates them with named attesters nor separates
 them from client authentication keys, so it does not replace
 `client_attesters`.
@@ -568,11 +575,11 @@ authorization server MUST NOT try candidate keys in turn.
 When retrieving a JWK Set or client metadata, the authorization server
 MUST authenticate the HTTPS server and MUST NOT follow redirects.
 Bounding response size and request time, and blocking prohibited network
-destinations, are local defenses; see {{security}}. The authorization
-server SHOULD advertise the
+destinations, are local defenses; see {{security}}. The values that the
+authorization server advertises in the
 `client_attestation_signing_alg_values_supported` metadata parameter
-with values consistent with the algorithm restrictions in step 3 of
-{{as-processing}} ({{Section 8 of ATTEST}}).
+({{Section 8 of ATTEST}}) SHOULD be consistent with the algorithm
+restrictions in step 3 of {{as-processing}}.
 
 ## Errors {#errors}
 
@@ -601,11 +608,11 @@ NOT expose policy details.
 This profile does not change the HTTP status code that an endpoint
 returns for a client authentication failure. The token endpoint responds
 with HTTP status code 400 (Bad Request) by default and requires 401
-(Unauthorized) only when the client authenticated through the
-`Authorization` request header field ({{Section 5.2 of RFC6749}}), which
-a Client Attestation does not use. The introspection endpoint responds
-with 401 (Unauthorized) ({{Section 2.3 of RFC7662}}). Other endpoints
-follow their own specifications.
+(Unauthorized) only when the client attempted to authenticate through
+the `Authorization` request header field ({{Section 5.2 of RFC6749}}),
+which a Client Attestation does not use. The introspection endpoint
+responds with 401 (Unauthorized) ({{Section 2.3 of RFC7662}}). Other
+endpoints follow their own specifications.
 
 A client library that recognizes only the `invalid_client` error code
 treats the `invalid_client_attestation` error code as an unrecognized
@@ -619,8 +626,8 @@ as a satisfied signal. If the deployment requires an attestation
 alongside that method, the request fails. An authorization server
 signals that requirement by advertising the
 `client_attestation_pop_methods_supported` metadata parameter without
-the value `none`; a list containing `none` leaves the attestation
-optional. Where the attestation is optional, whether the request
+the value `none`; a list containing `none` signals that the attestation
+is optional. Where the attestation is optional, whether the request
 proceeds on the companion method alone is authorization server policy.
 
 Whenever an endorsement validation failure causes the authorization
@@ -642,14 +649,15 @@ protocol, for example under the trust agreement ({{profile-selection}}),
 not by client retry.
 
 Other failures produce the errors defined by their own specifications.
-Signature verification with a resolved key and the remaining attestation
-and proof checks follow {{Section 7.4 of ATTEST}}, including challenge
-and freshness responses. A companion client authentication method that
-fails, or that authenticates a different client identifier, produces the
-error defined by its own specification. Other metadata-discovery,
-registration, authentication, and grant errors follow their base
-specifications. The prohibition on other attester-trust mechanisms in
-{{acceptance}} applies.
+Failures of signature verification with a resolved key and of the
+remaining attestation and proof checks produce the errors of
+{{Section 7.4 of ATTEST}}, including challenge and freshness responses.
+A companion client authentication method that fails, or that
+authenticates a different client identifier, produces the error defined
+by its own specification. Other metadata-discovery, registration,
+authentication, and grant errors follow their base specifications. The
+prohibition on other attester-trust mechanisms in {{acceptance}}
+applies.
 
 # Updates and Withdrawal {#updates}
 
@@ -755,7 +763,7 @@ signed-metadata mechanism with independently trusted signing keys could
 bind publisher intent independently of the HTTPS host; this
 specification defines none.
 
-## Attester Compromise {#attester-compromise}
+## Shared Attesters {#shared-attesters}
 
 A client or tenant of a shared attester could obtain attestations naming
 another, so the attester needs issuance controls that prevent this.
@@ -790,14 +798,16 @@ The `client_attesters` parameter does not itself require attestation, so
 an attacker that obtains the client's other credentials can authenticate
 without one unless the deployment requires attestation, either through
 an attestation-based `token_endpoint_auth_method` value or by
-advertising the `client_attestation_pop_methods_supported` metadata
-parameter without the value `none` ({{errors}}); the latter retains
-mutual TLS or `private_key_jwt` as the client authentication method. A
-registration access token can change the `token_endpoint_auth_method` or
-`jwks` parameter through {{RFC7592}} even where it cannot change
-`client_attesters` ({{registered}}), so a deployment relying on
-endorsement also restricts those changes or requires attestation by
-authorization server policy.
+authorization server policy that requires an attestation alongside
+another method ({{errors}}); the latter retains mutual TLS or
+`private_key_jwt` as the client authentication method. Advertising the
+`client_attestation_pop_methods_supported` metadata parameter without
+the value `none` signals such a policy to clients but does not enforce
+it ({{Section 7.6 of ATTEST}}). A registration access token can change
+the `token_endpoint_auth_method` or `jwks` parameter through {{RFC7592}}
+even where it cannot change `client_attesters` ({{registered}}), so a
+deployment relying on endorsement also restricts those changes or
+requires attestation by authorization server policy.
 
 ## Unscoped Endorsement {#unscoped-endorsement}
 
@@ -919,7 +929,7 @@ claim names the client:
 {
   "iss": "https://attester.example/tenant/acme",
   "sub": "https://platform.example/oauth-client",
-  "exp": 1789434000,
+  "exp": 2524608000,
   "cnf": {
     "jwk": {
       "kty": "EC",
@@ -944,7 +954,8 @@ claim names the client:
 There is one Client ID Metadata Document, not one per Client Instance.
 An endorsement for this client does not let the attester authenticate
 another client, even if both use the same Client Attester. The flow does
-not require a `client_instance_id` claim or an `act` claim.
+not require the `client_instance_id` claim of {{INSTANCE-ID}} or an
+`act` claim ({{Section 4.1 of RFC8693}}).
 
 Under AS-configured attester trust, keys come only from the configured
 key source, and the endorsed `jwks_uri` is required to equal it, as it
@@ -952,9 +963,10 @@ does here. An attestation from an unendorsed issuer, an endorsement
 naming the trusted issuer with a different key location, or a `kid`
 value that resolves to no key in the configured key source results in
 the following error response. {{Section 5.2 of RFC6749}} requires a 401
-(Unauthorized) status code only for a client that authenticated through
-the `Authorization` request header field, which this client does not
-use, so the example shows the default 400 (Bad Request) status code:
+(Unauthorized) status code only for a client that attempted to
+authenticate through the `Authorization` request header field, which
+this client does not use, so the example shows the default 400 (Bad
+Request) status code:
 
 ~~~ http-message
 HTTP/1.1 400 Bad Request
@@ -1023,7 +1035,7 @@ differs:
 {
   "iss": "https://attester.example/tenant/acme",
   "sub": "s6BhdRkqt3",
-  "exp": 1789434000,
+  "exp": 2524608000,
   "cnf": {
     "jwk": {
       "kty": "EC",
