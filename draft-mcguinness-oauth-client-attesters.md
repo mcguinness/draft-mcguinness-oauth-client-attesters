@@ -46,12 +46,7 @@ informative:
   RFC8705:
   RFC9126:
   SPIFFE-OAUTH: I-D.ietf-oauth-spiffe-client-auth
-  INSTANCE-ID:
-    title: "Client Instance Identification for Attestation-Based Client Authentication"
-    target: https://mcguinness.github.io/draft-mcguinness-oauth-client-instance-id/draft-mcguinness-oauth-client-instance-id.html
-    author:
-      - fullname: Karl McGuinness
-    date: 2026-09-14
+  INSTANCE-ID: I-D.mcguinness-oauth-client-instance-id
 --- abstract
 
 OAuth 2.0 Attestation-Based Client Authentication requires an
@@ -1114,5 +1109,15 @@ cases and their error response are those of {{example}}.
 {:numbered="false"}
 
 *RFC EDITOR: Remove this section before publication.*
+
+-01
+
+* Aligned with draft-ietf-oauth-attestation-based-client-auth-12 and
+  draft-ietf-oauth-spiffe-client-auth-03: the example attestations
+  include the now-required `iat` claim, Errors cites the status codes of
+  ATTEST, and the SPIFFE comparison reflects client-scoped bundles.
+* Cited draft-mcguinness-oauth-client-instance-id as an Internet-Draft.
+
+-00
 
 * Initial draft.
