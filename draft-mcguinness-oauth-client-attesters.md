@@ -627,13 +627,16 @@ client credential, as the cause. The code does not distinguish
 endorsement failures from other attestation failures.
 
 This profile does not change the HTTP status code that an endpoint
-returns for a client authentication failure. The token endpoint responds
-with HTTP status code 400 (Bad Request) by default and requires 401
-(Unauthorized) only when the client attempted to authenticate through
-the `Authorization` request header field ({{Section 5.2 of RFC6749}}),
-which a Client Attestation does not use. The introspection endpoint
-responds with 401 (Unauthorized) ({{Section 2.3 of RFC7662}}). Other
-endpoints follow their own specifications.
+returns for a client authentication failure. {{Section 7.4 of ATTEST}}
+recommends 400 (Bad Request) for its error codes at an authorization
+server and permits 401 (Unauthorized) for `invalid_client_attestation`.
+The token endpoint responds with HTTP status code 400 (Bad Request) by
+default and requires 401 (Unauthorized) only when the client attempted
+to authenticate through the `Authorization` request header field
+({{Section 5.2 of RFC6749}}), which a Client Attestation does not use.
+The introspection endpoint responds with 401 (Unauthorized)
+({{Section 2.3 of RFC7662}}). Other endpoints follow their own
+specifications.
 
 A client library that recognizes only the `invalid_client` error code
 treats the `invalid_client_attestation` error code as an unrecognized
