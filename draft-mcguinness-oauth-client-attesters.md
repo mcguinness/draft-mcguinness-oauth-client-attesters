@@ -1110,4 +1110,14 @@ cases and their error response are those of {{example}}.
 
 *RFC EDITOR: Remove this section before publication.*
 
+-01
+
+* Aligned with draft-ietf-oauth-attestation-based-client-auth-12 and
+  draft-ietf-oauth-spiffe-client-auth-03: the example attestations
+  include the now-required `iat` claim, Errors cites the status codes of
+  ATTEST, and the SPIFFE comparison reflects client-scoped bundles.
+* Cited draft-mcguinness-oauth-client-instance-id as an Internet-Draft.
+
+-00
+
 * Initial draft.
