@@ -1083,11 +1083,11 @@ Table of Contents
 10.2.  Informative References
 
    [INSTANCE-ID]
-              McGuinness, K., "Client Instance Identification for
-              Attestation-Based Client Authentication", 14 September
-              2026, <https://mcguinness.github.io/draft-mcguinness-
-              oauth-client-instance-id/draft-mcguinness-oauth-client-
-              instance-id.html>.
+              McGuinness, K., "OAuth 2.0 Client Instance Identifiers",
+              Work in Progress, Internet-Draft, draft-mcguinness-oauth-
+              client-instance-id-01, 2 November 2026,
+              <https://datatracker.ietf.org/doc/html/draft-mcguinness-
+              oauth-client-instance-id-01>.
 
    [RFC7009]  Lodderstedt, T., Ed., Dronia, S., and M. Scurtescu, "OAuth
               2.0 Token Revocation", RFC 7009, DOI 10.17487/RFC7009,
@@ -1335,6 +1335,19 @@ Appendix B.  Registered Client Example
 Document History
 
    _RFC EDITOR: Remove this section before publication._
+
+   -01
+
+   *  Aligned with draft-ietf-oauth-attestation-based-client-auth-12 and
+      draft-ietf-oauth-spiffe-client-auth-03: the example attestations
+      include the now-required iat claim, Errors cites the status codes
+      of ATTEST, and the SPIFFE comparison reflects client-scoped
+      bundles.
+
+   *  Cited draft-mcguinness-oauth-client-instance-id as an Internet-
+      Draft.
+
+   -00
 
    *  Initial draft.
 
