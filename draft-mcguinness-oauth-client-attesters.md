@@ -382,13 +382,18 @@ them from client authentication keys, so it does not replace
 `client_attesters`.
 
 Secure Production Identity Framework for Everyone (SPIFFE) client
-authentication {{SPIFFE-OAUTH}} publishes one verification-key location
-per trust domain in the `spiffe_bundle_endpoint` client metadata
-parameter. Under AS-configured attester trust, the endorsed `jwks_uri`
-serves that function for each named attester, but the key source is
-established out of band and the endorsed location is only compared
-against it. Publisher-authorized key selection lets the publisher name
-the location, so it does not substitute for SPIFFE bundle configuration.
+authentication {{SPIFFE-OAUTH}} uses a comparable pair of key sources
+for SVID signing keys. Its `spiffe_bundle_endpoint` client metadata
+parameter names a bundle location for the client's trust domain. A
+bundle obtained from it is used only for that `client_id`, and
+{{Section 6.1 of SPIFFE-OAUTH}} recommends using a bundle that the
+authorization server has obtained for the trust domain by other means
+instead. Publisher-authorized key selection corresponds to accepting
+`spiffe_bundle_endpoint` from client metadata, and has the same trust
+model ({{Section 8.2 of SPIFFE-OAUTH}}). AS-configured attester trust
+corresponds to a bundle obtained by other means. This specification
+requires the configured key source to govern the issuer for every client
+({{key-resolution}}), where SPIFFE-OAUTH only recommends it.
 
 Clients using attestation as client authentication use the value
 `attest_jwt_client_auth` or `attest_jwt_client_auth_dpop` in the
