@@ -4,8 +4,8 @@
 
 Web Authorization Protocol                                 K. McGuinness
 Internet-Draft                                               Independent
-Intended status: Standards Track                       27 September 2026
-Expires: 31 March 2027
+Intended status: Standards Track                         2 November 2026
+Expires: 6 May 2027
 
 
                  OAuth 2.0 Client Attester Endorsement
@@ -58,7 +58,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 31 March 2027.
+   This Internet-Draft will expire on 6 May 2027.
 
 Copyright Notice
 
@@ -450,14 +450,18 @@ Table of Contents
    replace client_attesters.
 
    Secure Production Identity Framework for Everyone (SPIFFE) client
-   authentication [SPIFFE-OAUTH] publishes one verification-key location
-   per trust domain in the spiffe_bundle_endpoint client metadata
-   parameter.  Under AS-configured attester trust, the endorsed jwks_uri
-   serves that function for each named attester, but the key source is
-   established out of band and the endorsed location is only compared
-   against it.  Publisher-authorized key selection lets the publisher
-   name the location, so it does not substitute for SPIFFE bundle
-   configuration.
+   authentication [SPIFFE-OAUTH] uses a comparable pair of key sources
+   for SVID signing keys.  Its spiffe_bundle_endpoint client metadata
+   parameter names a bundle location for the client's trust domain.  A
+   bundle obtained from it is used only for that client_id, and
+   Section 6.1 of [SPIFFE-OAUTH] recommends using a bundle that the
+   authorization server has obtained for the trust domain by other means
+   instead.  Publisher-authorized key selection corresponds to accepting
+   spiffe_bundle_endpoint from client metadata, and has the same trust
+   model (Section 8.2 of [SPIFFE-OAUTH]).  AS-configured attester trust
+   corresponds to a bundle obtained by other means.  This specification
+   requires the configured key source to govern the issuer for every
+   client (Section 5.3), where SPIFFE-OAUTH only recommends it.
 
    Clients using attestation as client authentication use the value
    attest_jwt_client_auth or attest_jwt_client_auth_dpop in the
@@ -711,12 +715,14 @@ Table of Contents
    endorsement failures from other attestation failures.
 
    This profile does not change the HTTP status code that an endpoint
-   returns for a client authentication failure.  The token endpoint
-   responds with HTTP status code 400 (Bad Request) by default and
-   requires 401 (Unauthorized) only when the client attempted to
-   authenticate through the Authorization request header field
-   (Section 5.2 of [RFC6749]), which a Client Attestation does not use.
-   The introspection endpoint responds with 401 (Unauthorized)
+   returns for a client authentication failure.  Section 7.4 of [ATTEST]
+   recommends 400 (Bad Request) for its error codes at an authorization
+   server and permits 401 (Unauthorized) for invalid_client_attestation.
+   The token endpoint responds with HTTP status code 400 (Bad Request)
+   by default and requires 401 (Unauthorized) only when the client
+   attempted to authenticate through the Authorization request header
+   field (Section 5.2 of [RFC6749]), which a Client Attestation does not
+   use.  The introspection endpoint responds with 401 (Unauthorized)
    (Section 2.3 of [RFC7662]).  Other endpoints follow their own
    specifications.
 
@@ -895,11 +901,14 @@ Table of Contents
    (Section 2.1).  The publisher, or a party that controls its CIMD
    host, can therefore operate its own attester, and a Client
    Attestation verified under this policy carries no assurance
-   independent of the publisher.  Claims it makes about the Client
-   Instance, such as platform or hardware integrity, are only as
-   trustworthy as the publisher.  A deployment that relies on attester
-   assurance independent of the publisher uses AS-configured attester
-   trust for those attesters.
+   independent of the publisher.  Section 12.3 of [ATTEST] limits
+   reliance on attestation claims, such as platform or hardware
+   integrity of the Client Instance, to the trust placed in the issuing
+   Client Attester; under this policy, that is trust in the publisher.
+   Section 8.2 of [SPIFFE-OAUTH] describes the same trust model for
+   SPIFFE bundles obtained from a CIMD.  A deployment that relies on
+   attester assurance independent of the publisher uses AS-configured
+   attester trust for those attesters.
 
 7.3.  Shared Attesters
 
@@ -1007,9 +1016,9 @@ Table of Contents
    [ATTEST]   Looker, T., Bastian, P., and C. Bormann, "OAuth 2.0
               Attestation-Based Client Authentication", Work in
               Progress, Internet-Draft, draft-ietf-oauth-attestation-
-              based-client-auth-11, 3 September 2026,
+              based-client-auth-12, 12 October 2026,
               <https://datatracker.ietf.org/doc/html/draft-ietf-oauth-
-              attestation-based-client-auth-11>.
+              attestation-based-client-auth-12>.
 
    [CIMD]     Parecki, A. and E. Smith, "OAuth Client ID Metadata
               Document", Work in Progress, Internet-Draft, draft-ietf-
@@ -1118,9 +1127,9 @@ Table of Contents
               Schwenkschuster, A., Kasselman, P., Rose, S., Thorgersen,
               S., and N. Cam-Winget, "OAuth SPIFFE Client
               Authentication", Work in Progress, Internet-Draft, draft-
-              ietf-oauth-spiffe-client-auth-02, 15 June 2026,
+              ietf-oauth-spiffe-client-auth-03, 2 November 2026,
               <https://datatracker.ietf.org/doc/html/draft-ietf-oauth-
-              spiffe-client-auth-02>.
+              spiffe-client-auth-03>.
 
 Appendix A.  Client ID Metadata Document Example
 
@@ -1199,6 +1208,7 @@ Appendix A.  Client ID Metadata Document Example
    {
      "iss": "https://attester.example/tenant/acme",
      "sub": "https://platform.example/oauth-client",
+     "iat": 2524604400,
      "exp": 2524608000,
      "cnf": {
        "jwk": {
@@ -1300,6 +1310,7 @@ Appendix B.  Registered Client Example
    {
      "iss": "https://attester.example/tenant/acme",
      "sub": "s6BhdRkqt3",
+     "iat": 2524604400,
      "exp": 2524608000,
      "cnf": {
        "jwk": {
