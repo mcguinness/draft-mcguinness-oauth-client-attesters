@@ -975,6 +975,7 @@ claim names the client:
 {
   "iss": "https://attester.example/tenant/acme",
   "sub": "https://platform.example/oauth-client",
+  "iat": 2524604400,
   "exp": 2524608000,
   "cnf": {
     "jwk": {
@@ -1081,6 +1082,7 @@ differs:
 {
   "iss": "https://attester.example/tenant/acme",
   "sub": "s6BhdRkqt3",
+  "iat": 2524604400,
   "exp": 2524608000,
   "cnf": {
     "jwk": {
