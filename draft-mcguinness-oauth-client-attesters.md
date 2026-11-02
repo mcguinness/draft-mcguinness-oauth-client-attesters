@@ -46,12 +46,7 @@ informative:
   RFC8705:
   RFC9126:
   SPIFFE-OAUTH: I-D.ietf-oauth-spiffe-client-auth
-  INSTANCE-ID:
-    title: "Client Instance Identification for Attestation-Based Client Authentication"
-    target: https://mcguinness.github.io/draft-mcguinness-oauth-client-instance-id/draft-mcguinness-oauth-client-instance-id.html
-    author:
-      - fullname: Karl McGuinness
-    date: 2026-09-14
+  INSTANCE-ID: I-D.mcguinness-oauth-client-instance-id
 --- abstract
 
 OAuth 2.0 Attestation-Based Client Authentication requires an
