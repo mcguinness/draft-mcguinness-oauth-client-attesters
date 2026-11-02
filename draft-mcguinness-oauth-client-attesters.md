@@ -807,9 +807,12 @@ accepts each attester that an authorized publisher endorses
 ({{acceptance}}). The publisher, or a party that controls its CIMD host,
 can therefore operate its own attester, and a Client Attestation
 verified under this policy carries no assurance independent of the
-publisher. Claims it makes about the Client Instance, such as platform
-or hardware integrity, are only as trustworthy as the publisher. A
-deployment that relies on attester assurance independent of the
+publisher. {{Section 12.3 of ATTEST}} limits reliance on attestation
+claims, such as platform or hardware integrity of the Client Instance,
+to the trust placed in the issuing Client Attester; under this policy,
+that is trust in the publisher. {{Section 8.2 of SPIFFE-OAUTH}}
+describes the same trust model for SPIFFE bundles obtained from a CIMD.
+A deployment that relies on attester assurance independent of the
 publisher uses AS-configured attester trust for those attesters.
 
 ## Shared Attesters {#shared-attesters}
