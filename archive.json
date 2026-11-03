@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-09-29T03:04:20.591394+00:00",
+  "timestamp": "2026-11-03T04:23:07.857027+00:00",
   "repo": "mcguinness/draft-mcguinness-oauth-client-attesters",
   "labels": [
     {
@@ -1040,6 +1040,62 @@
       "mergedBy": "mcguinness",
       "mergeCommit": {
         "oid": "96654bbd09d299532f41d4cc3ad0c59d33380b4b"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 38,
+      "id": "PR_kwDOUbZtSc8AAAABMYSB-A",
+      "title": "Update for SPIFFE client authentication -03 and ATTEST -12",
+      "url": "https://github.com/mcguinness/draft-mcguinness-oauth-client-attesters/pull/38",
+      "state": "MERGED",
+      "author": "mcguinness",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "Updates the draft for two new dependency revisions: SPIFFE client authentication -03 (2 November 2026) and ATTEST -12 (18 October 2026). Both reference entries are unversioned, so builds now cite -03 and -12 automatically. These commits make the draft's statements hold for those revisions. CIMD is unchanged at -02. There is one commit per item.\n\n| Change | Commit | Why |\n|---|---|---|\n| Rewrite the SPIFFE comparison in Client Metadata | 8baec45 | SPIFFE -03 \u00a76.1 (new) binds a bundle fetched from `spiffe_bundle_endpoint` to its `client_id`, and recommends a bundle obtained by other means instead. \u00a78.2 (new) gives a CIMD-supplied bundle the same trust model as publisher-authorized key selection. The old closing sentence, \"does not substitute for SPIFFE bundle configuration\", no longer described how the two relate. The paragraph now maps each key-trust policy to its SPIFFE counterpart, and notes that this draft requires (where SPIFFE recommends) the configured source to govern. |\n| Add `iat` to both example attestations | 40d2c2f | **Must fix.** ATTEST -12 Section 4 changes `iat` from OPTIONAL to REQUIRED, so the examples no longer conformed. The value 2524604400 is one hour before their `exp`. |\n| Cite ATTEST Section 7.4's status codes in Errors | be66465 | ATTEST -12 adds: authorization servers SHOULD use 400 for these codes and MAY use 401 for `invalid_client_attestation`. The draft's text was consistent with this but reasoned only from RFC 6749 and RFC 7662. |\n| Cite ATTEST \u00a712.3 and SPIFFE \u00a78.2 in Publisher-Selected Attesters | 26c0ce8 | **Optional; can be dropped on its own.** ATTEST -12 \u00a712.3 (new) limits reliance on attestation claims to the trust placed in the attester, and SPIFFE -03 \u00a78.2 describes the same publisher-controlled trust model. |\n\n## Checked and unchanged\n\n- **SPIFFE -03 still matches the draft:** `spiffe_bundle_endpoint` is OPTIONAL client metadata for the client's trust domain, and `jwt-svid` is still a key `use` value in its example bundle. Its new \u00a73.1 requires `client_id` for CIMD clients, which matches #34.\n- **ATTEST -12 keeps every section the draft cites at the same number:** 4, 5.2, 7.1, 7.3\u20137.6, 8, 9, 10.8, 11, 12, 13. A word-level diff shows only editorial changes apart from the items above.\n  - \"Section 4 of [ATTEST] does not require the `iss` claim\" still holds.\n  - The conditional `client_id` check (\u00a77.1, \u00a77.5) is unchanged.\n  - The client-metadata key-resolution option (\u00a710.8) is unchanged.\n  - The DPoP key-match check (\u00a77.3) is unchanged.\n\n## Checks\n\n- **Keywords:** the ordered BCP 14 sequence is identical (53). The new sentences describe what dependencies recommend in lowercase.\n- **Build:** `make lint` is clean, and the build succeeds with no literal `{{` and no rendered line over 72 columns. All seven JSON examples parse.\n- **Links:** the rendered HTML links ATTEST -12 and SPIFFE-OAUTH -03.\n",
+      "createdAt": "2026-11-02T18:56:20Z",
+      "updatedAt": "2026-11-02T19:08:08Z",
+      "baseRepository": "mcguinness/draft-mcguinness-oauth-client-attesters",
+      "baseRefName": "main",
+      "baseRefOid": "96654bbd09d299532f41d4cc3ad0c59d33380b4b",
+      "headRepository": "mcguinness/draft-mcguinness-oauth-client-attesters",
+      "headRefName": "dependency-updates",
+      "headRefOid": "26c0ce82c0f88a9e6effe4138cc33d2196242a69",
+      "closedAt": "2026-11-02T19:08:05Z",
+      "mergedAt": "2026-11-02T19:08:05Z",
+      "mergedBy": "mcguinness",
+      "mergeCommit": {
+        "oid": "4ab1dee58be481a55f34b2b986bb2a5f24decee0"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 39,
+      "id": "PR_kwDOUbZtSc8AAAABMYgiaw",
+      "title": "Cite client-instance-id as an Internet-Draft",
+      "url": "https://github.com/mcguinness/draft-mcguinness-oauth-client-attesters/pull/39",
+      "state": "MERGED",
+      "author": "mcguinness",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "draft-mcguinness-oauth-client-instance-id-01 is now on the datatracker. The INSTANCE-ID reference therefore becomes a normal Internet-Draft citation instead of a GitHub editor's copy. Two commits.\n\n| Commit | Change |\n|---|---|\n| 4b3772d | `INSTANCE-ID: I-D.mcguinness-oauth-client-instance-id`, replacing the custom editor's-copy entry that hard-coded the old title and a 14 September date. It stays informative and unversioned, like ATTEST, CIMD and SPIFFE-OAUTH. |\n| c6432d1 | Adds a -01 Document History entry covering this change and #38 (ATTEST -12, SPIFFE-OAUTH -03), in the same format as the sibling draft. Drop it if you would rather write the entry at submission. |\n\n**Rendering lag:** bib.ietf.org still serves -00 under the old title (\"Client Instance Identification for Attestation-Based Client Authentication\"). -01 renamed the draft \"OAuth 2.0 Client Instance Identifiers\". Builds pick up -01 and the new title once the service updates; no edit is needed.\n\n## Checked against -01\n\n- **Statements this draft makes about INSTANCE-ID still hold:**\n  - it is an optional claims profile;\n  - the `client_instance_id` claim is unchanged;\n  - its \u00a73.1 and \u00a78.1 say an endorsement establishes the attester association but does not select that profile. That matches \"instance continuity remains independent\" (Acceptance Policy).\n- **-01's citations of this draft resolve to the right sections on main:**\n  - Section 2.3, Applicability and Scope: authorization server endpoints only.\n  - Section 3, Client Metadata: `client_attesters`.\n  - Appendix A: the CIMD example.\n\n## Checks\n\n- **Keywords:** the ordered BCP 14 sequence is identical (53).\n- **Build:** `make lint` is clean, and the build succeeds with no literal `{{` and no rendered line over 72 columns.\n",
+      "createdAt": "2026-11-02T19:14:18Z",
+      "updatedAt": "2026-11-02T19:15:17Z",
+      "baseRepository": "mcguinness/draft-mcguinness-oauth-client-attesters",
+      "baseRefName": "main",
+      "baseRefOid": "4ab1dee58be481a55f34b2b986bb2a5f24decee0",
+      "headRepository": "mcguinness/draft-mcguinness-oauth-client-attesters",
+      "headRefName": "instance-id-reference",
+      "headRefOid": "c6432d1c6c98aa202f61deaf3990baf9cb9f9743",
+      "closedAt": "2026-11-02T19:15:13Z",
+      "mergedAt": "2026-11-02T19:15:13Z",
+      "mergedBy": "mcguinness",
+      "mergeCommit": {
+        "oid": "4ee9cdd183772d769126bc2ad222b04bfb88839c"
       },
       "comments": [],
       "reviews": []
